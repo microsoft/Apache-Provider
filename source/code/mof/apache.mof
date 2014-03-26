@@ -1,0 +1,185 @@
+// -*- idl -*-
+
+// Copyright (c) Microsoft Corporation. All rights reserved. See license.txt for license information.
+
+#pragma locale ("en_US")
+
+// Apache_HTTPDProcess
+// -------------------------------------------------------------------
+[   Version ( "1.0.0" ), 
+    Description ( "Apache Web Server Process Information" )
+]
+class Apache_HTTPDProcess : CIM_Process {
+
+    [ Description ( "Percentage of time spent in user-mode") ]
+    uint16 PercentUserTime;
+
+    [ Description ( "Current working set size in MB") ]
+    uint32 WorkingSetSizeMB;
+
+};
+
+// Apache_HTTPDServer
+// -------------------------------------------------------------------
+[   Version ( "1.0.0" ), 
+    Description ( "Apache Web Server Information" )
+]
+class Apache_HTTPDServer : CIM_InstalledProduct {
+
+    [ Description ( "Configuration file for the server") ]
+    string ConfigurationFile;
+
+    [ Description ( "List of currently installed modules for the server") ]
+    string InstalledModules[];
+
+    [ Description ( "Name of the process for the server") ]
+    string ProcessName;
+
+    [ Description ( "Name of the service for the server") ]
+    string ServiceName;
+
+    [ Description ( "Status of the server"),
+      ValueMap { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18" },
+      Values { "Unknown", "Other", "OK", "Degraded", "Stressed", "Predictive Failure", "Error", "Non-Recoverable Error", "Starting", "Stopping", "Stopped", "In Service", "No Contact",  "Lost Communication", "Aborted", "Dormant", "Supporting Entity in Error", "Completed", "Power Mode" }
+    ]
+    string OperatingStatus;
+
+};
+
+// Apache_HTTPDServerStatistics
+// -------------------------------------------------------------------
+[   Version ( "1.0.0" ), 
+    Description ( "Apache Web Server Statistical Information" )
+]
+class Apache_HTTPDServerStatistics : CIM_StatisticalData {
+
+    [ Description ( "Total requests received by the server since start") ]
+    uint64 RequestsTotal;
+
+    [ Description ( "Average requests per second received by the server") ]
+    uint32 RequestsPerSecond;
+
+    [ Description ( "Average KB per request handled by the server") ]
+    uint32 KBPerRequest;
+
+    [ Description ( "Average KB per second handled by the server") ]
+    uint32 KBPerSecond;
+
+    [ Description ( "Average total percentage of CPU used by the server") ]
+    uint32 TotalPctCPU;
+
+    [ Description ( "Count of currently idle workers for the server") ]
+    uint32 IdleWorkers;
+
+    [ Description ( "Count of currently busy workers for the server") ]
+    uint32 BusyWorkers;
+
+    [ Description ( "Percentage of currently busy workers for the server") ]
+    uint32 PctBusyWorkers;
+
+    [ Description ( "Configuration file for the server") ]
+    string ConfigurationFile;
+
+};
+
+// Apache_HTTPDVirtualHost
+// -------------------------------------------------------------------
+[   Version ( "1.0.0" ), 
+    Description ( "Apache Web Server virtual host Information" )
+]
+class Apache_HTTPDVirtualHost : CIM_SoftwareElement {
+    
+    [ Description ( "Listening IP Addresses for the virtual host") ]
+    string IPAddresses[];
+
+    [ Description ( "Listening HTTP Port for the virtual host") ]
+    uint16 HTTPPort;
+        
+    [ Description ( "Listening HTTPS Port for the virtual host") ]
+    uint16 HTTPSPort;
+
+    [ Description ( "Hostname and port that identifies the virtual host") ]
+    string ServerName;
+
+    [ Description ( "Alternate host names for the virtual host") ]
+    string ServerAlias[];
+
+    [ Description ( "Root document directory for the virtual host") ]
+    string DocumentRoot;
+
+    [ Description ( "Contact address for the  virtual host administrator") ]
+    string ServerAdmin;
+
+    [ Description ( "Location of the error log for the  virtual host") ]
+    string ErrorLog;
+
+    [ Description ( "Location of the custom log for the  virtual host") ]
+    string CustomLog;
+
+    [ Description ( "Location of the access log for the  virtual host") ]
+    string AccessLog;
+
+};
+
+// Apache_HTTPDVirtualHostCertificate
+// -------------------------------------------------------------------
+[   Version ( "1.0.0" ), 
+    Description ( "Apache Web Server virtual host Certificate Information" )
+]
+class Apache_HTTPDVirtualHostCertificate : CIM_SoftwareElement {
+
+    [ Description ( "Hostname and port that identifies the virtual host") ]
+    string ServerName;
+
+    [ Description ( "Expiration date of the certificate") ]
+    datetime ExpirationDate;
+
+    [ Description ( "Days until the certificate expires") ]
+    uint16 DaysUntilExpiration;
+
+    [ Description ( "File name of the certificate") ]
+    string FileName;
+
+};
+
+// Apache_HTTPDVirtualHostStatistics
+// -------------------------------------------------------------------
+[   Version ( "1.0.0" ), 
+    Description ( "Apache Web Server virtual host Statistical Information" )
+]
+class Apache_HTTPDVirtualHostStatistics : CIM_StatisticalData {
+
+    [ Description ( "Hostname and port that identifies the virtual host") ]
+    string ServerName;
+
+    [ Description ( "Total requests received by the virtual host since start") ]
+    uint64 RequestsTotal;
+
+    [ Description ( "Total bytes returned for all requests received by the virtual host since start") ]
+    uint64 RequestsTotalBytes;
+
+    [ Description ( "Average requests per second received by the virtual host") ]
+    uint32 RequestsPerSecond;
+
+    [ Description ( "Average KB per request handled by the virtual host") ]
+    uint32 KBPerRequest;
+
+    [ Description ( "Average KB per second handled by the virtual host") ]
+    uint32 KBPerSecond;
+
+    [ Description( "Average milliseconds per request handled by the virtual host" ) ]
+    uint32 MSPerRequest;
+
+    [ Description( "Total number of 4xx HTTP Error Responses" ) ]
+    uint64 ErrorCount400;
+
+    [ Description( "Total number of 5xx HTTP Error Responses" ) ]
+    uint64 ErrorCount500;
+
+    [ Description( "Average number of 4xx HTTP Error Responses per minute" ) ]
+    uint32 ErrorsPerMinute400;
+
+    [ Description( "Average number of 5xx HTTP Error Responses per minute" ) ]
+    uint32 ErrorsPerMinute500;
+
+};
