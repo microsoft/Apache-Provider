@@ -1,15 +1,16 @@
 #!/bin/bash
 
-scxomi_dir=`(cd ../../../omi/distro; pwd -P)`
+scxomi_dir=`(cd ../../omi/distro; pwd -P)`
 
 enable_debug=""
 enable_debug_flag=0
 enable_purify_agent=""
 enable_purify_server=""
+enable_omi_tools=""
+enable_omi_tools_flag=0
 
 # Default OMI qualifiers for build purposes
-# (Not hugely important since we don't distribute OMI from this build)
-omi_configure_quals="--prefix=${scxomi_dir}/output/install_local"
+omi_configure_quals=""
 
 if [ ! -d "$scxomi_dir" ]; then
     echo "OMI directory ($scxomi_dir) does not exist"
@@ -40,6 +41,11 @@ do
       enable_purify_server="--enable-purify-server"
     ;;
 
+    --enable-omi-tools)
+      enable_omi_tools="--prefix=${scxomi_dir}/output/install_local"
+      enable_omi_tools_flag=1
+    ;;
+
     *)
       echo "configure: invalid option '$opt'"
       echo "Try configure --help' for more information."
@@ -68,15 +74,17 @@ OPTIONS:
     --enable-debug              Perform a debug build.
     --enable-purify-agent       Allow agent to be run with purify (memory leak detection)
     --enable-purify-server      Allow server to be run with purify (memory leak detection)
+    --enable-omi-tools          Build to allow use of OMI tools (omischema and omireg)
 
 EOF
     exit 0
 fi
 
-omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${omi_configure_quals}"
+omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${enable_omi_tools} ${omi_configure_quals}"
 
 cat <<EOF > config.mak
 ENABLE_DEBUG=$enable_debug_flag
+PERFORM_OMI_MAKEINSTALL=$enable_omi_tools_flag
 OMI_CONFIGURE_QUALS=$omi_configure_quals
 EOF
 

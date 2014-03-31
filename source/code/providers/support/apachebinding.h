@@ -21,6 +21,7 @@
 #include "apr_shm.h"
 
 #include "mmap_region.h"
+#include "datasampler.h"
 
 
 /*------------------------------------------------------------------------------*/
@@ -53,6 +54,8 @@ public:
     static apr_status_t LockMutex() { return apr_global_mutex_lock(ms_mutexMapRW); }
     static apr_status_t UnlockMutex() { return apr_global_mutex_unlock(ms_mutexMapRW); }
 
+    static apr_pool_t *GetPool() { return ms_apr_pool; }
+
 private:
     static apr_pool_t *ms_apr_pool;
     static apr_shm_t *ms_mmap_region;
@@ -61,6 +64,7 @@ private:
 
     static apr_global_mutex_t *ms_mutexMapRW;
 
+    static DataSampler ms_sampler;
     static int ms_loadCount;
 };
 

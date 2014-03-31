@@ -6,7 +6,7 @@
 #--------------------------------------------------------------------------------
 
 BASE_DIR := $(subst /build,,$(PWD))
-OMI_ROOT := $(shell cd ../../../omi/distro; pwd -P)
+OMI_ROOT := $(shell cd ../../omi/distro; pwd -P)
 
 HTTP_LIBDIR := $(shell apxs -q LIBEXECDIR)
 
@@ -44,14 +44,16 @@ SHARED_FLAGS := -shared
 #--------------------------------------------------------------------------------
 # Build targets
 
-all : $(PROVIDER_LIBRARY) $(APACHE_MODULE)
+all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 
 clean :
-	-rm -r $(TARGET_DIR)
+	-rm -rf $(TARGET_DIR)
 
 distclean : clean
 	-rm $(BASE_DIR)/build/config.mak
 	-find $(BASE_DIR) -name \*~ -exec rm {} \;
+	-make -C $(OMI_ROOT) distclean
+	-rm -rf $(OMI_ROOT)/output*
 
 # Install both the Apache module and the OMI provider
 # This assumes that:
@@ -68,6 +70,27 @@ install : $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 restart :
 	sudo /etc/init.d/omiserverd restart
 	sudo /etc/init.d/httpd restart
+
+
+#--------------------------------------------------------------------------------
+# OMI build
+#
+# Build the OMI distribution
+#
+# Technically, we should go to build OMI all the time. But I'd rather not spend
+# the time doing it here EVERY TIME, when we never normally change OMI. This is
+# a good tradeoff (build if not built, otherwise assume all is well).
+#
+# Doing a 'make clean' in OMI directory will force us to rebuild.
+
+$(OMI_ROOT)/output : $(OMI_ROOT)/output/lib/libmicxx.so
+
+$(OMI_ROOT)/output/lib/libmicxx.so :
+	@echo "========================= Performing Building OMI"
+	make -C $(OMI_ROOT)
+ifeq ($(PERFORM_OMI_MAKEINSTALL),1)
+	make -C $(OMI_ROOT) install
+endif
 
 #--------------------------------------------------------------------------------
 # Apache Provider
@@ -88,9 +111,14 @@ STATIC_PROVIDERLIB_SRCFILES += \
 	$(PROVIDER_DIR)/module.cpp
 
 STATIC_PROVIDERLIB_SRCFILES += \
-	$(PROVIDER_DIR)/support/apachebinding.cpp
+	$(PROVIDER_DIR)/support/apachebinding.cpp \
+	$(PROVIDER_DIR)/support/datasampler.cpp
 
-$(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST)
+PROVIDER_HEADERS = \
+	$(PROVIDER_DIR)/support/apachebinding.h \
+	$(PROVIDER_DIR)/support/datasampler.h
+
+$(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"
 	mkdir -p $(TARGET_DIR)
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
@@ -115,6 +143,8 @@ $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST)
 # The following is all for OMI "bootstrap" stuff (allowing omigen and omireg to run)
 #
 
+ifeq ($(PERFORM_OMI_MAKEINSTALL),1)
+
 CLASSES = \
 	Apache_HTTPDProcess \
 	Apache_HTTPDServer \
@@ -130,12 +160,8 @@ OMIGEN = $(OMI_BINDIR)/omigen
 
 MOF_DIR = $(SOURCE_DIR)/mof
 
-# TODO: This really sucks.  We need to make OMI not dependent upon PAL;
-#       omi kit build should be done by CM or OM (so we don't care)
-#
-# For these OMI targets to run, OMI must be configured with something like (from opsmgr directory):
-#   ./configure --enable-debug --prefix=/home/jeffcof/dev/work/omi/distro/output/install_local
-#   make install   (in OMI directory)
+# For these targets to run, configure MUST be run with the --enable-omi-tools qualifier, like this:
+#   ./configure --enable-debug --enable-omi-tools
 
 schema_gen :
 	# The omigen facility is unhappy if no ~/.omigenrc file exists, so create one for this run
@@ -149,3 +175,5 @@ omi_reg :
 	mkdir -p $(OMI_DIR)/etc/omiregister/root-apache
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(TARGET_DIR)/omi; $(OMI_BINDIR)/omireg -n root/apache -o root $(PROVIDER_LIBRARY)
 	cp -r $(OMI_DIR)/etc/omiregister/root-apache $(TARGET_DIR)/omi
+
+endif # $(PERFORM_OMI_MAKEINSTALL),1
