@@ -11,6 +11,9 @@
 */
 /*----------------------------------------------------------------------------*/
 
+#include <limits>
+
+#include <apr_atomic.h>
 #include <apr_strings.h>
 
 #include "apachebinding.h"
@@ -19,6 +22,7 @@
 DataSampler::DataSampler()
     : m_tid(NULL), m_mutex(NULL), m_cond(NULL), m_fShutdown(false)
 {
+    m_timeLastUpdated = apr_time_now();
 }
 
 DataSampler::~DataSampler()
@@ -229,9 +233,129 @@ void DataSampler::ThreadMain()
     return;
 }
 
+/*----------------------------------------------------------------------------*/
+/**
+    Helper routine to determine delta updates and accumulate totals.
+
+    The purpose of this function is to accumulate totals and determine the
+    delta (change) from the last total to the current total kept by the
+    Apache server. This is necessary because the APR only allows for 32-bit
+    atomic operations, allowing the possibility of numeric overflow.
+
+    \param      myCurrentTotal          Grant total (64-bit) for the counter
+    \param      myPriorTotal            Previous total (last time we ran),
+                                        updated to latest total upon exit
+    \param      myLatestTotal           Latest total from Apache module (atomic)
+
+    \returns    Difference between myLatestTotal and myPriorTotal, accounting
+                for numeric overflows.
+*/
+
+static apr_uint32_t DeltaHelper(apr_uint64_t *myCurrentTotal, apr_uint32_t *myPriorTotal, volatile apr_uint32_t *myLatestTotal)
+{
+    apr_uint32_t currentDelta;
+    apr_uint32_t priorTotal = *myPriorTotal;
+    apr_uint32_t latestTotal = apr_atomic_read32(myLatestTotal);
+
+    // Did we roll over (APR only keeps 32-bit atomics)
+    if (priorTotal > latestTotal)
+    {
+        currentDelta = (std::numeric_limits<apr_uint32_t>::max() - priorTotal) + latestTotal + 1;
+    }
+    else
+    {
+        currentDelta = latestTotal - priorTotal;
+    }
+
+    // Now update values and return the delta
+
+    *myPriorTotal = *myLatestTotal;
+    *myCurrentTotal += currentDelta;
+
+    return currentDelta;
+}
+
 void DataSampler::PerformComputations()
 {
+    mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
+    apr_time_t currentTime = apr_time_now();
+    apr_interval_time_t deltaTime = currentTime - m_timeLastUpdated;
+
+    // Scheduling oddity - just update time and return
+    if (apr_time_sec(deltaTime) < 1)
+    {
+        g_apache.DisplayError(0, "DataSampler::PerformComputations skipping execution due to thread scheduling issue");
+        m_timeLastUpdated = currentTime;
+        return;
+    }
+
     g_apache.DisplayError(0, "DataSampler::PerformComputations executing");
 
+    // Compute the CPU time utilized and related bits of information (need mutex for this)
+    // (If we fail for some reason, log but continue with other statistics)
+
+    do {
+        apr_status_t status;
+
+        if (APR_SUCCESS != (status = g_apache.LockMutex()))
+        {
+            g_apache.DisplayError(status, "DataSampler::PerformComputations: skipping worker statistics due to mutex lock error");
+            break;
+        }
+
+        // Grab what we need and then unlock the mutex; note that we need to copy to "provider" versions atomically
+        // since that's how providers will access them. It's better to not grab mutex in provider enumerations since
+        // that can happen potentially more often, impacting overall Apache performanace.
+
+        apr_atomic_set32(&g_apache.ms_server_data->idleWorkers, g_apache.ms_server_data->idleApacheWorkers);
+        apr_atomic_set32(&g_apache.ms_server_data->busyWorkers, g_apache.ms_server_data->busyApacheWorkers);
+        clock_t cpuUtilization = g_apache.ms_server_data->apacheCpuUtilization;
+
+        if (APR_SUCCESS != (status = g_apache.UnlockMutex()))
+        {
+            g_apache.DisplayError(status, "DataSampler::PerformComputations: mutex unlock error in worker statistics");
+        }
+
+//      Apache made the computation like this:
+//      ap_rprintf(r, "CPULoad: %g\n",
+//                 (tu + ts + tcu + tcs) / tick / up_time * 100.);
+//
+//      mod_cimprov.c stores (tu + ts + tcu + tcs) / tick in apacheCpuUtilization;
+
+        // TODO: Not quite sure here - Kris will get back to me on how to compute this
+        apr_atomic_set32(&g_apache.ms_server_data->percentCPU, 0);
+
+        // Save the current clock value as the prior value for the next time 'round
+        g_apache.ms_server_data->cpuUtilizationPrior = cpuUtilization;
+    } while (false);
+
+    // TODO: Lock the process mutex (thread mutex?  Don't think we need process mutex for virtual hosts)
+
+    for (apr_size_t i = 0; i < g_apache.GetVHostCount(); i++)
+    {
+        apr_uint32_t deltaRequests, deltaBytes, delta400, delta500;
+
+        // Determine deltas for each of RequestsTotal, RequestsBytesTotal, errorCount400Total, and ErrorCount500Total
+
+        deltaRequests = DeltaHelper(&vhosts[i].requestTotal64, &vhosts[i].requestsTotalPrior, &vhosts[i].requestsTotal);
+        deltaBytes = DeltaHelper(&vhosts[i].requestsBytesTotal64, &vhosts[i].requestsTotalBytesPrior, &vhosts[i].requestsBytes);
+        delta400 = DeltaHelper(&vhosts[i].errorCount400Total64, &vhosts[i].errorCount400TotalPrior, &vhosts[i].errorCount400);
+        delta500 = DeltaHelper(&vhosts[i].errorCount500Total64, &vhosts[i].errorCount500TotalPrior, &vhosts[i].errorCount500);
+
+        // RequestsPerSecond: Delta # of requests / # of seconds since last run
+        apr_atomic_set32(&vhosts[i].requestsPerSecond, deltaRequests / apr_time_sec(deltaTime));
+        // kbPerRequest: Total KB (delta) / # of requests (delta); KB = Total bytes (delta) / 1024
+        apr_atomic_set32(&vhosts[i].kbPerRequest, ( deltaRequests ? (deltaBytes / 1024) / deltaRequests : 0));
+        // kbPerSecond: Total KB (delta) / # of seconds since last run
+        apr_atomic_set32(&vhosts[i].kbPerSecond, (deltaBytes / 1024) / apr_time_sec(deltaTime));
+
+        // errorsPerMinute* = (errorDelta / (# of seconds since last run)) * 60. (the idea is to normalize to a per-minute rate)
+        apr_atomic_set32(&vhosts[i].errorsPerMinute400, (delta400 / apr_time_sec(deltaTime)) * 60);
+        apr_atomic_set32(&vhosts[i].errorsPerMinute500, (delta500 / apr_time_sec(deltaTime)) * 60);
+    }
+
+    // TODO: Unlock the process mutex
+
+    m_timeLastUpdated = currentTime;
     return;
 }

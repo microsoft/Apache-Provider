@@ -3,8 +3,10 @@
 #include "Apache_HTTPDServerStatistics_Class_Provider.h"
 
 // Provider include definitions
+#include <apr_atomic.h>
 #include "apachebinding.h"
 
+#include <unistd.h>
 
 MI_BEGIN_NAMESPACE
 
@@ -57,7 +59,6 @@ void Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances(
     const MI_Filter* filter)
 {
     Apache_HTTPDServerStatistics_Class inst;
-    mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
 
     // Insert the key into the instance
 
@@ -65,12 +66,27 @@ void Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances(
 
     if (! keysOnly)
     {
+        mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
+
         // Insert the values into the instance
 
-        inst.RequestsTotal_value(vhosts[0].requestsTotal);
-        inst.IdleWorkers_value(g_apache.GetWorkerCountIdle());
-        inst.BusyWorkers_value(g_apache.GetWorkerCountBusy());
+        inst.RequestsTotal_value(vhosts[0].requestTotal64);
         inst.ConfigurationFile_value(g_apache.GetServerConfigFile());
+
+        // Insert time-based values into the instance
+
+        inst.RequestsPerSecond_value(apr_atomic_read32(&vhosts[0].requestsPerSecond));
+        inst.KBPerRequest_value(apr_atomic_read32(&vhosts[0].kbPerRequest));
+        inst.KBPerSecond_value(apr_atomic_read32(&vhosts[0].kbPerSecond));
+        inst.TotalPctCPU_value(g_apache.GetCPUUtilization());
+
+        apr_uint32_t idleWorkers = g_apache.GetWorkerCountIdle();
+        apr_uint32_t busyWorkers = g_apache.GetWorkerCountBusy();
+        apr_uint32_t totalWorkers = idleWorkers + busyWorkers;
+
+        inst.IdleWorkers_value(idleWorkers);
+        inst.BusyWorkers_value(busyWorkers);
+        inst.PctBusyWorkers_value(totalWorkers ? (busyWorkers * 100) / totalWorkers : 0);
     }
 
     context.Post(inst);

@@ -44,6 +44,7 @@ private:
     void PerformComputations();
 
     apr_thread_t *m_tid;
+    apr_time_t m_timeLastUpdated;
 
     // Support for condition (to control thread shutdown)
 

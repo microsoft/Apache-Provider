@@ -29,9 +29,17 @@ typedef struct
     char processName[NAME_MAX+1];       // Process name
     int operatingStatus;                // Operating status
 
+    apr_uint32_t idleApacheWorkers;     // Number of workers that are currently idle (from Apache)
+    apr_uint32_t busyApacheWorkers;     // Number of workers that are currently busy (from Apache)
+    clock_t apacheCpuUtilization;       // CPU utilization for the server (from Apache)
+    volatile time_t busyRefreshTime;    // Time of last update for idle/busy workers
+
+    clock_t cpuUtilizationPrior;        // Prior copy of apacheCpuUtilization for delta computations
+
+    // The following are from provider worker thread that are updated once/minute
     volatile apr_uint32_t idleWorkers;  // Number of workers that are currently idle
     volatile apr_uint32_t busyWorkers;  // Number of workers that are currently busy
-    volatile time_t busyRefreshTime;    // Time of last update for idle/busy workers
+    volatile apr_uint32_t percentCPU;   // Percentage of CPU utilization
 
     apr_size_t moduleCount;             // Number of elements of mmap_server_modules that follow
     mmap_server_modules modules[0];     // Array of Apache modules loaded into the configuraiton
@@ -69,17 +77,16 @@ typedef struct
     // above data is per-VirtualHost structure, here is a good a place as any.
 
     apr_uint32_t requestsTotalPrior;
-    apr_uint32_t requestsBytesPrior;
+    apr_uint32_t requestsTotalBytesPrior;
+    apr_uint32_t errorCount400TotalPrior;
+    apr_uint32_t errorCount500TotalPrior;
 
-    apr_uint64_t requestsTotalHistory[5];       // 5 minutes worth of history
-    apr_uint64_t requestsBytesHistory[5];
-    apr_uint64_t errorCount400History[5];
-    apr_uint64_t errorCount500History[5];
+    apr_uint64_t requestTotal64;
+    apr_uint64_t requestsBytesTotal64;
+    apr_uint64_t errorCount400Total64;
+    apr_uint64_t errorCount500Total64;
 
-    volatile apr_uint32_t requestsCurrent;
     volatile apr_uint32_t requestsPerSecond;
-
-    volatile apr_uint32_t msPerRequest;
     volatile apr_uint32_t kbPerRequest;
     volatile apr_uint32_t kbPerSecond;
 

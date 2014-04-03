@@ -26,10 +26,10 @@
 #include <http_protocol.h>
 #include <ap_mpm.h>
 #include <scoreboard.h>
-
+#ifdef AP_NEED_SET_MUTEX_PERMS
+#include <unixd.h>
+#endif // AP_NEED_SET_MUTEX_PERMS
 #include "mmap_region.h"
-
-// #define DEBUG_HYSTERICAL 1
 
 /*
  * Global memory definitions
@@ -45,9 +45,18 @@ static apr_global_mutex_t *mutexMapInit = NULL;
 static apr_global_mutex_t *mutexMapRW = NULL;
 
 static int g_enablelogging = 0;
+static int g_enablehystericallogging = 0;
 static int g_busyrefreshfrequency = 60;
 
 static int g_process_limit = 0, g_thread_limit = 0;
+
+#ifdef HAVE_TIMES
+/* ugh... need to know if we're running with a pthread implementation
+ * such as linuxthreads that treats individual threads as distinct
+ * processes; that affects how we add up CPU time in a process
+ */
+static pid_t g_child_pid;
+#endif
 
 
 typedef enum
@@ -118,6 +127,17 @@ static const char *set_logging_state(cmd_parms *cmd, void *dummy, int arg)
     return NULL;
 }
 
+static const char *set_hystericallogging_state(cmd_parms *cmd, void *dummy, int arg)
+{
+    const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
+    if (err != NULL) {
+        return err;
+    }
+
+    g_enablehystericallogging = arg;
+    return NULL;
+}
+
 static const char *set_busyrefresh_frequency(cmd_parms *cmd, void *dummy, const char *arg)
 {
     const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
@@ -134,9 +154,12 @@ static const command_rec cimprov_module_cmds[] =
 {
     AP_INIT_FLAG("CimSetLogging", set_logging_state, NULL, RSRC_CONF,
       "\"On\" to enable logging information, \"Off\" to disable"),
+    AP_INIT_FLAG("CimSetHystericalLogging", set_hystericallogging_state, NULL, RSRC_CONF,
+      "\"On\" to enable hysterical logging information, \"Off\" to disable. "
+      "Note that CimSetLogging must be On for hysterical output to display properly."),
     AP_INIT_TAKE1("CimBusyRefreshFrequency", set_busyrefresh_frequency, NULL, RSRC_CONF,
-      "Set the default busy refresh frequency for busy/idle thread counts. "
-      "Default = 60 seconds, -1 = Disabled, 0 = Update on each request."),
+      "Set the default busy refresh frequency for busy/idle thread counts and CPU load. "
+      "Default = 60 seconds, -1 = Disabled, 0 = Update on each request (very high overhead)."),
     {NULL}
 };
 
@@ -151,12 +174,18 @@ static apr_status_t mutex_lock(lock_type type)
 
     if (LOCKTYPE_INIT == type)
     {
-        display_error("cimprov: mutex_lock: locking INIT mutex", 0, 0);
+        if (g_enablehystericallogging)
+        {
+            display_error("cimprov: mutex_lock: locking INIT mutex", 0, 0);
+        }
         mutex = mutexMapInit;
     }
     else
     {
-        display_error("cimprov: mutex_lock: locking RW mutex", 0, 0);
+        if (g_enablehystericallogging)
+        {
+            display_error("cimprov: mutex_lock: locking RW mutex", 0, 0);
+        }
         mutex = mutexMapRW;
     }
 
@@ -177,12 +206,18 @@ static apr_status_t mutex_unlock(lock_type type)
 
     if (LOCKTYPE_INIT == type)
     {
-        display_error("cimprov: mutex_unlock: unlocking INIT mutex", 0, 0);
+        if (g_enablehystericallogging)
+        {
+            display_error("cimprov: mutex_unlock: unlocking INIT mutex", 0, 0);
+        }
         mutex = mutexMapInit;
     }
     else
     {
-        display_error("cimprov: mutex_unlock: unlocking RW mutex", 0, 0);
+        if (g_enablehystericallogging)
+        {
+            display_error("cimprov: mutex_unlock: unlocking RW mutex", 0, 0);
+        }
         mutex = mutexMapRW;
     }
 
@@ -486,6 +521,13 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
         return display_error(errorText, status, 1);
     }
 
+#ifdef AP_NEED_SET_MUTEX_PERMS
+    if (APR_SUCCESS != (status = unixd_set_global_mutex_perms(mutexMapRW)))
+    {
+        return display_error("cimprov: post_config_handler could not set permissions on global mutex", status, 1);
+    }
+#endif // AP_NEED_SET_MUTEX_PERMS
+
     if (APR_SUCCESS != (status = mutex_lock(LOCKTYPE_RW)))
     {
         return display_error(errorText, status, 1);
@@ -571,6 +613,8 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 
 static apr_status_t handle_WorkerStatistics(const request_rec *r)
 {
+    apr_status_t status;
+
     /* If idle/busy lookup is diabled, return */
     if (-1 == g_busyrefreshfrequency)
     {
@@ -580,23 +624,22 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
     /* See if it's time to determine idle/busy lookup */
     if (0 != g_busyrefreshfrequency)
     {
-        apr_status_t status;
         apr_time_t currentTime = apr_time_now();
         apr_time_t lastUpdateTime;
 
-        time_t ansiUpdateTime = apr_atomic_read32((apr_uint32_t *) &g_server_data->busyRefreshTime);
+        apr_uint32_t ansiUpdateTime = apr_atomic_read32((apr_uint32_t *) &g_server_data->busyRefreshTime);
         if (APR_SUCCESS != (status = apr_time_ansi_put(&lastUpdateTime, ansiUpdateTime)))
         {
             display_error("cimprov: Error converting from time_t, forcing update", status, 0);
             lastUpdateTime = 0;
         }
 
-#if defined(DEBUG_HYSTERICAL)
-        char *text;
-        text = apr_psprintf(r->pool, "DEBUG: lastUpdateTime=%lu, currentTime=%lu, freq=%d",
-                            lastUpdateTime, currentTime, g_busyrefreshfrequency);
-        display_error(text, 0, 0);
-#endif // defined(DEBUG_HYSTERICAL)
+        if (g_enablehystericallogging)
+        {
+            char *text = apr_psprintf(r->pool, "DEBUG: lastUpdateTime=%lu, currentTime=%lu, freq=%d",
+                                      lastUpdateTime, currentTime, g_busyrefreshfrequency);
+            display_error(text, 0, 0);
+        }
 
         // Just bag if it's not time to do the refresh
         if (0 != lastUpdateTime && (lastUpdateTime + apr_time_from_sec(g_busyrefreshfrequency)) > currentTime)
@@ -604,12 +647,39 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
             return APR_SUCCESS;
         }
 
-        // It's time to refresh - fall through
-        apr_atomic_set32((apr_uint32_t *) &g_server_data->busyRefreshTime, (time_t) apr_time_sec(currentTime));
+        // It's time to refresh - fall through, but take care to only run once in case of thread collision
+        apr_uint32_t newUpdateTime = apr_time_sec(currentTime);
+        apr_uint32_t originalTime = apr_atomic_cas32((apr_uint32_t *) &g_server_data->busyRefreshTime, newUpdateTime, ansiUpdateTime);
+
+        if (g_enablehystericallogging)
+        {
+            char *text = apr_psprintf(r->pool, "DEBUG: originalTime=%d, ansiUpdateTime=%d, freq=%d",
+                                      originalTime, ansiUpdateTime, g_busyrefreshfrequency);
+            display_error(text, 0, 0);
+        }
+
+        if (originalTime != ansiUpdateTime)
+        {
+            // Some other thread is handling this, so we don't need to
+            return APR_SUCCESS;
+        }
     }
 
     apr_uint32_t ready = 0, busy = 0;
+    clock_t tu, ts, tcu, tcs;
     int i, j;
+#ifdef HAVE_TIMES
+    float tick;
+    int times_per_thread = getpid() != g_child_pid;
+
+#ifdef _SC_CLK_TCK
+    tick = sysconf(_SC_CLK_TCK);
+#else
+    tick = HZ;
+#endif
+#endif
+
+    tu = ts = tcu = tcs = 0;
 
 #if defined(linux)
     char *text = apr_psprintf(r->pool, "cimprov: Computing Apache idle/busy thread/process counts in PID %d",
@@ -623,6 +693,10 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
         process_score *score_process;
         worker_score *score_worker;
         int state;
+#ifdef HAVE_TIMES
+        clock_t proc_tu = 0, proc_ts = 0, proc_tcu = 0, proc_tcs = 0;
+        clock_t tmp_tu, tmp_ts, tmp_tcu, tmp_tcs;
+#endif
 
         score_process = ap_get_scoreboard_process(i);
         for (j = 0; j < g_thread_limit; ++j) {
@@ -639,11 +713,65 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
                     busy++;
                 }
             }
+
+#ifdef HAVE_TIMES
+            unsigned long lres = score_worker->access_count;
+
+            if (lres != 0 || (state != SERVER_READY && state != SERVER_DEAD)) {
+                tmp_tu = score_worker->times.tms_utime;
+                tmp_ts = score_worker->times.tms_stime;
+                tmp_tcu = score_worker->times.tms_cutime;
+                tmp_tcs = score_worker->times.tms_cstime;
+
+                if (times_per_thread) {
+                    proc_tu += tmp_tu;
+                    proc_ts += tmp_ts;
+                    proc_tcu += tmp_tcu;
+                    proc_tcs += proc_tcs;
+                }
+                else {
+                    if (tmp_tu > proc_tu || tmp_ts > proc_ts || tmp_tcu > proc_tcu || tmp_tcs > proc_tcs) {
+                        proc_tu = tmp_tu;
+                        proc_ts = tmp_ts;
+                        proc_tcu = tmp_tcu;
+                        proc_tcs = proc_tcs;
+                    }
+                }
+            }
+#endif /* HAVE_TIMES */
         }
+
+#ifdef HAVE_TIMES
+        tu += proc_tu;
+        ts += proc_ts;
+        tcu += proc_tcu;
+        tcs += proc_tcs;
+#endif
     }
 
-    apr_atomic_set32(&g_server_data->idleWorkers, ready);
-    apr_atomic_set32(&g_server_data->busyWorkers, busy);
+    // Because clock_t data structure can be 64-bit (on 64-bit platforms), and
+    // because the APR doesn't support 64-bit atomics, we use a mutex here ...
+
+    if (APR_SUCCESS != (status = mutex_lock(LOCKTYPE_RW)))
+    {
+        return display_error("handle_WorkerStatistics: Error locking RW mutex", status, 1);
+    }
+
+#ifdef HAVE_TIMES
+    if (ts || tu || tcu || tcs)
+    {
+        g_server_data->apacheCpuUtilization = (tu + ts + tcu + tcs) / tick;
+    }
+#endif
+
+    // These could be updated atomically, but since we needed the mutex anyway ...
+    g_server_data->idleApacheWorkers = ready;
+    g_server_data->busyApacheWorkers = busy;
+
+    if (APR_SUCCESS != (status = mutex_unlock(LOCKTYPE_RW)))
+    {
+        return display_error("handle_WorkerStatistics: Error unlocking RW mutex", status, 1);
+    }
 
     return APR_SUCCESS;
 }
@@ -657,6 +785,18 @@ static int log_request_handler(request_rec *r)
     return DECLINED;
 }
 
+#ifdef HAVE_TIMES
+static void child_init_handler(apr_pool_t *pool, server_rec *server)
+{
+    apr_status_t status;
+    if (APR_SUCCESS != (status = apr_global_mutex_child_init(&mutexMapRW, MUTEX_RW_NAME, pool)))
+    {
+        display_error("child_init_handler: failed to initialize child mutex", status, 1);
+    }
+    g_child_pid = getpid();
+}
+#endif
+
 /*
 *    Define the hooks and the functions registered to those hooks
 */
@@ -664,6 +804,7 @@ static void register_hooks(apr_pool_t *pool)
 {
     ap_hook_log_transaction(log_request_handler, NULL, NULL, APR_HOOK_MIDDLE);
     ap_hook_post_config(post_config_handler, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_hook_child_init(child_init_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
 module AP_MODULE_DECLARE_DATA cimprov_module =

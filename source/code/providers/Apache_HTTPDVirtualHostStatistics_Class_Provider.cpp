@@ -3,6 +3,7 @@
 #include "Apache_HTTPDVirtualHostStatistics_Class_Provider.h"
 
 // Provider include definitions
+#include <apr_atomic.h>
 #include "apachebinding.h"
 
 
@@ -27,6 +28,13 @@ static void EnumerateOneInstance(Context& context,
         inst.RequestsTotalBytes_value(vhosts[item].requestsBytes);
         inst.ErrorCount400_value(vhosts[item].errorCount400);
         inst.ErrorCount500_value(vhosts[item].errorCount500);
+
+        // Insert the time-based values into the instance
+
+        inst.KBPerRequest_value(apr_atomic_read32(&vhosts[item].kbPerRequest));
+        inst.KBPerSecond_value(apr_atomic_read32(&vhosts[item].kbPerSecond));
+        inst.ErrorsPerMinute400_value(apr_atomic_read32(&vhosts[item].errorsPerMinute400));
+        inst.ErrorsPerMinute500_value(apr_atomic_read32(&vhosts[item].errorsPerMinute500));
     }
 
     context.Post(inst);

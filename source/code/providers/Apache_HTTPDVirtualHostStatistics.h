@@ -42,7 +42,6 @@ typedef struct _Apache_HTTPDVirtualHostStatistics /* extends CIM_StatisticalData
     MI_ConstUint32Field RequestsPerSecond;
     MI_ConstUint32Field KBPerRequest;
     MI_ConstUint32Field KBPerSecond;
-    MI_ConstUint32Field MSPerRequest;
     MI_ConstUint64Field ErrorCount400;
     MI_ConstUint64Field ErrorCount500;
     MI_ConstUint32Field ErrorsPerMinute400;
@@ -423,22 +422,6 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostStatistics_Clear_KBPerSecond(
     Apache_HTTPDVirtualHostStatistics* self)
 {
     memset((void*)&self->KBPerSecond, 0, sizeof(self->KBPerSecond));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostStatistics_Set_MSPerRequest(
-    Apache_HTTPDVirtualHostStatistics* self,
-    MI_Uint32 x)
-{
-    ((MI_Uint32Field*)&self->MSPerRequest)->value = x;
-    ((MI_Uint32Field*)&self->MSPerRequest)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostStatistics_Clear_MSPerRequest(
-    Apache_HTTPDVirtualHostStatistics* self)
-{
-    memset((void*)&self->MSPerRequest, 0, sizeof(self->MSPerRequest));
     return MI_RESULT_OK;
 }
 
@@ -987,46 +970,6 @@ public:
     void KBPerSecond_clear()
     {
         const size_t n = offsetof(Self, KBPerSecond);
-        GetField<Uint32>(n).Clear();
-    }
-
-    //
-    // Apache_HTTPDVirtualHostStatistics_Class.MSPerRequest
-    //
-    
-    const Field<Uint32>& MSPerRequest() const
-    {
-        const size_t n = offsetof(Self, MSPerRequest);
-        return GetField<Uint32>(n);
-    }
-    
-    void MSPerRequest(const Field<Uint32>& x)
-    {
-        const size_t n = offsetof(Self, MSPerRequest);
-        GetField<Uint32>(n) = x;
-    }
-    
-    const Uint32& MSPerRequest_value() const
-    {
-        const size_t n = offsetof(Self, MSPerRequest);
-        return GetField<Uint32>(n).value;
-    }
-    
-    void MSPerRequest_value(const Uint32& x)
-    {
-        const size_t n = offsetof(Self, MSPerRequest);
-        GetField<Uint32>(n).Set(x);
-    }
-    
-    bool MSPerRequest_exists() const
-    {
-        const size_t n = offsetof(Self, MSPerRequest);
-        return GetField<Uint32>(n).exists ? true : false;
-    }
-    
-    void MSPerRequest_clear()
-    {
-        const size_t n = offsetof(Self, MSPerRequest);
         GetField<Uint32>(n).Clear();
     }
 

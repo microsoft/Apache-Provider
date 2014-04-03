@@ -4,21 +4,6 @@
 
 #pragma locale ("en_US")
 
-// Apache_HTTPDProcess
-// -------------------------------------------------------------------
-[   Version ( "1.0.0" ), 
-    Description ( "Apache Web Server Process Information" )
-]
-class Apache_HTTPDProcess : CIM_Process {
-
-    [ Description ( "Percentage of time spent in user-mode") ]
-    uint16 PercentUserTime;
-
-    [ Description ( "Current working set size in MB") ]
-    uint32 WorkingSetSizeMB;
-
-};
-
 // Apache_HTTPDServer
 // -------------------------------------------------------------------
 [   Version ( "1.0.0" ), 
@@ -166,9 +151,6 @@ class Apache_HTTPDVirtualHostStatistics : CIM_StatisticalData {
 
     [ Description ( "Average KB per second handled by the virtual host") ]
     uint32 KBPerSecond;
-
-    [ Description( "Average milliseconds per request handled by the virtual host" ) ]
-    uint32 MSPerRequest;
 
     [ Description( "Total number of 4xx HTTP Error Responses" ) ]
     uint64 ErrorCount400;

@@ -15,10 +15,11 @@
 #define APACHEBINDING_H
 
 // Apache Portable Runtime definitions
-#include "apr.h"
-#include "apr_errno.h"
-#include "apr_global_mutex.h"
-#include "apr_shm.h"
+#include <apr.h>
+#include <apr_atomic.h>
+#include <apr_errno.h>
+#include <apr_global_mutex.h>
+#include <apr_shm.h>
 
 #include "mmap_region.h"
 #include "datasampler.h"
@@ -45,8 +46,9 @@ public:
     static int GetOperatingStatus() { return ms_server_data->operatingStatus; }
     static apr_size_t GetModuleCount() { return ms_server_data->moduleCount; }
     static mmap_server_modules *GetServerModules() { return ms_server_data->modules; }
-    static apr_uint32_t GetWorkerCountIdle() { return ms_server_data->idleWorkers; }
-    static apr_uint32_t GetWorkerCountBusy() { return ms_server_data->busyWorkers; }
+    static apr_uint32_t GetWorkerCountIdle() { return apr_atomic_read32(&ms_server_data->idleWorkers); }
+    static apr_uint32_t GetWorkerCountBusy() { return apr_atomic_read32(&ms_server_data->busyWorkers); }
+    static apr_uint32_t GetCPUUtilization() { return apr_atomic_read32(&ms_server_data->percentCPU); }
 
     static apr_size_t GetVHostCount() { return ms_vhost_data->count; }
     static mmap_vhost_elements *GetVHostElements() { return ms_vhost_data->vhosts; }
@@ -66,6 +68,8 @@ private:
 
     static DataSampler ms_sampler;
     static int ms_loadCount;
+
+    friend class DataSampler;
 };
 
 extern ApacheBinding g_apache;

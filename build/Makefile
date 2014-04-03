@@ -34,8 +34,11 @@ OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
 MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include
 PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support
 
+ifeq ($(ENABLE_DEBUG),1)
+PROV_DEBUG_FLAGS := -g
+endif
 
-COMPILE_FLAGS := -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
+COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
 
 LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib -lmicxx -lapr-1
 
@@ -98,7 +101,6 @@ endif
 # Build the Provider Library 
 
 STATIC_PROVIDERLIB_SRCFILES = \
-	$(PROVIDER_DIR)/Apache_HTTPDProcess_Class_Provider.cpp \
 	$(PROVIDER_DIR)/Apache_HTTPDServer_Class_Provider.cpp \
 	$(PROVIDER_DIR)/Apache_HTTPDServerStatistics_Class_Provider.cpp \
 	$(PROVIDER_DIR)/Apache_HTTPDVirtualHost_Class_Provider.cpp \
@@ -146,7 +148,6 @@ $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST)
 ifeq ($(PERFORM_OMI_MAKEINSTALL),1)
 
 CLASSES = \
-	Apache_HTTPDProcess \
 	Apache_HTTPDServer \
 	Apache_HTTPDServerStatistics \
 	Apache_HTTPDVirtualHost \
