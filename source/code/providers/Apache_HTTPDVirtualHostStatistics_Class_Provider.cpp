@@ -31,6 +31,7 @@ static void EnumerateOneInstance(Context& context,
 
         // Insert the time-based values into the instance
 
+        inst.RequestsPerSecond_value(apr_atomic_read32(&vhosts[item].requestsPerSecond));
         inst.KBPerRequest_value(apr_atomic_read32(&vhosts[item].kbPerRequest));
         inst.KBPerSecond_value(apr_atomic_read32(&vhosts[item].kbPerSecond));
         inst.ErrorsPerMinute400_value(apr_atomic_read32(&vhosts[item].errorsPerMinute400));
