@@ -104,13 +104,8 @@ void Apache_HTTPDVirtualHostStatistics_Class_Provider::EnumerateInstances(
         EnumerateOneInstance(context, keysOnly, i);
     }
 
-    // Only display _UNKNOWN if it data saved to it
-    if (g_apache.GetVHostElements()[1].requestsTotal)
-    {
-        EnumerateOneInstance(context, keysOnly, 1);
-    }
-
-    // Support _TOTAL
+    // Support _Default and _Total
+    EnumerateOneInstance(context, keysOnly, 1);
     EnumerateOneInstance(context, keysOnly, 0);
 
     g_apache.UnlockMutex();

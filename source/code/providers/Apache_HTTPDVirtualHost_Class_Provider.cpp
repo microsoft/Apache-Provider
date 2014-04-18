@@ -106,6 +106,9 @@ void Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances(
         EnumerateOneInstance(context, keysOnly, i);
     }
 
+    // Also display _Default
+    EnumerateOneInstance(context, keysOnly, 1);
+
     g_apache.UnlockMutex();
     context.Post(MI_RESULT_OK);
 }

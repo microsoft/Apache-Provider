@@ -306,7 +306,7 @@ static apr_status_t mmap_region_cleanup(void *dummy)
 static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
     int module_count = 0;               /* Number of modules loaded into server */
-    int vhost_count = 2;                /* Save space for _TOTAL and _UNKNOWN */
+    int vhost_count = 2;                /* Save space for _Total and _Default */
     char *text;
 
     /* Walk the list of loaded modules to determine the count */
@@ -341,7 +341,7 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
         s = s->next;
     }
 
-    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _UNKNOWN & _TOTAL)",
+    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
                         vhost_count);
     display_error(text, 0, 0);
 
@@ -428,15 +428,12 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
     g_vhost_data->count = vhost_count;
 
     /*
-     * VirtualHost [0] reserved for _TOTAL
-     * VirtualHost [1] reserved for _UNKNOWN
+     * VirtualHost [0] reserved for _Total
+     * VirtualHost [1] reserved for _Default
      */
 
-    apr_cpystrn(g_vhost_data->vhosts[0].name, "_TOTAL", MAX_VIRTUALHOST_NAME_LEN);
-    apr_hash_set(g_vhost_hash, "_TOTAL", APR_HASH_KEY_STRING, 0);
-
-    apr_cpystrn(g_vhost_data->vhosts[1].name, "_UNKNOWN", MAX_VIRTUALHOST_NAME_LEN);
-    apr_hash_set(g_vhost_hash, "_UNKNOWN", APR_HASH_KEY_STRING, (void *) 1);
+    apr_cpystrn(g_vhost_data->vhosts[0].name, "_Total", MAX_VIRTUALHOST_NAME_LEN);
+    apr_cpystrn(g_vhost_data->vhosts[1].name, "_Default", MAX_VIRTUALHOST_NAME_LEN);
 
     /* Set up virtual host map in reverse order since that's how server_rc comes to us */
 
@@ -559,7 +556,7 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
 
 static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 {
-    const char *serverName = "_UNKNOWN";
+    const char *serverName = "_Default";
     if (r->server)
         serverName = r->server->server_hostname;
 
@@ -570,7 +567,7 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 
     if ( element < 2 || element >= g_vhost_data->count )
     {
-        /* Umm, somehow we got a virtual host that wasn't in the hash; use _UNKNOWN */
+        /* Umm, somehow we got a virtual host that wasn't in the hash; use _Default */
         element = 1;
     }
 
@@ -585,7 +582,7 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
         display_error(text, 0, 0);
     }
 
-    /* Count the statistics - and include in _TOTAL */
+    /* Count the statistics - and include in _Total */
     apr_atomic_inc32(&g_vhost_data->vhosts[element].requestsTotal);
     apr_atomic_add32(&g_vhost_data->vhosts[element].requestsBytes, r->bytes_sent);
     if (http_status >= 400 && http_status <= 499)

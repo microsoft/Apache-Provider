@@ -38,18 +38,6 @@ class Apache_HTTPDServer : CIM_InstalledProduct {
 ]
 class Apache_HTTPDServerStatistics : CIM_StatisticalData {
 
-    [ Description ( "Total requests received by the server since start") ]
-    uint64 RequestsTotal;
-
-    [ Description ( "Average requests per second received by the server") ]
-    uint32 RequestsPerSecond;
-
-    [ Description ( "Average KB per request handled by the server") ]
-    uint32 KBPerRequest;
-
-    [ Description ( "Average KB per second handled by the server") ]
-    uint32 KBPerSecond;
-
     [ Description ( "Average total percentage of CPU used by the server") ]
     uint32 TotalPctCPU;
 

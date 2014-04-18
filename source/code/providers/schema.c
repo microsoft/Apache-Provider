@@ -1000,74 +1000,6 @@ MI_CONST MI_ClassDecl CIM_StatisticalData_rtti =
 **==============================================================================
 */
 
-/* property Apache_HTTPDServerStatistics.RequestsTotal */
-static MI_CONST MI_PropertyDecl Apache_HTTPDServerStatistics_RequestsTotal_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00726C0D, /* code */
-    MI_T("RequestsTotal"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_UINT64, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(Apache_HTTPDServerStatistics, RequestsTotal), /* offset */
-    MI_T("Apache_HTTPDServerStatistics"), /* origin */
-    MI_T("Apache_HTTPDServerStatistics"), /* propagator */
-    NULL,
-};
-
-/* property Apache_HTTPDServerStatistics.RequestsPerSecond */
-static MI_CONST MI_PropertyDecl Apache_HTTPDServerStatistics_RequestsPerSecond_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00726411, /* code */
-    MI_T("RequestsPerSecond"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_UINT32, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(Apache_HTTPDServerStatistics, RequestsPerSecond), /* offset */
-    MI_T("Apache_HTTPDServerStatistics"), /* origin */
-    MI_T("Apache_HTTPDServerStatistics"), /* propagator */
-    NULL,
-};
-
-/* property Apache_HTTPDServerStatistics.KBPerRequest */
-static MI_CONST MI_PropertyDecl Apache_HTTPDServerStatistics_KBPerRequest_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x006B740C, /* code */
-    MI_T("KBPerRequest"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_UINT32, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(Apache_HTTPDServerStatistics, KBPerRequest), /* offset */
-    MI_T("Apache_HTTPDServerStatistics"), /* origin */
-    MI_T("Apache_HTTPDServerStatistics"), /* propagator */
-    NULL,
-};
-
-/* property Apache_HTTPDServerStatistics.KBPerSecond */
-static MI_CONST MI_PropertyDecl Apache_HTTPDServerStatistics_KBPerSecond_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x006B640B, /* code */
-    MI_T("KBPerSecond"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_UINT32, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(Apache_HTTPDServerStatistics, KBPerSecond), /* offset */
-    MI_T("Apache_HTTPDServerStatistics"), /* origin */
-    MI_T("Apache_HTTPDServerStatistics"), /* propagator */
-    NULL,
-};
-
 /* property Apache_HTTPDServerStatistics.TotalPctCPU */
 static MI_CONST MI_PropertyDecl Apache_HTTPDServerStatistics_TotalPctCPU_prop =
 {
@@ -1162,10 +1094,6 @@ static MI_PropertyDecl MI_CONST* MI_CONST Apache_HTTPDServerStatistics_props[] =
     &CIM_StatisticalData_StartStatisticTime_prop,
     &CIM_StatisticalData_StatisticTime_prop,
     &CIM_StatisticalData_SampleInterval_prop,
-    &Apache_HTTPDServerStatistics_RequestsTotal_prop,
-    &Apache_HTTPDServerStatistics_RequestsPerSecond_prop,
-    &Apache_HTTPDServerStatistics_KBPerRequest_prop,
-    &Apache_HTTPDServerStatistics_KBPerSecond_prop,
     &Apache_HTTPDServerStatistics_TotalPctCPU_prop,
     &Apache_HTTPDServerStatistics_IdleWorkers_prop,
     &Apache_HTTPDServerStatistics_BusyWorkers_prop,

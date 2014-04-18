@@ -66,18 +66,12 @@ void Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances(
 
     if (! keysOnly)
     {
-        mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
-
         // Insert the values into the instance
 
-        inst.RequestsTotal_value(vhosts[0].requestTotal64);
         inst.ConfigurationFile_value(g_apache.GetServerConfigFile());
 
         // Insert time-based values into the instance
 
-        inst.RequestsPerSecond_value(apr_atomic_read32(&vhosts[0].requestsPerSecond));
-        inst.KBPerRequest_value(apr_atomic_read32(&vhosts[0].kbPerRequest));
-        inst.KBPerSecond_value(apr_atomic_read32(&vhosts[0].kbPerSecond));
         inst.TotalPctCPU_value(g_apache.GetCPUUtilization());
 
         apr_uint32_t idleWorkers = g_apache.GetWorkerCountIdle();

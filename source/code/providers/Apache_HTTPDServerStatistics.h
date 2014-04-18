@@ -36,10 +36,6 @@ typedef struct _Apache_HTTPDServerStatistics /* extends CIM_StatisticalData */
     MI_ConstDatetimeField StatisticTime;
     MI_ConstDatetimeField SampleInterval;
     /* Apache_HTTPDServerStatistics properties */
-    MI_ConstUint64Field RequestsTotal;
-    MI_ConstUint32Field RequestsPerSecond;
-    MI_ConstUint32Field KBPerRequest;
-    MI_ConstUint32Field KBPerSecond;
     MI_ConstUint32Field TotalPctCPU;
     MI_ConstUint32Field IdleWorkers;
     MI_ConstUint32Field BusyWorkers;
@@ -312,70 +308,6 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Clear_SampleInterval(
     return MI_RESULT_OK;
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Set_RequestsTotal(
-    Apache_HTTPDServerStatistics* self,
-    MI_Uint64 x)
-{
-    ((MI_Uint64Field*)&self->RequestsTotal)->value = x;
-    ((MI_Uint64Field*)&self->RequestsTotal)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Clear_RequestsTotal(
-    Apache_HTTPDServerStatistics* self)
-{
-    memset((void*)&self->RequestsTotal, 0, sizeof(self->RequestsTotal));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Set_RequestsPerSecond(
-    Apache_HTTPDServerStatistics* self,
-    MI_Uint32 x)
-{
-    ((MI_Uint32Field*)&self->RequestsPerSecond)->value = x;
-    ((MI_Uint32Field*)&self->RequestsPerSecond)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Clear_RequestsPerSecond(
-    Apache_HTTPDServerStatistics* self)
-{
-    memset((void*)&self->RequestsPerSecond, 0, sizeof(self->RequestsPerSecond));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Set_KBPerRequest(
-    Apache_HTTPDServerStatistics* self,
-    MI_Uint32 x)
-{
-    ((MI_Uint32Field*)&self->KBPerRequest)->value = x;
-    ((MI_Uint32Field*)&self->KBPerRequest)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Clear_KBPerRequest(
-    Apache_HTTPDServerStatistics* self)
-{
-    memset((void*)&self->KBPerRequest, 0, sizeof(self->KBPerRequest));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Set_KBPerSecond(
-    Apache_HTTPDServerStatistics* self,
-    MI_Uint32 x)
-{
-    ((MI_Uint32Field*)&self->KBPerSecond)->value = x;
-    ((MI_Uint32Field*)&self->KBPerSecond)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Clear_KBPerSecond(
-    Apache_HTTPDServerStatistics* self)
-{
-    memset((void*)&self->KBPerSecond, 0, sizeof(self->KBPerSecond));
-    return MI_RESULT_OK;
-}
-
 MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Set_TotalPctCPU(
     Apache_HTTPDServerStatistics* self,
     MI_Uint32 x)
@@ -446,7 +378,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Set_ConfigurationFile(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        15,
+        11,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -458,7 +390,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_SetPtr_ConfigurationFil
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        15,
+        11,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -469,7 +401,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServerStatistics_Clear_ConfigurationFile
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        15);
+        11);
 }
 
 /*
@@ -714,166 +646,6 @@ public:
     static const MI_ClassDecl* GetClassDecl()
     {
         return &Apache_HTTPDServerStatistics_rtti;
-    }
-
-    //
-    // Apache_HTTPDServerStatistics_Class.RequestsTotal
-    //
-    
-    const Field<Uint64>& RequestsTotal() const
-    {
-        const size_t n = offsetof(Self, RequestsTotal);
-        return GetField<Uint64>(n);
-    }
-    
-    void RequestsTotal(const Field<Uint64>& x)
-    {
-        const size_t n = offsetof(Self, RequestsTotal);
-        GetField<Uint64>(n) = x;
-    }
-    
-    const Uint64& RequestsTotal_value() const
-    {
-        const size_t n = offsetof(Self, RequestsTotal);
-        return GetField<Uint64>(n).value;
-    }
-    
-    void RequestsTotal_value(const Uint64& x)
-    {
-        const size_t n = offsetof(Self, RequestsTotal);
-        GetField<Uint64>(n).Set(x);
-    }
-    
-    bool RequestsTotal_exists() const
-    {
-        const size_t n = offsetof(Self, RequestsTotal);
-        return GetField<Uint64>(n).exists ? true : false;
-    }
-    
-    void RequestsTotal_clear()
-    {
-        const size_t n = offsetof(Self, RequestsTotal);
-        GetField<Uint64>(n).Clear();
-    }
-
-    //
-    // Apache_HTTPDServerStatistics_Class.RequestsPerSecond
-    //
-    
-    const Field<Uint32>& RequestsPerSecond() const
-    {
-        const size_t n = offsetof(Self, RequestsPerSecond);
-        return GetField<Uint32>(n);
-    }
-    
-    void RequestsPerSecond(const Field<Uint32>& x)
-    {
-        const size_t n = offsetof(Self, RequestsPerSecond);
-        GetField<Uint32>(n) = x;
-    }
-    
-    const Uint32& RequestsPerSecond_value() const
-    {
-        const size_t n = offsetof(Self, RequestsPerSecond);
-        return GetField<Uint32>(n).value;
-    }
-    
-    void RequestsPerSecond_value(const Uint32& x)
-    {
-        const size_t n = offsetof(Self, RequestsPerSecond);
-        GetField<Uint32>(n).Set(x);
-    }
-    
-    bool RequestsPerSecond_exists() const
-    {
-        const size_t n = offsetof(Self, RequestsPerSecond);
-        return GetField<Uint32>(n).exists ? true : false;
-    }
-    
-    void RequestsPerSecond_clear()
-    {
-        const size_t n = offsetof(Self, RequestsPerSecond);
-        GetField<Uint32>(n).Clear();
-    }
-
-    //
-    // Apache_HTTPDServerStatistics_Class.KBPerRequest
-    //
-    
-    const Field<Uint32>& KBPerRequest() const
-    {
-        const size_t n = offsetof(Self, KBPerRequest);
-        return GetField<Uint32>(n);
-    }
-    
-    void KBPerRequest(const Field<Uint32>& x)
-    {
-        const size_t n = offsetof(Self, KBPerRequest);
-        GetField<Uint32>(n) = x;
-    }
-    
-    const Uint32& KBPerRequest_value() const
-    {
-        const size_t n = offsetof(Self, KBPerRequest);
-        return GetField<Uint32>(n).value;
-    }
-    
-    void KBPerRequest_value(const Uint32& x)
-    {
-        const size_t n = offsetof(Self, KBPerRequest);
-        GetField<Uint32>(n).Set(x);
-    }
-    
-    bool KBPerRequest_exists() const
-    {
-        const size_t n = offsetof(Self, KBPerRequest);
-        return GetField<Uint32>(n).exists ? true : false;
-    }
-    
-    void KBPerRequest_clear()
-    {
-        const size_t n = offsetof(Self, KBPerRequest);
-        GetField<Uint32>(n).Clear();
-    }
-
-    //
-    // Apache_HTTPDServerStatistics_Class.KBPerSecond
-    //
-    
-    const Field<Uint32>& KBPerSecond() const
-    {
-        const size_t n = offsetof(Self, KBPerSecond);
-        return GetField<Uint32>(n);
-    }
-    
-    void KBPerSecond(const Field<Uint32>& x)
-    {
-        const size_t n = offsetof(Self, KBPerSecond);
-        GetField<Uint32>(n) = x;
-    }
-    
-    const Uint32& KBPerSecond_value() const
-    {
-        const size_t n = offsetof(Self, KBPerSecond);
-        return GetField<Uint32>(n).value;
-    }
-    
-    void KBPerSecond_value(const Uint32& x)
-    {
-        const size_t n = offsetof(Self, KBPerSecond);
-        GetField<Uint32>(n).Set(x);
-    }
-    
-    bool KBPerSecond_exists() const
-    {
-        const size_t n = offsetof(Self, KBPerSecond);
-        return GetField<Uint32>(n).exists ? true : false;
-    }
-    
-    void KBPerSecond_clear()
-    {
-        const size_t n = offsetof(Self, KBPerSecond);
-        GetField<Uint32>(n).Clear();
     }
 
     //
