@@ -2,6 +2,7 @@
 #ifndef MMAP_REGION_H
 #define MMAP_REGION_H
 
+#include <time.h>
 #include <stdint.h>
 #include "apr.h"
 
@@ -9,7 +10,7 @@
  * Memory mapped region layout
  *
  * Memory mapped region contains the following:
- *   mmap_server_data:          Server informaion and nuber of server modules allocated.  This includes:
+ *   mmap_server_data:          Server informaion and number of server modules allocated.  This includes:
  *     mmap_server_modules:       Array (size based on Apache Config) for each module loaded in configuration
  *   mmap_vhost_data:           Size marker to indicate number of virtual tables allocated.  This includes:
  *     mmap_vhost_elements:       Array (size based on Apache Config) for each virtual host in configuraiton
@@ -36,7 +37,7 @@ typedef struct
 
     clock_t cpuUtilizationPrior;        // Prior copy of apacheCpuUtilization for delta computations
 
-    // The following are from provider worker thread that are updated once/minute
+    /* The following are from provider worker thread that are updated once/minute */
     volatile apr_uint32_t idleWorkers;  // Number of workers that are currently idle
     volatile apr_uint32_t busyWorkers;  // Number of workers that are currently busy
     volatile apr_uint32_t percentCPU;   // Percentage of CPU utilization
@@ -53,6 +54,13 @@ typedef struct
     char logError[PATH_MAX];
     char logCustom[PATH_MAX];
     char logAccess[PATH_MAX];
+
+#if defined(HAVE_OPENSSL)
+    /* SSL certificate information */
+    char certificateFile[PATH_MAX];
+    char certificateExpirationCimTime[32];
+    time_t certificateExpirationPosixTime;
+#endif
 
     // Need: IPAddresses[], ServerAliases[] in some way to avoid maximum lengths.
     // Perhaps variable length ending in \0\0 like "val1\0val2\0val3\0\0" ?

@@ -24,6 +24,22 @@ PROVIDER_LIBRARY := $(TARGET_DIR)/libApacheHttpdProvider.so
 APACHE_MODULE_BASENAME := mod_cimprov
 APACHE_MODULE := $(TARGET_DIR)/$(APACHE_MODULE_BASENAME).so
 
+OPENSSL_INCLUDE_DIR := $(wildcard /usr/include/openssl)
+ifeq ($(OPENSSL_INCLUDE_DIR),"")
+MODULE_DEFINES :=
+else
+MODULE_DEFINES := -DHAVE_OPENSSL
+endif
+
+APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
+ifeq ($(APACHE_SOURCE_DIR),"")
+APACHE_SOURCE_INCLUDE_PATH_OPTION :=
+APACHE_SOURCE_LIB_PATH_OPTION :=
+else
+APACHE_SOURCE_INCLUDE_PATH_OPTION := -I$(APACHE_SOURCE_DIR)/include
+APACHE_SOURCE_LIB_PATH_OPTION := -L$(APACHE_SOURCE_DIR)/lib
+endif
+
 # Include files
 
 INCLUDE_VHOST := $(SOURCE_DIR)/include/mmap_region.h
@@ -31,7 +47,7 @@ INCLUDE_VHOST := $(SOURCE_DIR)/include/mmap_region.h
 # Compiler flags
 
 OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
-MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include
+MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include $(APACHE_SOURCE_INCLUDE_PATH_OPTION)
 PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support
 
 ifeq ($(ENABLE_DEBUG),1)
@@ -40,7 +56,7 @@ endif
 
 COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
 
-LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib -lmicxx -lapr-1
+LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1
 
 SHARED_FLAGS := -shared
 
@@ -137,9 +153,7 @@ $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
 
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST)
 	@echo "========================= Performing Building module"
-	cd $(TARGET_DIR)/module && apxs -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
-
-
+	cd $(TARGET_DIR)/module && apxs -c $(MODULE_DEFINES) $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
 
 #
 # The following is all for OMI "bootstrap" stuff (allowing omigen and omireg to run)

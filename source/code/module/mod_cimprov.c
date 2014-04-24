@@ -5,14 +5,26 @@
     \file        mod_cimprov.c
 
     \brief       Apache Module for Apache managmement/monitoring via CIM Provider
-    
+   
     \date        01-21-2013 13:38:00
 */
 /*----------------------------------------------------------------------------*/
 
 #if defined(linux)
 // The APR doesn't have a way to get the current PID ...
-#include <unistd.h>
+# include <unistd.h>
+# include <time.h>
+# include <errno.h>
+#endif
+
+#if defined(HAVE_OPENSSL)
+# include <openssl/x509.h>
+# include <openssl/ssl.h>
+# if OPENSSL_VERSION_NUMBER < 0x00904000     /* OpenSSL vers. < 0.9d */
+#  define mod_PEM_read_bio_X509(b,x,c,a) PEM_read_bio_X509(b,x,c);
+# else
+#  define mod_PEM_read_bio_X509(b,x,c,a) PEM_read_bio_X509(b,x,c,a);
+# endif
 #endif
 
 #include <apr_atomic.h>
@@ -50,6 +62,10 @@ static int g_busyrefreshfrequency = 60;
 
 static int g_process_limit = 0, g_thread_limit = 0;
 
+#if defined(HAVE_OPENSSL)
+static char g_defaultsslcertificatefile[PATH_MAX] = "";
+#endif
+
 #ifdef HAVE_TIMES
 /* ugh... need to know if we're running with a pthread implementation
  * such as linuxthreads that treats individual threads as distinct
@@ -65,8 +81,8 @@ typedef enum
     LOCKTYPE_RW
 } lock_type;
 
-module AP_MODULE_DECLARE_DATA cimprov_module;
 
+module AP_MODULE_DECLARE_DATA cimprov_module;
 
 /*
  * Persistent server configuration data
@@ -75,8 +91,6 @@ module AP_MODULE_DECLARE_DATA cimprov_module;
 typedef struct {
     apr_pool_t *pool;
 } persist_cfg;
-
-
 
 /*
  * Utility functions
@@ -149,6 +163,19 @@ static const char *set_busyrefresh_frequency(cmd_parms *cmd, void *dummy, const 
     return NULL;
 }
 
+#if defined(HAVE_OPENSSL)
+static const char *set_default_ssl_certificate_file(cmd_parms *cmd, void *dummy, const char *arg)
+{
+    const char *err = ap_check_cmd_context(cmd, NOT_IN_DIR_LOC_FILE);
+    if (err != NULL)
+    {
+        return err;
+    }
+
+    strncpy(g_defaultsslcertificatefile, arg, sizeof g_defaultsslcertificatefile);
+    return NULL;
+}
+#endif
 
 static const command_rec cimprov_module_cmds[] =
 {
@@ -160,6 +187,10 @@ static const command_rec cimprov_module_cmds[] =
     AP_INIT_TAKE1("CimBusyRefreshFrequency", set_busyrefresh_frequency, NULL, RSRC_CONF,
       "Set the default busy refresh frequency for busy/idle thread counts and CPU load. "
       "Default = 60 seconds, -1 = Disabled, 0 = Update on each request (very high overhead)."),
+#if defined(HAVE_OPENSSL)
+    AP_INIT_TAKE1("SSLCertificateFile", set_default_ssl_certificate_file, NULL, RSRC_CONF,
+      "Set the name of the SSL certificate file for the default host."),
+#endif
     {NULL}
 };
 
@@ -286,6 +317,84 @@ static apr_status_t module_mutex_initialize(apr_pool_t *pool)
     return APR_SUCCESS;
 }
 
+#if defined(HAVE_OPENSSL)
+/* Get an SSL certificate expiration date */
+static apr_status_t get_certificate_expiration_time(const char* file, char* expirationCimTime, time_t* expirationPosixTime)
+{
+    apr_status_t status;
+    X509* pCert = NULL;
+    X509* pCertOut;
+    int n;
+
+    /* Open the certificate file and load it into an X509 structure */
+    BIO* bio = BIO_new_file(file, "r");
+    if (bio == NULL)
+    {
+        status = APR_FROM_OS_ERROR(apr_get_os_error());
+        display_error("cimprov: failed to open certificate PEM file", status, 0);
+        return status;
+    }
+     
+    pCertOut = mod_PEM_read_bio_X509(bio, &pCert, NULL, NULL);
+    BIO_free(bio);
+    if (pCertOut == NULL)
+    {
+        status = APR_EINVAL;
+        display_error("cimprov: certificate file not in correct PEM format", status, 0);
+        return status;
+    }
+
+    /* get not after time */
+    ASN1_TIME* notAfterTime = X509_get_notAfter(pCert);
+    if (notAfterTime == NULL)
+    {
+        status = APR_EINVAL;
+        display_error("cimprov: X.509 certificate does not contain valid date/time fields", status, 0);
+        return status;
+    }
+
+    /* get the time field and check for valid length */
+    const char* expirationX509Time = (char*)notAfterTime->data;
+    if (strlen(expirationX509Time) < 13)
+    {
+        status = APR_EINVAL;
+        display_error("cimprov: X.509 certificate does not contain valid date/time fields", status, 0);
+        return status;
+    }
+
+    /* Make a CIM time from an ASN-1 time by prepending "20" to make a 4-digit year,
+       by appending microseconds and by replacing the trailing "Z" with a CIM UTC
+       indicator, "+000".
+       Thus, "YYMMDDHHMMSSZ" becomes "20YYMMDDHHMMSS.000000+000". */
+    sprintf(expirationCimTime, "20%12.12s.000000+000", expirationX509Time);
+
+    /* get the expiation time in Posix form */
+    struct tm expirationTm;
+    memset(&expirationTm, 0, sizeof (struct tm));   /* set timezone and DST fields to 0 */
+    n = sscanf(expirationX509Time,
+               "%2d%2d%2d%2d%2d%2d",
+               &expirationTm.tm_year,
+               &expirationTm.tm_mon,
+               &expirationTm.tm_mday,
+               &expirationTm.tm_hour,
+               &expirationTm.tm_min,
+               &expirationTm.tm_sec);
+    if (n != 6)
+    {
+        status = APR_EINVAL;
+        display_error("cimprov: X.509 certificate does not contain valid date/time fields", status, 0);
+        return status;
+    }    
+    expirationTm.tm_year += 100;    /* change year base from 2000 to 1900 */
+    expirationTm.tm_mon--;          /* change month base from 1 to 0 */
+
+
+    *expirationPosixTime = mktime(&expirationTm);
+
+    return APR_SUCCESS;
+}
+#endif
+
 /* Create memory mapped file for provider information */
 
 static apr_status_t mmap_region_cleanup(void *dummy)
@@ -391,6 +500,9 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
      *   If configuration file is: /etc/apache2/httpd.conf, we pick: apache2
      * So just pick the second directory in the configuration filename.
      *
+     *   If the configuration file begins with "/usr/local", treat the "/usr/local"
+     *   just like the "/etc", above.
+     *
      * Note: If config filename isn't one of those, keep blank (unknown installation)
      */
 
@@ -400,7 +512,12 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
     char *tok_last;
     char *processName = apr_pstrdup(ptemp, ap_conftree->filename);
     char *token = apr_strtok(processName, "/", &tok_last);
-    token = apr_strtok(NULL, "/", &tok_last);
+
+    /* Skip /usr/local for install by source compiles */
+    if (0 == apr_strnatcasecmp(token, "local"))
+    {
+        token = apr_strtok(NULL, "/", &tok_last);
+    }
 
     if (0 == apr_strnatcasecmp(token, "apache2") || 0 == apr_strnatcasecmp(token, "httpd"))
     {
@@ -421,6 +538,7 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
         }
 
         apr_cpystrn(g_server_data->modules[index++].moduleName, modp->name, sizeof(g_server_data->modules[0].moduleName));
+
     }
 
     /* Initialize the memory mapped region for virtual host data */
@@ -434,6 +552,16 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
 
     apr_cpystrn(g_vhost_data->vhosts[0].name, "_Total", MAX_VIRTUALHOST_NAME_LEN);
     apr_cpystrn(g_vhost_data->vhosts[1].name, "_Default", MAX_VIRTUALHOST_NAME_LEN);
+
+#if defined(HAVE_OPENSSL)
+    if (ap_find_linked_module("mod_ssl.c") != NULL)
+    {
+        apr_cpystrn(g_vhost_data->vhosts[1].certificateFile, g_defaultsslcertificatefile, PATH_MAX);
+        get_certificate_expiration_time(g_defaultsslcertificatefile,
+                                        g_vhost_data->vhosts[1].certificateExpirationCimTime,
+                                        &g_vhost_data->vhosts[1].certificateExpirationPosixTime);
+    }
+#endif
 
     /* Set up virtual host map in reverse order since that's how server_rc comes to us */
 
@@ -504,7 +632,7 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
 
     apr_pool_userdata_get(&data, key, head->process->pool);
     if ( data == NULL )
-    { 
+    {
         apr_pool_userdata_set((const void *)1, key, apr_pool_cleanup_null, head->process->pool);
         return OK;
     }
