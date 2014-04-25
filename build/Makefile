@@ -7,8 +7,7 @@
 
 BASE_DIR := $(subst /build,,$(PWD))
 OMI_ROOT := $(shell cd ../../omi/distro; pwd -P)
-
-HTTP_LIBDIR := $(shell apxs -q LIBEXECDIR)
+SCXPAL_DIR := $(shell cd ../../pal; pwd -P)
 
 include $(BASE_DIR)/build/config.mak
 
@@ -19,16 +18,20 @@ endif
 SOURCE_DIR := $(BASE_DIR)/source/code
 PROVIDER_DIR := $(SOURCE_DIR)/providers
 
-TARGET_DIR := $(BASE_DIR)/target
+TARGET_DIR := $(BASE_DIR)/target/$(BUILD_CONFIGURATION)
 PROVIDER_LIBRARY := $(TARGET_DIR)/libApacheHttpdProvider.so
 APACHE_MODULE_BASENAME := mod_cimprov
 APACHE_MODULE := $(TARGET_DIR)/$(APACHE_MODULE_BASENAME).so
 
+INSTALLER_TMPDIR := $(TARGET_DIR)/installer_tmp
+
 OPENSSL_INCLUDE_DIR := $(wildcard /usr/include/openssl)
 ifeq ($(OPENSSL_INCLUDE_DIR),"")
-MODULE_DEFINES :=
+DEFINES_SSL :=
+SSL_LINKAGE :=
 else
-MODULE_DEFINES := -DHAVE_OPENSSL
+DEFINES_SSL := -DHAVE_OPENSSL
+SSL_LINKAGE := -lssl -lcrypto
 endif
 
 APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
@@ -60,13 +63,21 @@ LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmi
 
 SHARED_FLAGS := -shared
 
+# Support for installbuilder
+
+STAGING_DIR := $(TARGET_DIR)/staging
+
 #--------------------------------------------------------------------------------
 # Build targets
 
+ifeq ($(ULINUX),1)
+all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE) kit
+else
 all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
+endif
 
 clean :
-	-rm -rf $(TARGET_DIR)
+	-rm -rf $(BASE_DIR)/target
 
 distclean : clean
 	-rm $(BASE_DIR)/build/config.mak
@@ -81,10 +92,10 @@ distclean : clean
 #   2) OMI already has registration files for libApacheHttpdProvider.so
 install : $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 	@echo "========================= Performing Installing module"
-	sudo cp -v $(APACHE_MODULE) $(HTTP_LIBDIR)
+	sudo cp -v $(APACHE_MODULE) /opt/microsoft/apache-cimprov/lib/
 	sudo cp -v $(PROVIDER_LIBRARY) /opt/microsoft/omi/lib/
-	sudo /etc/init.d/omiserverd restart
 	sudo /etc/init.d/httpd restart
+	sudo /etc/init.d/omiserverd restart
 
 restart :
 	sudo /etc/init.d/omiserverd restart
@@ -139,7 +150,7 @@ PROVIDER_HEADERS = \
 $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"
 	mkdir -p $(TARGET_DIR)
-	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
+	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(DEFINES_SSL) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
 
 #--------------------------------------------------------------------------------
 # Apache Module
@@ -153,7 +164,59 @@ $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
 
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST)
 	@echo "========================= Performing Building module"
-	cd $(TARGET_DIR)/module && apxs -c $(MODULE_DEFINES) $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
+	cd $(TARGET_DIR)/module && apxs -c $(DEFINES_SSL) $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c $(SSL_LINKAGE) && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
+
+#--------------------------------------------------------------------------------
+# Build the distribution kit
+#
+# Build the packages via installbuilder
+#
+# While the "formal build" only builds ULINUX, we may build something else for DEV purposes.
+# Assume we ALWAYS build RPM, but only build DPKG if --enable-ulinux is speified in configure.
+
+kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
+	@echo "========================= Performing Building RPM and DPKG packages"
+	mkdir -p $(INSTALLER_TMPDIR)
+
+#		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+#		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
+
+	sudo rm -rf $(STAGING_DIR)
+	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
+		--BASE_DIR=$(BASE_DIR) \
+		--TARGET_DIR=$(TARGET_DIR) \
+		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
+		--STAGING_DIR=$(STAGING_DIR) \
+		--BUILD_TYPE=$(BUILD_TYPE) \
+		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
+		--PFARCH=$(PF_ARCH) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--VERSION=1.0.0 \
+		--RELEASE=100 \
+		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
+		base_apache.data linux.data linux_rpm.data
+
+ifeq ($(ULINUX),1)
+	sudo rm -rf $(STAGING_DIR)
+	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
+		--BASE_DIR=$(BASE_DIR) \
+		--TARGET_DIR=$(TARGET_DIR) \
+		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
+		--STAGING_DIR=$(STAGING_DIR) \
+		--BUILD_TYPE=$(BUILD_TYPE) \
+		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
+		--PFARCH=$(PF_ARCH) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--VERSION=1.0.0 \
+		--RELEASE=100 \
+		--DPKG_LOCATION=$(SCXPAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH) \
+		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
+		base_apache.data linux.data linux_dpkg.data
+endif
 
 #
 # The following is all for OMI "bootstrap" stuff (allowing omigen and omireg to run)
