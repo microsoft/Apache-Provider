@@ -11,6 +11,9 @@
 ]
 class Apache_HTTPDServer : CIM_InstalledProduct {
 
+    [ Description ( "Version of the Apache CIM provider") ]
+    string ModuleVersion;
+
     [ Description ( "Configuration file for the server") ]
     string ConfigurationFile;
 

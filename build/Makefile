@@ -25,6 +25,13 @@ APACHE_MODULE := $(TARGET_DIR)/$(APACHE_MODULE_BASENAME).so
 
 INSTALLER_TMPDIR := $(TARGET_DIR)/installer_tmp
 
+# Find the appropriate version of 'apxs' to build with
+APXS := apxs
+ifeq ($(shell (type apxs > /dev/null 2>&1 && echo 0) || echo 1),1)
+    APXS := apxs2
+endif
+
+# OpenSSL linkage - should go away when Niel calls 'openssl' command line tool
 OPENSSL_INCLUDE_DIR := $(wildcard /usr/include/openssl)
 ifeq ($(OPENSSL_INCLUDE_DIR),"")
 DEFINES_SSL :=
@@ -34,6 +41,7 @@ DEFINES_SSL := -DHAVE_OPENSSL
 SSL_LINKAGE := -lssl -lcrypto
 endif
 
+# If building with Apache source code, handle appropriately
 APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
 ifeq ($(APACHE_SOURCE_DIR),"")
 APACHE_SOURCE_INCLUDE_PATH_OPTION :=
@@ -164,7 +172,7 @@ $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
 
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST)
 	@echo "========================= Performing Building module"
-	cd $(TARGET_DIR)/module && apxs -c $(DEFINES_SSL) $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c $(SSL_LINKAGE) && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
+	cd $(TARGET_DIR)/module && $(APXS) -c $(DEFINES_SSL) $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c $(SSL_LINKAGE) && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
 
 #--------------------------------------------------------------------------------
 # Build the distribution kit

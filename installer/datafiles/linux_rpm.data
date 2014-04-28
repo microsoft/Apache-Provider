@@ -1,0 +1,5 @@
+%Variables
+PACKAGE_TYPE: 'RPM'
+
+%Dependencies
+omi >= 1.0.6.5

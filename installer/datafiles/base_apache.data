@@ -1,0 +1,185 @@
+%Variables
+SHELL_HEADER:            '#!/bin/sh'
+APACHEHOME:              '/opt/microsoft/apache-cimprov'
+SHLIB_EXT:               'so'
+
+SHORT_NAME:              'apache-cimprov'
+SHORT_NAME_PREFIX:       'MSFT'
+LONG_NAME:               'Microsoft CIM management interface for Apache HTTP Server'
+GROUP:                   'Applications/System'
+LICENSE:                 'none'
+VENDOR:                  'http://www.microsoft.com'
+PROVIDES:                'cimprovider'
+DESCRIPTION:             'Provides CIM management interface for Apache HTTP Server'
+MAINTAINER:              'Microsoft Corporation'
+
+INCLUDE_DIRECTIVE:       'include /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
+
+%Defines
+
+%Files
+/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}};       755; root; root
+/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}; 755; root; root
+
+/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf;                installer/conf/mod_cimprov.conf;                                  644; root; root; conffile
+/etc/opt/microsoft/apache-cimprov/conf/installinfo.txt;                 installer/conf/installinfo.txt;                                   644; root; root; conffile
+
+/etc/opt/microsoft/omi/conf/omiregister/root-apache/ApacheHttpdProvider.reg; installer/conf/omi/ApacheHttpdProvider.reg;                  755; root; root
+
+%Links
+
+%Directories
+/etc;                                                   755; root; root; sysdir
+/etc/opt;                                               755; root; root; sysdir
+/opt;                                                   755; root; root; sysdir
+/var;                                                   755; root; root; sysdir
+/var/opt;                                               755; root; root; sysdir
+
+/etc/opt/microsoft;                                     755; root; root
+/etc/opt/microsoft/apache-cimprov;                      755; root; root
+/etc/opt/microsoft/apache-cimprov/conf;                 755; root; root
+
+/etc/opt/microsoft/omi;                                 755; root; root
+/etc/opt/microsoft/omi/conf;                            755; root; root
+/etc/opt/microsoft/omi/conf/omiregister;                755; root; root
+/etc/opt/microsoft/omi/conf/omiregister/root-apache;    755; root; root
+
+/opt/microsoft;                                         755; root; root
+/opt/microsoft/apache-cimprov;                          755; root; root
+/opt/microsoft/apache-cimprov/lib;                      755; root; root
+
+/opt/microsoft;                                         755; root; root
+/opt/microsoft/omi;                                     755; root; root
+/opt/microsoft/omi/lib;                                 755; root; root
+
+/var/opt/microsoft;                                     755; root; root
+/var/opt/microsoft/apache-cimprov;                      755; root; root
+/var/opt/microsoft/apache-cimprov/run;                  755; root; root
+
+
+%Dependencies
+
+%CheckIfOmiIsRunning
+OMI_IS_RUNNING=1
+if [ -f /var/opt/microsoft/omi/run/omiserver.pid ]; then
+    #  Check if omiserver is running with this pid.
+    omi_pid=`cat /var/opt/microsoft/omi/run/omiserver.pid`
+    ps -aef | grep $omi_pid | grep omiserver 1> /dev/null 2> /dev/null
+    if [ $? -ne 0 ]; then
+	OMI_IS_RUNNING=0
+    fi
+else
+    OMI_IS_RUNNING=0
+fi
+
+%FindApacheConfigurationFile
+FindApacheConfigFile()
+{
+    if [ -z "${APACHE_CONF}" ]; then
+        # Redhat-type installation
+        APACHE_CONF=/etc/httpd/conf/httpd.conf
+        [ -e "${APACHE_CONF}" ] && return
+
+	# SuSE-type installation
+        APACHE_CONF=/etc/apache2/default-server.conf
+        [ -e "${APACHE_CONF}" ] && return
+
+	# Source code installation w/default directories
+        APACHE_CONF=/usr/local/apache2/conf/httpd.conf
+        [ -e "${APACHE_CONF}" ] && return
+
+        # Unable to find it, so indicate so
+        APACHE_CONF=
+    fi
+}
+FindApacheConfigFile
+
+%UnconfigureApacheConf
+#include FindApacheConfigurationFile
+UnconfigureApacheConf_File()
+{
+    if [ ! -e "${APACHE_CONF}" ]; then
+	echo "Failure unconfiguring Apache: Apache configuration file was not found" 1>&2
+	return 1;
+    fi
+
+    apache_config_data=`grep -v "${{INCLUDE_DIRECTIVE}}" ${APACHE_CONF}`
+    if [ $? -ne 0 ]; then
+	# mod_cimprov not configured in Apache
+	return 0
+    fi
+    #
+    # Write it back (to the copy first, but leave backup "just in case")
+    #
+    cp -p ${APACHE_CONF} ${APACHE_CONF}.bak
+    if [ $? -ne 0 ]; then
+	echo "Can't create backup of ${APACHE_CONF}"
+	return 1
+    fi
+    cp -p ${APACHE_CONF} ${APACHE_CONF}.tmp
+    echo "${apache_config_data}" > ${APACHE_CONF}.tmp
+    if [ $? -ne 0 ]; then
+	echo "Can't write to ${APACHE_CONF}.tmp"
+	return 1
+    fi
+    mv ${APACHE_CONF}.tmp ${APACHE_CONF}
+    if [ $? -ne 0 ]; then
+	echo "Can't replace file ${APACHE_CONF}"
+	return 1
+    fi
+}
+
+%ConfigureApacheConf
+#include FindApacheConfigurationFile
+ConfigureApacheConf_File()
+{
+    if [ ! -e "${APACHE_CONF}" ]; then
+	echo "Failure configuring Apache: Apache configuration file was not found" 1>&2
+	return 1;
+    fi
+
+    grep -q "${{INCLUDE_DIRECTIVE}}" ${APACHE_CONF}
+    if [ $? -eq 0 ]; then
+	# mod_cimprov is already configured in Apache
+	return 0
+    fi
+    #
+    # Append the include directive to the Apache configuraiton file
+    #
+    echo "${{INCLUDE_DIRECTIVE}}" >> ${APACHE_CONF}
+    if [ $? -ne 0 ]; then
+	echo "Can't append include directive to file ${APACHE_CONF}"
+	return 1
+    fi
+}
+
+%Postinstall_10
+WriteInstallInfo() {
+    date +%Y-%m-%dT%T.0Z > /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt
+    echo ${{VERSION}}-${{RELEASE}} >> /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt
+}
+WriteInstallInfo
+
+#include ConfigureApacheConf
+ConfigureApacheConf_File
+
+%Postuninstall_10
+# Clean up installinfo.txt file (registered as "conf" file to pass rpmcheck)
+rm -f /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt*
+rmdir /etc/opt/microsoft/apache-cimprov/conf 2> /dev/null
+rmdir /etc/opt/microsoft/apache-cimprov 2> /dev/null
+rmdir /etc/opt/microsoft 2> /dev/null
+rmdir /etc/opt 2> /dev/null
+
+#include UnconfigureApacheConf
+UnconfigureApacheConf_File
+
+%Preinstall_0
+${{SHELL_HEADER}}
+%Postinstall_0
+${{SHELL_HEADER}}
+%Preuninstall_0
+${{SHELL_HEADER}}
+
+%Postuninstall_0
+${{SHELL_HEADER}}

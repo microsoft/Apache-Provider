@@ -1,0 +1,115 @@
+%Variables
+PF:	'Linux'
+
+%ApacheService_funcs
+FindApacheService() {
+    if [ -x /etc/init.d/httpd ]; then
+        APACHE_SERVICE="httpd"
+    elif [ -x /etc/init.d/apache2 ]; then
+        APACHE_SERVICE="apache2"
+    elif [ -x  /usr/local/apache2/bin/httpd ]; then
+        APACHE_SERVICE="none"
+    else
+        echo "Unable to determine Apache service name; Apache must be restarted manually" 1>&2
+    fi
+}
+
+StopApacheServer() {
+    FindApacheService
+    if [ -z "${APACHE_SERVICE}" ]; then
+        echo "No service defined for Apache; please stop Apache manually"
+        return 0;
+    fi
+
+    if [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
+        echo "Stopping Apache server ..."
+        /usr/local/apache2/bin/httpd -k stop
+    elif [ -x /usr/sbin/invoke-rc.d ]; then
+        /usr/sbin/invoke-rc.d ${APACHE_SERVICE} stop
+    elif [ -x /sbin/service ]; then
+        service ${APACHE_SERVICE} stop
+    else
+        echo "Unrecognized Service Controller to stop Apache Service" 1>&2
+    fi
+}
+
+StartApacheServer() {
+    FindApacheService
+    if [ -z "${APACHE_SERVICE}" ]; then
+        echo "No service defined for Apache; please start Apache manually"
+        return 0;
+    fi
+
+    if [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
+        echo "Starting Apache server ..."
+        /usr/local/apache2/bin/httpd -k start
+    elif [ -x /usr/sbin/invoke-rc.d ]; then
+        /usr/sbin/invoke-rc.d ${APACHE_SERVICE} start
+    elif [ -x /sbin/service ]; then
+        service ${APACHE_SERVICE} start
+    else
+        echo "Unrecognized Service Controller to start Apache Service" 1>&2
+        exit 1
+    fi
+}
+
+RestartApacheServer() {
+    StopApacheServer
+    StartApacheServer
+}
+
+%OmiService_funcs
+StopOmiServer() {
+    if [ -x /usr/sbin/invoke-rc.d ]; then
+        /usr/sbin/invoke-rc.d omiserverd stop
+    elif [ -x /sbin/service ]; then
+        service omiserverd stop
+    else
+        echo "Unrecognized Service Controller to start OMI Service" 1>&2
+        exit 1
+    fi
+}
+
+StartOmiServer() {
+    if [ -x /usr/sbin/invoke-rc.d ]; then
+        /usr/sbin/invoke-rc.d omiserverd start
+    elif [ -x /sbin/service ]; then
+        service omiserverd start
+    else
+        echo "Unrecognized Service Controller to start OMI Service" 1>&2
+        exit 1
+    fi
+}
+
+RestartOmiServer() {
+    if [ $OMI_IS_RUNNING -eq 1 ]; then
+        StopOmiServer
+    fi
+    StartOmiServer
+}
+
+%Preinstall_10
+#include OmiService_funcs
+
+#include CheckIfOmiIsRunning
+if [ $OMI_IS_RUNNING -eq 1 ]; then
+    StopOmiServer
+fi
+
+#include ApacheService_funcs
+StopApacheServer
+
+%Postinstall_1100
+#include ApacheService_funcs
+StartApacheServer
+
+#include OmiService_funcs
+StartOmiServer
+
+%Postuninstall_1100
+#include ApacheService_funcs
+RestartApacheServer
+
+#include OmiService_funcs
+#include CheckIfOmiIsRunning
+RestartOmiServer

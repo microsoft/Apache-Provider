@@ -108,8 +108,8 @@ typedef struct
     mmap_vhost_elements vhosts[0];      // Array of mmap_vhost_elements (virtual host information)
 } mmap_vhost_data;
 
-#define PROVIDER_MMAP_NAME      "/var/www/mod_cimprov/Provider_Region"
-#define MUTEX_INIT_NAME         "/var/www/mod_cimprov/mutexInit.lock"
-#define MUTEX_RW_NAME           "/var/www/mod_cimprov/mutexRW.lock"
+#define PROVIDER_MMAP_NAME      "/var/opt/microsoft/apache-cimprov/run/Provider_Region"
+#define MUTEX_INIT_NAME         "/var/opt/microsoft/apache-cimprov/run/mutexInit.lock"
+#define MUTEX_RW_NAME           "/var/opt/microsoft/apache-cinmprov/run/mutexRW.lock"
 
 #endif // #define MMAP_REGION_H
