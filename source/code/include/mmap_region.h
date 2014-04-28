@@ -55,12 +55,10 @@ typedef struct
     char logCustom[PATH_MAX];
     char logAccess[PATH_MAX];
 
-#if defined(HAVE_OPENSSL)
     /* SSL certificate information */
     char certificateFile[PATH_MAX];
     char certificateExpirationCimTime[32];
     time_t certificateExpirationPosixTime;
-#endif
 
     // Need: IPAddresses[], ServerAliases[] in some way to avoid maximum lengths.
     // Perhaps variable length ending in \0\0 like "val1\0val2\0val3\0\0" ?

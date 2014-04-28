@@ -584,6 +584,23 @@ MI_CONST MI_ClassDecl CIM_InstalledProduct_rtti =
 **==============================================================================
 */
 
+/* property Apache_HTTPDServer.ModuleVersion */
+static MI_CONST MI_PropertyDecl Apache_HTTPDServer_ModuleVersion_prop =
+{
+    MI_FLAG_PROPERTY, /* flags */
+    0x006D6E0D, /* code */
+    MI_T("ModuleVersion"), /* name */
+    NULL, /* qualifiers */
+    0, /* numQualifiers */
+    MI_STRING, /* type */
+    NULL, /* className */
+    0, /* subscript */
+    offsetof(Apache_HTTPDServer, ModuleVersion), /* offset */
+    MI_T("Apache_HTTPDServer"), /* origin */
+    MI_T("Apache_HTTPDServer"), /* propagator */
+    NULL,
+};
+
 /* property Apache_HTTPDServer.ConfigurationFile */
 static MI_CONST MI_PropertyDecl Apache_HTTPDServer_ConfigurationFile_prop =
 {
@@ -682,6 +699,7 @@ static MI_PropertyDecl MI_CONST* MI_CONST Apache_HTTPDServer_props[] =
     &CIM_InstalledProduct_SystemID_prop,
     &CIM_InstalledProduct_CollectionID_prop,
     &CIM_InstalledProduct_Name_prop,
+    &Apache_HTTPDServer_ModuleVersion_prop,
     &Apache_HTTPDServer_ConfigurationFile_prop,
     &Apache_HTTPDServer_InstalledModules_prop,
     &Apache_HTTPDServer_ProcessName_prop,

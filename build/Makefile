@@ -31,16 +31,6 @@ ifeq ($(shell (type apxs > /dev/null 2>&1 && echo 0) || echo 1),1)
     APXS := apxs2
 endif
 
-# OpenSSL linkage - should go away when Niel calls 'openssl' command line tool
-OPENSSL_INCLUDE_DIR := $(wildcard /usr/include/openssl)
-ifeq ($(OPENSSL_INCLUDE_DIR),"")
-DEFINES_SSL :=
-SSL_LINKAGE :=
-else
-DEFINES_SSL := -DHAVE_OPENSSL
-SSL_LINKAGE := -lssl -lcrypto
-endif
-
 # If building with Apache source code, handle appropriately
 APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
 ifeq ($(APACHE_SOURCE_DIR),"")
@@ -86,10 +76,10 @@ endif
 
 clean :
 	-rm -rf $(BASE_DIR)/target
+	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 
 distclean : clean
 	-rm $(BASE_DIR)/build/config.mak
-	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 	-make -C $(OMI_ROOT) distclean
 	-rm -rf $(OMI_ROOT)/output*
 
@@ -158,7 +148,7 @@ PROVIDER_HEADERS = \
 $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"
 	mkdir -p $(TARGET_DIR)
-	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(DEFINES_SSL) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
+	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
 
 #--------------------------------------------------------------------------------
 # Apache Module
@@ -172,7 +162,7 @@ $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
 
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST)
 	@echo "========================= Performing Building module"
-	cd $(TARGET_DIR)/module && $(APXS) -c $(DEFINES_SSL) $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c $(SSL_LINKAGE) && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
+	cd $(TARGET_DIR)/module && $(APXS) -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
 
 #--------------------------------------------------------------------------------
 # Build the distribution kit
