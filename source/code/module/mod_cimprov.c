@@ -33,28 +33,6 @@
 #endif // AP_NEED_SET_MUTEX_PERMS
 #include "mmap_region.h"
 
-/*
- * Global memory definitions
- */
-
-static apr_shm_t *g_mmap_region = NULL;
-static mmap_server_data *g_server_data = NULL;
-static mmap_vhost_data *g_vhost_data = NULL;
-
-static apr_hash_t *g_vhost_hash = NULL;
-
-static apr_global_mutex_t *mutexMapInit = NULL;
-static apr_global_mutex_t *mutexMapRW = NULL;
-
-static int g_enablelogging = 0;
-static int g_enablehystericallogging = 0;
-static int g_busyrefreshfrequency = 60;
-
-static int g_process_limit = 0, g_thread_limit = 0;
-
-static char g_defaultsslcertificatefile[PATH_MAX] = "";
-
-
 #ifdef HAVE_TIMES
 /* ugh... need to know if we're running with a pthread implementation
  * such as linuxthreads that treats individual threads as distinct
@@ -77,19 +55,48 @@ module AP_MODULE_DECLARE_DATA cimprov_module;
  * Persistent server configuration data
  */
 
+typedef struct config_sslCertFile config_sslCertFile;
+struct config_sslCertFile {
+    config_sslCertFile* next;           /* Pointer to next certificate structure */
+    char name[MAX_VIRTUALHOST_NAME_LEN]; /* Name of virtual host for this certficate (or _Default) */
+    char certFilename[PATH_MAX];        /* Filename for the certificate */
+};
+
 typedef struct {
-    apr_pool_t *pool;
+    /* The following items are used during configuraiton, and are deleted when configuraiton is complete */
+    config_sslCertFile* certFile;       /* Pointer to head of certificate file chain */
+} config_data;
+
+typedef struct {
+    apr_pool_t *pool;                   /* Primary pool given to us by Apache */
+    int enablelogging;                  /* Should we log to the Apache error logfile? */
+    int enablehystericallogging;        /* Should we log hysterically? */
+    int busyrefreshfrequency;           /* How often (at minimum) do we update busy/refresh properties? */
+
+    apr_shm_t *mmap_region;             /* APR's memory mapped region handle */
+    mmap_server_data *server_data;      /* Pointer to server data within memory mapped region */
+    mmap_vhost_data *vhost_data;        /* Pointer to vhost data within memory mapped region */
+    apr_hash_t *vhost_hash;             /* APR hash to virtual hosts in memory mapped region */
+
+    apr_global_mutex_t *mutexMapInit;   /* APR handle to Initialization Mutex */
+    apr_global_mutex_t *mutexMapRW;     /* APR handle to Read/Write Mutex */
+
+    int process_limit;                  /* Process limit for Apache Process */
+    int thread_limit;                   /* Thread limit for Apache Process */
+
+    apr_pool_t *configPool;             /* Temporary pool used during configuraiton */
+    config_data *configData;            /* Temporary configuration data (discarded after configuration) */
 } persist_cfg;
 
 /*
  * Utility functions
  */
 
-apr_status_t display_error(const char *error_text, apr_status_t status, int fatal)
+apr_status_t display_error(persist_cfg *cfg, const char *error_text, apr_status_t status, int fatal)
 {
     // If logging disabled (and nothing "bad"), just return
 
-    if (!g_enablelogging && !fatal)
+    if (!cfg->enablelogging && !fatal)
     {
         return HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -121,46 +128,51 @@ apr_status_t display_error(const char *error_text, apr_status_t status, int fata
 
 static const char *set_logging_state(cmd_parms *cmd, void *dummy, int arg)
 {
+    persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
     const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
     if (err != NULL) {
         return err;
     }
 
-    g_enablelogging = arg;
+    cfg->enablelogging = arg;
     return NULL;
 }
 
 static const char *set_hystericallogging_state(cmd_parms *cmd, void *dummy, int arg)
 {
+    persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
     const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
     if (err != NULL) {
         return err;
     }
 
-    g_enablehystericallogging = arg;
+    cfg->enablehystericallogging = arg;
     return NULL;
 }
 
 static const char *set_busyrefresh_frequency(cmd_parms *cmd, void *dummy, const char *arg)
 {
+    persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
     const char *err = ap_check_cmd_context(cmd, GLOBAL_ONLY);
     if (err != NULL) {
         return err;
     }
 
-    g_busyrefreshfrequency = atoi(arg);
+    cfg->busyrefreshfrequency = atoi(arg);
     return NULL;
 }
 
 static const char *set_default_ssl_certificate_file(cmd_parms *cmd, void *dummy, const char *arg)
 {
+    persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
     const char *err = ap_check_cmd_context(cmd, NOT_IN_DIR_LOC_FILE);
     if (err != NULL)
     {
         return err;
     }
 
-    strncpy(g_defaultsslcertificatefile, arg, sizeof g_defaultsslcertificatefile);
+    // Store in _Default certificate of temporary configuration data block
+    strncpy(cfg->configData->certFile->certFilename, arg, sizeof(cfg->configData->certFile->certFilename));
     return NULL;
 }
 
@@ -183,143 +195,145 @@ static const command_rec cimprov_module_cmds[] =
  * Mutex initialization and manipulation
  */
 
-static apr_status_t mutex_lock(lock_type type)
+static apr_status_t mutex_lock(persist_cfg *cfg, lock_type type)
 {
     apr_status_t status;
     apr_global_mutex_t *mutex;
 
     if (LOCKTYPE_INIT == type)
     {
-        if (g_enablehystericallogging)
+        if (cfg->enablehystericallogging)
         {
-            display_error("cimprov: mutex_lock: locking INIT mutex", 0, 0);
+            display_error(cfg, "cimprov: mutex_lock: locking INIT mutex", 0, 0);
         }
-        mutex = mutexMapInit;
+        mutex = cfg->mutexMapInit;
     }
     else
     {
-        if (g_enablehystericallogging)
+        if (cfg->enablehystericallogging)
         {
-            display_error("cimprov: mutex_lock: locking RW mutex", 0, 0);
+            display_error(cfg, "cimprov: mutex_lock: locking RW mutex", 0, 0);
         }
-        mutex = mutexMapRW;
+        mutex = cfg->mutexMapRW;
     }
 
     status = apr_global_mutex_lock(mutex);
     if (APR_SUCCESS != status)
     {
-        display_error("cimprov: mutex_lock failed to lock mutex", status, 1);
+        display_error(cfg, "cimprov: mutex_lock failed to lock mutex", status, 1);
         return status;
     }
 
     return APR_SUCCESS;
 }
 
-static apr_status_t mutex_unlock(lock_type type)
+static apr_status_t mutex_unlock(persist_cfg *cfg, lock_type type)
 {
     apr_status_t status;
     apr_global_mutex_t *mutex;
 
     if (LOCKTYPE_INIT == type)
     {
-        if (g_enablehystericallogging)
+        if (cfg->enablehystericallogging)
         {
-            display_error("cimprov: mutex_unlock: unlocking INIT mutex", 0, 0);
+            display_error(cfg, "cimprov: mutex_unlock: unlocking INIT mutex", 0, 0);
         }
-        mutex = mutexMapInit;
+        mutex = cfg->mutexMapInit;
     }
     else
     {
-        if (g_enablehystericallogging)
+        if (cfg->enablehystericallogging)
         {
-            display_error("cimprov: mutex_unlock: unlocking RW mutex", 0, 0);
+            display_error(cfg, "cimprov: mutex_unlock: unlocking RW mutex", 0, 0);
         }
-        mutex = mutexMapRW;
+        mutex = cfg->mutexMapRW;
     }
 
     status = apr_global_mutex_unlock(mutex);
     if (APR_SUCCESS != status)
     {
-        display_error("cimprov: mutex_unlock failed to unlock mutex", status, 1);
+        display_error(cfg, "cimprov: mutex_unlock failed to unlock mutex", status, 1);
         return status;
     }
 
     return APR_SUCCESS;
 }
 
-static apr_status_t module_mutex_cleanup(void *dummy)
+static apr_status_t module_mutex_cleanup(void *configuration)
 {
+    persist_cfg *cfg = (persist_cfg *) configuration;
     apr_status_t status;
 
-    display_error("cimprov: module_mutex_cleanup invoked ...", 0, 0);
+    display_error(cfg, "cimprov: module_mutex_cleanup invoked ...", 0, 0);
 
     // Clean up the mutexes
     // (We normally leave INIT mutex locked - so unlock it)
-    if (APR_SUCCESS != (status = mutex_unlock(LOCKTYPE_INIT)))
+    if (APR_SUCCESS != (status = mutex_unlock(cfg, LOCKTYPE_INIT)))
     {
-        display_error("cimprov: mutex_mutex_cleanup failed to unlock INIT mutex", status, 0);
+        display_error(cfg, "cimprov: mutex_mutex_cleanup failed to unlock INIT mutex", status, 0);
         // A failure to unlock shouldn't abort our cleanup efforts ...
     }
 
-    if (APR_SUCCESS != (status = apr_global_mutex_destroy(mutexMapInit)))
+    if (APR_SUCCESS != (status = apr_global_mutex_destroy(cfg->mutexMapInit)))
     {
-        display_error("cimprov: mutex_mutex_cleanup failed to clean up INIT mutex", status, 0);
+        display_error(cfg, "cimprov: mutex_mutex_cleanup failed to clean up INIT mutex", status, 0);
         // A failure here is abnormal, but shouldn't abort our cleanup efforts ...
     }
 
-    if (APR_SUCCESS != (status = apr_global_mutex_destroy(mutexMapRW)))
+    if (APR_SUCCESS != (status = apr_global_mutex_destroy(cfg->mutexMapRW)))
     {
-        display_error("cimprov: mutex_mutex_cleanup failed to clean up RW mutex", status, 1);
+        display_error(cfg, "cimprov: mutex_mutex_cleanup failed to clean up RW mutex", status, 1);
         return status;
     }
 
     return APR_SUCCESS;
 }
 
-static apr_status_t module_mutex_initialize(apr_pool_t *pool)
+static apr_status_t module_mutex_initialize(persist_cfg *cfg, apr_pool_t *pool)
 {
     apr_status_t status;
 
     // Initialize the mutexes
-    display_error("cimprov: module_mutex_initialize: creating Init mutex", 0, 0);
+    display_error(cfg, "cimprov: module_mutex_initialize: creating Init mutex", 0, 0);
 
-    if (APR_SUCCESS != (status = apr_global_mutex_create(&mutexMapInit, MUTEX_INIT_NAME, APR_LOCK_DEFAULT, pool)))
+    if (APR_SUCCESS != (status = apr_global_mutex_create(&cfg->mutexMapInit, MUTEX_INIT_NAME, APR_LOCK_DEFAULT, pool)))
     {
-        display_error("cimprov: mutex_mutex_initialize failed to initialize INIT mutex", status, 1);
+        display_error(cfg, "cimprov: mutex_mutex_initialize failed to initialize INIT mutex", status, 1);
         return status;
     }
 
-    display_error("cimprov: mutex_mutex_initialize: creating RW mutex", 0, 0);
-    if (APR_SUCCESS != (status = apr_global_mutex_create(&mutexMapRW, MUTEX_RW_NAME, APR_LOCK_DEFAULT, pool)))
+    display_error(cfg, "cimprov: mutex_mutex_initialize: creating RW mutex", 0, 0);
+    if (APR_SUCCESS != (status = apr_global_mutex_create(&cfg->mutexMapRW, MUTEX_RW_NAME, APR_LOCK_DEFAULT, pool)))
     {
-        display_error("cimprov: mutex_mutex_initialize failed to initialize RW mutex", status, 1);
+        display_error(cfg, "cimprov: mutex_mutex_initialize failed to initialize RW mutex", status, 1);
         return status;
     }
 
     // Register a cleanup handler
-    apr_pool_cleanup_register(pool, NULL, module_mutex_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, cfg, module_mutex_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
 /* Create memory mapped file for provider information */
 
-static apr_status_t mmap_region_cleanup(void *dummy)
+static apr_status_t mmap_region_cleanup(void *configuration)
 {
+    persist_cfg *cfg = (persist_cfg *) configuration;
     apr_status_t status;
 
-    display_error("cimprov: mmap_region_cleanup invoked", 0, 0);
+    display_error(cfg, "cimprov: mmap_region_cleanup invoked", 0, 0);
 
-    if (APR_SUCCESS != (status = apr_shm_destroy(g_mmap_region)))
+    if (APR_SUCCESS != (status = apr_shm_destroy(cfg->mmap_region)))
     {
-        display_error("cimprov: mmap_region_cleanup failed to destroy shared region", status, 1);
+        display_error(cfg, "cimprov: mmap_region_cleanup failed to destroy shared region", status, 1);
         return status;
     }
 
     return APR_SUCCESS;
 }
 
-static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
+static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
     int module_count = 0;               /* Number of modules loaded into server */
     int vhost_count = 2;                /* Save space for _Total and _Default */
@@ -343,13 +357,13 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
             default_port = s->port;
             text = apr_psprintf(ptemp, "cimprov: *** Default port has been set to %d ***",
                                 default_port);
-            display_error(text, 0, 0);
+            display_error(cfg, text, 0, 0);
         }
 
         text = apr_psprintf(ptemp, "cimprov: Server Vhost Name=%s, port=%d, is_virtual=%d",
                                   s->server_hostname ? s->server_hostname : "NULL",
                                   s->port, s->is_virtual);
-        display_error(text, 0, 0);
+        display_error(cfg, text, 0, 0);
 
         if (s->is_virtual && s->server_hostname != NULL)
             vhost_count++;
@@ -359,7 +373,7 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
 
     text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
                         vhost_count);
-    display_error(text, 0, 0);
+    display_error(cfg, text, 0, 0);
 
     /*
      * Create the memory mapped region
@@ -370,33 +384,30 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
                        + sizeof(mmap_vhost_data) + (sizeof(mmap_vhost_elements) * vhost_count);
 
     /* Region may already be mapped (due to a crash or something); try removing it just in case */
+    /* (If successful, indicates improper shutdown, so log informationally; otherwise ignore error) */
     status = apr_shm_remove(PROVIDER_MMAP_NAME, pool);
-    if (APR_SUCCESS != status)
+    if (APR_SUCCESS == status)
     {
-        display_error("cimprov: mmap_region_create: delete failed", status, 0);
-    }
-    else
-    {
-        display_error("cimprov: mmap_region_create: delete success", status, 0);
+        display_error(cfg, "cimprov: mmap_region_create: delete success", status, 0);
     }
 
     text = apr_psprintf(ptemp, "cimprov: mmap_region_create: creating memory map %s with size %lu",
                         PROVIDER_MMAP_NAME, mapSize);
-    display_error(text, 0, 0);
+    display_error(cfg, text, 0, 0);
 
-    status = apr_shm_create(&g_mmap_region, mapSize, PROVIDER_MMAP_NAME, pool);
+    status = apr_shm_create(&cfg->mmap_region, mapSize, PROVIDER_MMAP_NAME, pool);
     if (APR_SUCCESS != status)
     {
-        display_error("cimprov: mmap_region_create failed to create shared region", status, 1);
+        display_error(cfg, "cimprov: mmap_region_create failed to create shared region", status, 1);
         return status;
     }
 
-    g_vhost_hash = apr_hash_make(pool);
+    cfg->vhost_hash = apr_hash_make(pool);
 
     /* Assign global pointers */
-    g_server_data = apr_shm_baseaddr_get(g_mmap_region);
-    g_vhost_data = (void *) (g_server_data->modules + module_count);
-    memset(g_server_data, 0, mapSize);
+    cfg->server_data = apr_shm_baseaddr_get(cfg->mmap_region);
+    cfg->vhost_data = (void *) (cfg->server_data->modules + module_count);
+    memset(cfg->server_data, 0, mapSize);
 
     /*
      * Initialize the memory mapped region for server data
@@ -413,8 +424,8 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
      * Note: If config filename isn't one of those, keep blank (unknown installation)
      */
 
-    g_server_data->moduleCount = module_count;
-    apr_cpystrn(g_server_data->configFile, ap_conftree->filename, sizeof(g_server_data->configFile));
+    cfg->server_data->moduleCount = module_count;
+    apr_cpystrn(cfg->server_data->configFile, ap_conftree->filename, sizeof(cfg->server_data->configFile));
 
     char *tok_last;
     char *processName = apr_pstrdup(ptemp, ap_conftree->filename);
@@ -428,10 +439,10 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
 
     if (0 == apr_strnatcasecmp(token, "apache2") || 0 == apr_strnatcasecmp(token, "httpd"))
     {
-        apr_cpystrn(g_server_data->processName, token, sizeof(g_server_data->processName));
+        apr_cpystrn(cfg->server_data->processName, token, sizeof(cfg->server_data->processName));
     }
 
-    g_server_data->operatingStatus = 2 /* From MOF file: OPERATING_STATUS_OK */;
+    cfg->server_data->operatingStatus = 2 /* From MOF file: OPERATING_STATUS_OK */;
 
     /* Add each of the loaded modules */
 
@@ -440,30 +451,31 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
         if (index >= module_count)
         {
             status = APR_EMISMATCH;
-            display_error("cimprov: mmap_region_create failed to allocate module storage properly", status, 0);
+            display_error(cfg, "cimprov: mmap_region_create failed to allocate module storage properly", status, 0);
             return status;
         }
 
-        apr_cpystrn(g_server_data->modules[index++].moduleName, modp->name, sizeof(g_server_data->modules[0].moduleName));
+        apr_cpystrn(cfg->server_data->modules[index++].moduleName, modp->name, sizeof(cfg->server_data->modules[0].moduleName));
 
     }
 
     /* Initialize the memory mapped region for virtual host data */
 
-    g_vhost_data->count = vhost_count;
+    cfg->vhost_data->count = vhost_count;
 
     /*
      * VirtualHost [0] reserved for _Total
      * VirtualHost [1] reserved for _Default
      */
 
-    apr_cpystrn(g_vhost_data->vhosts[0].name, "_Total", MAX_VIRTUALHOST_NAME_LEN);
-    apr_cpystrn(g_vhost_data->vhosts[1].name, "_Default", MAX_VIRTUALHOST_NAME_LEN);
+    apr_cpystrn(cfg->vhost_data->vhosts[0].name, "_Total", MAX_VIRTUALHOST_NAME_LEN);
+    apr_cpystrn(cfg->vhost_data->vhosts[1].name, "_Default", MAX_VIRTUALHOST_NAME_LEN);
 
     /* If SSL is being used, then save certificate file */
     if (ap_find_linked_module("mod_ssl.c") != NULL)
     {
-        apr_cpystrn(g_vhost_data->vhosts[1].certificateFile, g_defaultsslcertificatefile, PATH_MAX);
+        // Fetch from _Default certificate of temporary configuration data block
+        apr_cpystrn(cfg->vhost_data->vhosts[1].certificateFile, cfg->configData->certFile->certFilename, PATH_MAX);
     }
 
     /* Set up virtual host map in reverse order since that's how server_rc comes to us */
@@ -474,35 +486,35 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
     {
         if (s->is_virtual)
         {
-            apr_hash_set(g_vhost_hash, s->server_hostname, APR_HASH_KEY_STRING, (void *) vhost_element);
+            apr_hash_set(cfg->vhost_hash, s->server_hostname, APR_HASH_KEY_STRING, (void *) vhost_element);
 
-            apr_cpystrn(g_vhost_data->vhosts[vhost_element].name, s->server_hostname, MAX_VIRTUALHOST_NAME_LEN);
+            apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].name, s->server_hostname, MAX_VIRTUALHOST_NAME_LEN);
             // TODO: Populate documentRoot, but not obvious in server_rec (it's not s->path)
             //if (s->path)
             //{
-            //    apr_cpystrn(g_vhost_data->vhosts[vhost_element].documentRoot,s->path, sizeof(g_vhost_entries->documentRoot));
+            //    apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].documentRoot,s->path, sizeof(g_vhost_entries->documentRoot));
             //}
             if (s->server_admin)
             {
-                apr_cpystrn(g_vhost_data->vhosts[vhost_element].serverAdmin, s->server_admin, sizeof(g_vhost_data->vhosts[0].serverAdmin));
+                apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].serverAdmin, s->server_admin, sizeof(cfg->vhost_data->vhosts[0].serverAdmin));
             }
             if (s->error_fname)
             {
-                apr_cpystrn(g_vhost_data->vhosts[vhost_element].logError, s->error_fname, sizeof(g_vhost_data->vhosts[0].logError));
+                apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].logError, s->error_fname, sizeof(cfg->vhost_data->vhosts[0].logError));
             }
             // TODO: Populate logCustom, but not obvious in server_rec
             // TODO: Populate logAccess, but not obvious in server_rec
-            g_vhost_data->vhosts[vhost_element].port_http = (s->port ? s->port : default_port);
+            cfg->vhost_data->vhosts[vhost_element].port_http = (s->port ? s->port : default_port);
             vhost_element--;
         }
 
         s = s->next;
     }
 
-    display_error("cimprov: mmap_region_create says buh bye", 0, 0);
+    display_error(cfg, "cimprov: mmap_region_create says buh bye", 0, 0);
 
     // Register a cleanup handler
-    apr_pool_cleanup_register(pool, NULL, mmap_region_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, cfg, mmap_region_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
@@ -513,6 +525,8 @@ static apr_status_t mmap_region_create(apr_pool_t *pool, apr_pool_t *ptemp, serv
 
 static void *create_config(apr_pool_t *pool, server_rec *s)
 {
+    apr_status_t status;
+
     /*
      * Initialize persistent storage
      *
@@ -523,6 +537,19 @@ static void *create_config(apr_pool_t *pool, server_rec *s)
     persist_cfg *cfg = apr_palloc(pool, sizeof(persist_cfg));
 
     cfg->pool = pool;
+    cfg->busyrefreshfrequency = 60;     /* Update busy/refresh statistics every 60 seconds */
+
+    /* Create sub-pool for configuration purposes and initialize configuration structure */
+    status = apr_pool_create(&cfg->configPool, pool);
+    if (APR_SUCCESS != status) {
+        display_error(cfg, "create_config unable to create configuration pool", status, 1);
+        return NULL;
+    }
+
+    cfg->configData = apr_palloc(cfg->configPool, sizeof(config_data));
+    cfg->configData->certFile = apr_palloc(cfg->configPool, sizeof(config_sslCertFile));
+    apr_cpystrn(cfg->configData->certFile->name, "_Default", sizeof(cfg->configData->certFile->name));
+
     return cfg;
 }
 
@@ -532,6 +559,7 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
     const char *errorText = "cimprov: post_config_handler";
     const char *key = "MSFT_cimprov_post_config";
     void *data = NULL;
+    persist_cfg *cfg = (persist_cfg *) ap_get_module_config(head->module_config, &cimprov_module);
 
     apr_pool_userdata_get(&data, key, head->process->pool);
     if ( data == NULL )
@@ -540,53 +568,59 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
         return OK;
     }
 
-    display_error("cimprov: post_config_handler invocation ...", 0, 0);
+    display_error(cfg, "cimprov: post_config_handler invocation ...", 0, 0);
 
     apr_status_t status;
 
-    if (APR_SUCCESS != (status = module_mutex_initialize(pconf)))
+    if (APR_SUCCESS != (status = module_mutex_initialize(cfg, pconf)))
     {
-        return display_error(errorText, status, 1);
+        return display_error(cfg, errorText, status, 1);
     }
 
 #ifdef AP_NEED_SET_MUTEX_PERMS
-    if (APR_SUCCESS != (status = unixd_set_global_mutex_perms(mutexMapRW)))
+    if (APR_SUCCESS != (status = unixd_set_global_mutex_perms(cfg->mutexMapRW)))
     {
-        return display_error("cimprov: post_config_handler could not set permissions on global mutex", status, 1);
+        return display_error(cfg, "cimprov: post_config_handler could not set permissions on global mutex", status, 1);
     }
 #endif // AP_NEED_SET_MUTEX_PERMS
 
-    if (APR_SUCCESS != (status = mutex_lock(LOCKTYPE_RW)))
+    if (APR_SUCCESS != (status = mutex_lock(cfg, LOCKTYPE_RW)))
     {
-        return display_error(errorText, status, 1);
+        return display_error(cfg, errorText, status, 1);
     }
 
-    if (APR_SUCCESS != (status = mutex_lock(LOCKTYPE_INIT)))
+    if (APR_SUCCESS != (status = mutex_lock(cfg, LOCKTYPE_INIT)))
     {
-        return display_error(errorText, status, 1);
+        return display_error(cfg, errorText, status, 1);
     }
 
-    display_error("cimprov: post_config_handler creating memory mapped region", 0, 0);
-    if (APR_SUCCESS != (status = mmap_region_create(pconf, ptemp, head)))
+    display_error(cfg, "cimprov: post_config_handler creating memory mapped region", 0, 0);
+    if (APR_SUCCESS != (status = mmap_region_create(cfg, pconf, ptemp, head)))
     {
-        return display_error(errorText, status, 1);
+        return display_error(cfg, errorText, status, 1);
     }
 
     /* Unlock */
-    if (APR_SUCCESS != (status = mutex_unlock(LOCKTYPE_RW)))
+    if (APR_SUCCESS != (status = mutex_unlock(cfg, LOCKTYPE_RW)))
     {
-        return display_error(errorText, status, 1);
+        return display_error(cfg, errorText, status, 1);
     }
 
     // Get the thread and process limits
-    ap_mpm_query(AP_MPMQ_HARD_LIMIT_THREADS, &g_thread_limit);
-    ap_mpm_query(AP_MPMQ_HARD_LIMIT_DAEMONS, &g_process_limit);
+    ap_mpm_query(AP_MPMQ_HARD_LIMIT_THREADS, &cfg->thread_limit);
+    ap_mpm_query(AP_MPMQ_HARD_LIMIT_DAEMONS, &cfg->process_limit);
+
+    /* We're completely initialized, so we don't need temporary configuration data anymore */
+    apr_pool_destroy(cfg->configPool);
+    cfg->configPool = NULL;
+    cfg->configData = NULL;
 
     return OK;
 }
 
 static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 {
+    persist_cfg *cfg = ap_get_module_config(r->server->module_config, &cimprov_module);
     const char *serverName = "_Default";
     if (r->server)
         serverName = r->server->server_hostname;
@@ -594,9 +628,9 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
     int http_status = r->status;
 
     /* Find the hash value of the server name */
-    apr_size_t element = (apr_size_t) apr_hash_get(g_vhost_hash, serverName, APR_HASH_KEY_STRING);
+    apr_size_t element = (apr_size_t) apr_hash_get(cfg->vhost_hash, serverName, APR_HASH_KEY_STRING);
 
-    if ( element < 2 || element >= g_vhost_data->count )
+    if ( element < 2 || element >= cfg->vhost_data->count )
     {
         /* Umm, somehow we got a virtual host that wasn't in the hash; use _Default */
         element = 1;
@@ -604,36 +638,36 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 
     /* Log our access for debugging purposes, if logging is enabled */
 
-    if (g_enablelogging)
+    if (cfg->enablelogging)
     {
         char *text = apr_psprintf(r->pool,
                                   "cimprov: Access result: Name=%s, status=%d, index=%lu",
                                   serverName ? serverName : "NULL",
                                   http_status, element);
-        display_error(text, 0, 0);
+        display_error(cfg, text, 0, 0);
     }
 
     /* Count the statistics - and include in _Total */
-    apr_atomic_inc32(&g_vhost_data->vhosts[element].requestsTotal);
-    apr_atomic_add32(&g_vhost_data->vhosts[element].requestsBytes, r->bytes_sent);
+    apr_atomic_inc32(&cfg->vhost_data->vhosts[element].requestsTotal);
+    apr_atomic_add32(&cfg->vhost_data->vhosts[element].requestsBytes, r->bytes_sent);
     if (http_status >= 400 && http_status <= 499)
     {
-        apr_atomic_inc32(&g_vhost_data->vhosts[element].errorCount400);
+        apr_atomic_inc32(&cfg->vhost_data->vhosts[element].errorCount400);
     }
     if (http_status >= 500 && http_status <= 599)
     {
-        apr_atomic_inc32(&g_vhost_data->vhosts[element].errorCount500);
+        apr_atomic_inc32(&cfg->vhost_data->vhosts[element].errorCount500);
     }
 
-    apr_atomic_inc32(&g_vhost_data->vhosts[0].requestsTotal);
-    apr_atomic_add32(&g_vhost_data->vhosts[0].requestsBytes, r->bytes_sent);
+    apr_atomic_inc32(&cfg->vhost_data->vhosts[0].requestsTotal);
+    apr_atomic_add32(&cfg->vhost_data->vhosts[0].requestsBytes, r->bytes_sent);
     if (http_status >= 400 && http_status <= 499)
     {
-        apr_atomic_inc32(&g_vhost_data->vhosts[0].errorCount400);
+        apr_atomic_inc32(&cfg->vhost_data->vhosts[0].errorCount400);
     }
     if (http_status >= 500 && http_status <= 599)
     {
-        apr_atomic_inc32(&g_vhost_data->vhosts[0].errorCount500);
+        apr_atomic_inc32(&cfg->vhost_data->vhosts[0].errorCount500);
     }
 
     return APR_SUCCESS;
@@ -641,49 +675,50 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 
 static apr_status_t handle_WorkerStatistics(const request_rec *r)
 {
+    persist_cfg *cfg = ap_get_module_config(r->server->module_config, &cimprov_module);
     apr_status_t status;
 
     /* If idle/busy lookup is diabled, return */
-    if (-1 == g_busyrefreshfrequency)
+    if (-1 == cfg->busyrefreshfrequency)
     {
         return APR_SUCCESS;
     }
 
     /* See if it's time to determine idle/busy lookup */
-    if (0 != g_busyrefreshfrequency)
+    if (0 != cfg->busyrefreshfrequency)
     {
         apr_time_t currentTime = apr_time_now();
         apr_time_t lastUpdateTime;
 
-        apr_uint32_t ansiUpdateTime = apr_atomic_read32((apr_uint32_t *) &g_server_data->busyRefreshTime);
+        apr_uint32_t ansiUpdateTime = apr_atomic_read32((apr_uint32_t *) &cfg->server_data->busyRefreshTime);
         if (APR_SUCCESS != (status = apr_time_ansi_put(&lastUpdateTime, ansiUpdateTime)))
         {
-            display_error("cimprov: Error converting from time_t, forcing update", status, 0);
+            display_error(cfg, "cimprov: Error converting from time_t, forcing update", status, 0);
             lastUpdateTime = 0;
         }
 
-        if (g_enablehystericallogging)
+        if (cfg->enablehystericallogging)
         {
             char *text = apr_psprintf(r->pool, "DEBUG: lastUpdateTime=%lu, currentTime=%lu, freq=%d",
-                                      lastUpdateTime, currentTime, g_busyrefreshfrequency);
-            display_error(text, 0, 0);
+                                      lastUpdateTime, currentTime, cfg->busyrefreshfrequency);
+            display_error(cfg, text, 0, 0);
         }
 
         // Just bag if it's not time to do the refresh
-        if (0 != lastUpdateTime && (lastUpdateTime + apr_time_from_sec(g_busyrefreshfrequency)) > currentTime)
+        if (0 != lastUpdateTime && (lastUpdateTime + apr_time_from_sec(cfg->busyrefreshfrequency)) > currentTime)
         {
             return APR_SUCCESS;
         }
 
         // It's time to refresh - fall through, but take care to only run once in case of thread collision
         apr_uint32_t newUpdateTime = apr_time_sec(currentTime);
-        apr_uint32_t originalTime = apr_atomic_cas32((apr_uint32_t *) &g_server_data->busyRefreshTime, newUpdateTime, ansiUpdateTime);
+        apr_uint32_t originalTime = apr_atomic_cas32((apr_uint32_t *) &cfg->server_data->busyRefreshTime, newUpdateTime, ansiUpdateTime);
 
-        if (g_enablehystericallogging)
+        if (cfg->enablehystericallogging)
         {
             char *text = apr_psprintf(r->pool, "DEBUG: originalTime=%d, ansiUpdateTime=%d, freq=%d",
-                                      originalTime, ansiUpdateTime, g_busyrefreshfrequency);
-            display_error(text, 0, 0);
+                                      originalTime, ansiUpdateTime, cfg->busyrefreshfrequency);
+            display_error(cfg, text, 0, 0);
         }
 
         if (originalTime != ansiUpdateTime)
@@ -712,12 +747,12 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
 #if defined(linux)
     char *text = apr_psprintf(r->pool, "cimprov: Computing Apache idle/busy thread/process counts in PID %d",
                               getpid());
-    display_error(text, 0, 0);
+    display_error(cfg, text, 0, 0);
 #else
-    display_error("cimprov: Computing Apache idle/busy thread/process counts", 0, 0);
+    display_error(cfg, "cimprov: Computing Apache idle/busy thread/process counts", 0, 0);
 #endif // defined(linux)
 
-    for (i = 0; i < g_process_limit; ++i) {
+    for (i = 0; i < cfg->process_limit; ++i) {
         process_score *score_process;
         worker_score *score_worker;
         int state;
@@ -727,7 +762,7 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
 #endif
 
         score_process = ap_get_scoreboard_process(i);
-        for (j = 0; j < g_thread_limit; ++j) {
+        for (j = 0; j < cfg->thread_limit; ++j) {
             score_worker = ap_get_scoreboard_worker(i, j);
             state = score_worker->status;
 
@@ -780,25 +815,25 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
     // Because clock_t data structure can be 64-bit (on 64-bit platforms), and
     // because the APR doesn't support 64-bit atomics, we use a mutex here ...
 
-    if (APR_SUCCESS != (status = mutex_lock(LOCKTYPE_RW)))
+    if (APR_SUCCESS != (status = mutex_lock(cfg, LOCKTYPE_RW)))
     {
-        return display_error("handle_WorkerStatistics: Error locking RW mutex", status, 1);
+        return display_error(cfg, "handle_WorkerStatistics: Error locking RW mutex", status, 1);
     }
 
 #ifdef HAVE_TIMES
     if (ts || tu || tcu || tcs)
     {
-        g_server_data->apacheCpuUtilization = (tu + ts + tcu + tcs) / tick;
+        cfg->server_data->apacheCpuUtilization = (tu + ts + tcu + tcs) / tick;
     }
 #endif
 
     // These could be updated atomically, but since we needed the mutex anyway ...
-    g_server_data->idleApacheWorkers = ready;
-    g_server_data->busyApacheWorkers = busy;
+    cfg->server_data->idleApacheWorkers = ready;
+    cfg->server_data->busyApacheWorkers = busy;
 
-    if (APR_SUCCESS != (status = mutex_unlock(LOCKTYPE_RW)))
+    if (APR_SUCCESS != (status = mutex_unlock(cfg, LOCKTYPE_RW)))
     {
-        return display_error("handle_WorkerStatistics: Error unlocking RW mutex", status, 1);
+        return display_error(cfg, "handle_WorkerStatistics: Error unlocking RW mutex", status, 1);
     }
 
     return APR_SUCCESS;
@@ -816,10 +851,12 @@ static int log_request_handler(request_rec *r)
 #ifdef HAVE_TIMES
 static void child_init_handler(apr_pool_t *pool, server_rec *server)
 {
+    persist_cfg *cfg = ap_get_module_config(server->module_config, &cimprov_module);
     apr_status_t status;
-    if (APR_SUCCESS != (status = apr_global_mutex_child_init(&mutexMapRW, MUTEX_RW_NAME, pool)))
+
+    if (APR_SUCCESS != (status = apr_global_mutex_child_init(&cfg->mutexMapRW, MUTEX_RW_NAME, pool)))
     {
-        display_error("child_init_handler: failed to initialize child mutex", status, 1);
+        display_error(cfg, "child_init_handler: failed to initialize child mutex", status, 1);
     }
     g_child_pid = getpid();
 }
