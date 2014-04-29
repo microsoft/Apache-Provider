@@ -108,6 +108,6 @@ typedef struct
 
 #define PROVIDER_MMAP_NAME      "/var/opt/microsoft/apache-cimprov/run/Provider_Region"
 #define MUTEX_INIT_NAME         "/var/opt/microsoft/apache-cimprov/run/mutexInit.lock"
-#define MUTEX_RW_NAME           "/var/opt/microsoft/apache-cinmprov/run/mutexRW.lock"
+#define MUTEX_RW_NAME           "/var/opt/microsoft/apache-cimprov/run/mutexRW.lock"
 
 #endif // #define MMAP_REGION_H
