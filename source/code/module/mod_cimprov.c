@@ -5,7 +5,7 @@
     \file        mod_cimprov.c
 
     \brief       Apache Module for Apache managmement/monitoring via CIM Provider
-   
+
     \date        01-21-2013 13:38:00
 */
 /*----------------------------------------------------------------------------*/
@@ -52,19 +52,27 @@ typedef enum
 module AP_MODULE_DECLARE_DATA cimprov_module;
 
 /*
- * Persistent server configuration data
+ * The module-wide list of server certificate files and the host names and ports that they apply to
  */
 
 typedef struct config_sslCertFile config_sslCertFile;
 struct config_sslCertFile {
     config_sslCertFile* next;           /* Pointer to next certificate structure */
-    char name[MAX_VIRTUALHOST_NAME_LEN]; /* Name of virtual host for this certficate (or _Default) */
-    char certFilename[PATH_MAX];        /* Filename for the certificate */
+    apr_pool_t* pool;                   /* The temporary pool that contains this item (and nothing else) */
+    char hostName[MAX_VIRTUALHOST_NAME_LEN]; /* Name of virtual host for this certficate (or _Default) */
+    apr_uint16_t port;                  /* Port of virtual host that uses this certificate */
+    char certificateFileName[PATH_MAX]; /* Filename for the certificate */
 };
 
+static config_sslCertFile* g_certificateFileList = NULL;
+
+/*
+ * Persistent server configuration data
+ */
+
 typedef struct {
-    /* The following items are used during configuraiton, and are deleted when configuraiton is complete */
-    config_sslCertFile* certFile;       /* Pointer to head of certificate file chain */
+    /* The following items are used during configuration, and are deleted when configuration is complete */
+    int dummy;                          /* Pointer to head of certificate file chain */
 } config_data;
 
 typedef struct {
@@ -84,8 +92,9 @@ typedef struct {
     int process_limit;                  /* Process limit for Apache Process */
     int thread_limit;                   /* Thread limit for Apache Process */
 
-    apr_pool_t *configPool;             /* Temporary pool used during configuraiton */
+    apr_pool_t *configPool;             /* Temporary pool used during configuration */
     config_data *configData;            /* Temporary configuration data (discarded after configuration) */
+
 } persist_cfg;
 
 /*
@@ -126,6 +135,7 @@ apr_status_t display_error(persist_cfg *cfg, const char *error_text, apr_status_
  * Be sure that cimprov related commands are at global level only.
  */
 
+/* Set the logging state for a single host */
 static const char *set_logging_state(cmd_parms *cmd, void *dummy, int arg)
 {
     persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
@@ -138,6 +148,7 @@ static const char *set_logging_state(cmd_parms *cmd, void *dummy, int arg)
     return NULL;
 }
 
+/* Set the hyserical logging state for a single host */
 static const char *set_hystericallogging_state(cmd_parms *cmd, void *dummy, int arg)
 {
     persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
@@ -162,17 +173,52 @@ static const char *set_busyrefresh_frequency(cmd_parms *cmd, void *dummy, const 
     return NULL;
 }
 
-static const char *set_default_ssl_certificate_file(cmd_parms *cmd, void *dummy, const char *arg)
+/* Add the name of the server certificate file for a single host to the certificate file names list */
+static const char *set_server_certificate_file(cmd_parms *cmd, void *dummy, const char *arg)
 {
-    persist_cfg *cfg = (persist_cfg *) ap_get_module_config(cmd->server->module_config, &cimprov_module);
+    persist_cfg *cfg = (persist_cfg *)ap_get_module_config(cmd->server->module_config, &cimprov_module);
+    apr_pool_t* pool;
+    config_sslCertFile* certFileInfo;
     const char *err = ap_check_cmd_context(cmd, NOT_IN_DIR_LOC_FILE);
+    apr_status_t status;
+
     if (err != NULL)
     {
         return err;
     }
 
-    // Store in _Default certificate of temporary configuration data block
-    strncpy(cfg->configData->certFile->certFilename, arg, sizeof(cfg->configData->certFile->certFilename));
+    status = apr_pool_create(&pool, cfg->configPool);
+    if (status != APR_SUCCESS)
+    {
+        display_error(cfg, "cimprov: unable to allocate memory for SSL certificate file name item", status, 1);
+    }
+    else
+    {
+        certFileInfo = apr_pcalloc(cfg->configPool, sizeof (config_sslCertFile));
+        if (certFileInfo != NULL)
+        {
+            server_rec* s = cmd->server;
+
+            certFileInfo->pool = pool;
+            apr_cpystrn(certFileInfo->hostName, s->server_hostname, sizeof certFileInfo->hostName);
+            certFileInfo->port = s->port;
+            apr_cpystrn(certFileInfo->certificateFileName, arg, sizeof certFileInfo->certificateFileName);
+
+            if (g_certificateFileList == NULL)
+            {
+                g_certificateFileList = certFileInfo;
+            }
+            else
+            {
+                config_sslCertFile* item;
+    
+                for (item = g_certificateFileList; item->next != NULL; item = item->next)
+                    ;
+                item->next = certFileInfo;
+            }
+        }
+    }
+
     return NULL;
 }
 
@@ -186,7 +232,7 @@ static const command_rec cimprov_module_cmds[] =
     AP_INIT_TAKE1("CimBusyRefreshFrequency", set_busyrefresh_frequency, NULL, RSRC_CONF,
       "Set the default busy refresh frequency for busy/idle thread counts and CPU load. "
       "Default = 60 seconds, -1 = Disabled, 0 = Update on each request (very high overhead)."),
-    AP_INIT_TAKE1("SSLCertificateFile", set_default_ssl_certificate_file, NULL, RSRC_CONF,
+    AP_INIT_TAKE1("SSLCertificateFile", set_server_certificate_file, NULL, RSRC_CONF,
       "Set the name of the SSL certificate file for the default host."),
     {NULL}
 };
@@ -333,6 +379,48 @@ static apr_status_t mmap_region_cleanup(void *configuration)
     return APR_SUCCESS;
 }
 
+static int find_certificate_file(
+    persist_cfg* cfg,
+    const char* hostName,
+    apr_uint16_t port,
+    char* fileName,
+    size_t maxFileNameLen)
+{
+    config_sslCertFile* item;
+    config_sslCertFile* prevItem = NULL;
+
+    for (item = g_certificateFileList; item != NULL; prevItem = item, item = item->next)
+    {
+        if (hostName == NULL ||
+            (apr_strnatcasecmp(item->hostName, hostName) == 0 && item->port == port))
+        {
+            apr_pool_t* pool;
+
+            /* save name of certificate file, if a match was found or the first one was desired */
+            if (fileName != NULL)
+            {
+                apr_cpystrn(fileName, item->certificateFileName, maxFileNameLen);
+            }
+
+            /* delete this item and its containing pool after saving its data */
+            pool = item->pool;
+            if (prevItem == NULL)
+            {
+                g_certificateFileList = item->next;
+            }
+            else
+            {
+                prevItem->next = item->next;
+            }
+            apr_pool_destroy(pool);
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
     int module_count = 0;               /* Number of modules loaded into server */
@@ -471,13 +559,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     apr_cpystrn(cfg->vhost_data->vhosts[0].name, "_Total", MAX_VIRTUALHOST_NAME_LEN);
     apr_cpystrn(cfg->vhost_data->vhosts[1].name, "_Default", MAX_VIRTUALHOST_NAME_LEN);
 
-    /* If SSL is being used, then save certificate file */
-    if (ap_find_linked_module("mod_ssl.c") != NULL)
-    {
-        // Fetch from _Default certificate of temporary configuration data block
-        apr_cpystrn(cfg->vhost_data->vhosts[1].certificateFile, cfg->configData->certFile->certFilename, PATH_MAX);
-    }
-
     /* Set up virtual host map in reverse order since that's how server_rc comes to us */
 
     apr_size_t vhost_element = vhost_count - 1; /* Since count is 1-based, reference the last element */
@@ -492,7 +573,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
             // TODO: Populate documentRoot, but not obvious in server_rec (it's not s->path)
             //if (s->path)
             //{
-            //    apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].documentRoot,s->path, sizeof(g_vhost_entries->documentRoot));
+            //    apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].documentRoot, s->path, sizeof(g_vhost_entries->documentRoot));
             //}
             if (s->server_admin)
             {
@@ -504,13 +585,31 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
             }
             // TODO: Populate logCustom, but not obvious in server_rec
             // TODO: Populate logAccess, but not obvious in server_rec
-            cfg->vhost_data->vhosts[vhost_element].port_http = (s->port ? s->port : default_port);
+            cfg->vhost_data->vhosts[vhost_element].port_http = s->port ? s->port : default_port;
+            find_certificate_file(cfg,
+                                  s->server_hostname,
+                                  s->port,
+                                  cfg->vhost_data->vhosts[vhost_element].certificateFile,
+                                  sizeof cfg->vhost_data->vhosts[vhost_element].certificateFile);
+
             vhost_element--;
         }
 
         s = s->next;
     }
 
+    /* set certificate file for default host to the first unclaimed item in cert. file list, if any */
+    (void)find_certificate_file(cfg, NULL, 0, cfg->vhost_data->vhosts[1].certificateFile, sizeof cfg->vhost_data->vhosts[1].certificateFile);
+
+    /* delete any remaining unclaimed items in certificate file list */
+    if (find_certificate_file(cfg, NULL, 0, NULL, 0))
+    {
+        display_error(cfg, "SSL certificate file name for unknown host", 0, 0);
+        while (find_certificate_file(cfg, NULL, 0, NULL, 0))
+        {
+            ;
+        }
+    }
     display_error(cfg, "cimprov: mmap_region_create says buh bye", 0, 0);
 
     // Register a cleanup handler
@@ -523,6 +622,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
  * Handlers
  */
 
+/* Create the persist_config memory for a single host */
 static void *create_config(apr_pool_t *pool, server_rec *s)
 {
     apr_status_t status;
@@ -530,11 +630,11 @@ static void *create_config(apr_pool_t *pool, server_rec *s)
     /*
      * Initialize persistent storage
      *
-     * To fetch this configuration within handlers, use something like:
+     * To fetch this configuration for the pertinent host within handlers, use something like:
      *   persist_cfg *cfg = ap_get_module_config(r->server->module_config, &cimprov_module);
      */
 
-    persist_cfg *cfg = apr_palloc(pool, sizeof(persist_cfg));
+    persist_cfg *cfg = apr_pcalloc(pool, sizeof(persist_cfg));
 
     cfg->pool = pool;
     cfg->busyrefreshfrequency = 60;     /* Update busy/refresh statistics every 60 seconds */
@@ -545,10 +645,7 @@ static void *create_config(apr_pool_t *pool, server_rec *s)
         display_error(cfg, "create_config unable to create configuration pool", status, 1);
         return NULL;
     }
-
-    cfg->configData = apr_palloc(cfg->configPool, sizeof(config_data));
-    cfg->configData->certFile = apr_palloc(cfg->configPool, sizeof(config_sslCertFile));
-    apr_cpystrn(cfg->configData->certFile->name, "_Default", sizeof(cfg->configData->certFile->name));
+    cfg->configData = apr_pcalloc(cfg->configPool, sizeof(config_data));
 
     return cfg;
 }
@@ -614,6 +711,7 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
     apr_pool_destroy(cfg->configPool);
     cfg->configPool = NULL;
     cfg->configData = NULL;
+    g_certificateFileList = NULL;
 
     return OK;
 }
