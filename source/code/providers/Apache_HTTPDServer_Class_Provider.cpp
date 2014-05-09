@@ -3,8 +3,10 @@
 #include "Apache_HTTPDServer_Class_Provider.h"
 
 // Provider include definitions
+#include <sstream>
 #include <vector>
 #include "apachebinding.h"
+#include "buildversion.h"
 
 // From MOF file:
 const char *OperatingStatusValues[] =
@@ -74,8 +76,17 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
 
     if (! keysOnly)
     {
+        // Build the version string
+        std::stringstream ss;
+        ss << CIMPROV_BUILDVERSION_MAJOR
+           << "." << CIMPROV_BUILDVERSION_MINOR
+           << "." << CIMPROV_BUILDVERSION_PATCH
+           << "-" << CIMPROV_BUILDVERSION_BUILDNR
+           << " (" << CIMPROV_BUILDVERSION_DATE << ")";
+
         // Insert the values into the instance
 
+        inst.ModuleVersion_value(ss.str().c_str());
         inst.InstanceID_value(g_apache.GetServerConfigFile());
         inst.ConfigurationFile_value(g_apache.GetServerConfigFile());
         inst.ProcessName_value(g_apache.GetServerProcessName());
