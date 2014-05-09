@@ -260,9 +260,6 @@
     <Exec WorkingDirectory='$(WorkspaceFolder)\bootstrap'
           Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\GetFiles.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/target/* "$(BinariesRoot)/"'
       />
-    <Exec WorkingDirectory='$(WorkspaceFolder)\bootstrap'
-          <!-- Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\GetFiles.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/test/util/testapp/testapp "$(BinariesRoot)/"'
-          IgnoreExitCode='true' /> -->
   </Target>
 
   <Target Name="CoreClean">
