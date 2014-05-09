@@ -252,7 +252,7 @@
 
     <!-- Pack up staging directory (since it contains symlinks, some of which may not exist) -->
     <Exec WorkingDirectory="$(WorkspaceFolder)\bootstrap"
-          Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/sApache/bootstrap/PackStagingDir.bsh $(UnixWorkspaceName)/Apache'
+          Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/bootstrap/PackStagingDir.bsh $(UnixWorkspaceName)/Apache'
           IgnoreStandardErrorWarningFormat='true'
           />
 
