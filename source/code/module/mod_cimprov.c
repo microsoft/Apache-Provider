@@ -57,11 +57,11 @@ module AP_MODULE_DECLARE_DATA cimprov_module;
 
 typedef struct config_sslCertFile config_sslCertFile;
 struct config_sslCertFile {
-    config_sslCertFile* next;               /* Pointer to next certificate structure */
-    apr_pool_t* pool;                       /* The temporary pool that contains this item (and nothing else) */
-    char hostName[MAX_VIRTUALHOST_NAME_LEN];/* Name of virtual host for this certficate (or _Default) */
-    apr_uint16_t port;                      /* Port of virtual host that uses this certificate */
-    char certificateFileNames[2][PATH_MAX]; /* Filename for the certificate */
+    config_sslCertFile* next;                   /* Pointer to next certificate structure */
+    apr_pool_t* pool;                           /* The temporary pool that contains this item (and nothing else) */
+    char certificateFileName[PATH_MAX];         /* Name of the the certificate file */
+    char hostName[MAX_VIRTUALHOST_NAME_LEN];    /* Name of virtual host for this certficate (or _Default) */
+    apr_uint16_t port;                          /* Port of virtual host that uses this certificate */
 };
 
 static config_sslCertFile* g_certificateFileList = NULL;
@@ -84,6 +84,7 @@ typedef struct {
     apr_shm_t *mmap_region;             /* APR's memory mapped region handle */
     mmap_server_data *server_data;      /* Pointer to server data within memory mapped region */
     mmap_vhost_data *vhost_data;        /* Pointer to vhost data within memory mapped region */
+    mmap_certificate_data *certificate_data;    /* Pointer to certificate file data within memory mapped region */
     apr_hash_t *vhost_hash;             /* APR hash to virtual hosts in memory mapped region */
 
     apr_global_mutex_t *mutexMapInit;   /* APR handle to Initialization Mutex */
@@ -174,30 +175,21 @@ static const char *set_busyrefresh_frequency(cmd_parms *cmd, void *dummy, const 
 }
 
 /* Find an entry for a host and port in the list of server certificate files */
-static config_sslCertFile* find_certificate_files(
-    const char* hostName,
-    apr_uint16_t port,
-    config_sslCertFile** prevItemPtr)
+static config_sslCertFile* find_certificate_file(const char* certificateFile)
 {
-    config_sslCertFile* item;
-    config_sslCertFile* prevItem = NULL;
+    config_sslCertFile* certInfo;
 
-    for (item = g_certificateFileList; item != NULL; prevItem = item, item = item->next)
+    for (certInfo = g_certificateFileList; certInfo != NULL; certInfo = certInfo->next)
     {
-        if (hostName == NULL ||
-            (apr_strnatcasecmp(item->hostName, hostName) == 0 && item->port == port))
+        if (apr_strnatcmp(certInfo->certificateFileName, certificateFile) == 0)
         {
-            if (prevItemPtr != NULL)
-            {
-                *prevItemPtr = prevItem;
-            }
-            return item;
+            return certInfo;
         }
     }
     return NULL;
 }
 
-/* Add the name of the server certificate file for a given host and port to the certificate file names list */
+/* Add the name of a server certificate file for a given host and port to the certificate file names list */
 static const char *set_server_certificate_file(cmd_parms *cmd, void *dummy, const char *arg)
 {
     persist_cfg *cfg = (persist_cfg *)ap_get_module_config(cmd->server->module_config, &cimprov_module);
@@ -206,17 +198,22 @@ static const char *set_server_certificate_file(cmd_parms *cmd, void *dummy, cons
     const char *err = ap_check_cmd_context(cmd, NOT_IN_DIR_LOC_FILE);
     apr_status_t status;
     server_rec* s = cmd->server;
-    int i;
+    char* hostName = s->server_hostname;
 
     if (err != NULL)
     {
         return err;
     }
 
-    certFileInfo = find_certificate_files(s->server_hostname, s->port, NULL);
+    if (hostName == NULL)
+    {
+        hostName = "_Default";
+    }
+
+    certFileInfo = find_certificate_file(arg);
     if (certFileInfo == NULL)
     {
-        /* if this server has no entry, create one by creating a pool and an item in the pool*/
+        /* if this certificate file has no entry, create one by creating a pool and an item in the pool*/
         status = apr_pool_create(&pool, cfg->configPool);
         if (status != APR_SUCCESS)
         {
@@ -234,29 +231,15 @@ static const char *set_server_certificate_file(cmd_parms *cmd, void *dummy, cons
         /* populate the item */
         certFileInfo->next = g_certificateFileList;
         certFileInfo->pool = pool;
-        apr_cpystrn(certFileInfo->hostName, s->server_hostname, sizeof certFileInfo->hostName);
-        certFileInfo->port = s->port;
+        apr_cpystrn(certFileInfo->certificateFileName, arg, sizeof certFileInfo->certificateFileName);
 
         /* add the new entry to the linked list */
         g_certificateFileList = certFileInfo;
-    }
 
-    /* add the certificate file to the list within the item */
-    for (i = 0; i < 2; i++)
-    {
-        if (certFileInfo->certificateFileNames[i][0] == '\0')
-        {
-            apr_cpystrn(certFileInfo->certificateFileNames[i], arg, sizeof certFileInfo->certificateFileNames[0]);
-            break;
-        }
+       /* if this is the first use of this certificate file, add the host and port to the list within the item */
+        apr_cpystrn(certFileInfo->hostName, hostName, sizeof certFileInfo->hostName);
+        certFileInfo->port = s->port;
     }
-
-    if (i == 2)
-    {                                   /* error: too many certificate file names */
-        display_error(cfg, "cimprov: more than 2 certificate file names per host in SSL module configuration file", status, 1);
-        return NULL;
-    }
-
     return NULL;
 }
 
@@ -417,52 +400,16 @@ static apr_status_t mmap_region_cleanup(void *configuration)
     return APR_SUCCESS;
 }
 
-static int find_certificate_files_and_consume_entry(
-    persist_cfg* cfg,
-    const char* hostName,
-    apr_uint16_t port,
-    char* fileName0,
-    char* fileName1,
-    size_t maxFileNameLen)
-{
-    config_sslCertFile* item;
-    config_sslCertFile* prevItem = NULL;
-    apr_pool_t* pool;
-
-    item = find_certificate_files(hostName, port, &prevItem);
-
-    if (item != NULL)
-    {
-        /* save names of certificate files */
-        if (fileName0 != NULL)
-        {
-            apr_cpystrn(fileName0, item->certificateFileNames[0], maxFileNameLen);
-            apr_cpystrn(fileName1, item->certificateFileNames[1], maxFileNameLen);
-        }
-
-        /* delete this item and its containing pool after saving its data */
-        pool = item->pool;
-        if (prevItem == NULL)
-        {
-            g_certificateFileList = item->next;
-        }
-        else
-        {
-            prevItem->next = item->next;
-        }
-        apr_pool_destroy(pool);
-
-        return 1;
-    }
-
-    return 0;
-}
-
 static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
     int module_count = 0;               /* Number of modules loaded into server */
     int vhost_count = 2;                /* Save space for _Total and _Default */
+    int certificate_count = 0;          /* Number of certificate information blocks */
+    config_sslCertFile* certInfo;       /* Ptr. to information about a certificate file */
+    size_t certificate_element;
     char *text;
+    server_rec *s = head;
+    apr_port_t default_port = 0;
 
     /* Walk the list of loaded modules to determine the count */
 
@@ -473,8 +420,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
 
     /* Walk the list of server_rec structures to determine the count of virtual hosts */
 
-    server_rec *s = head;
-    apr_port_t default_port = 0;
     while (s != NULL)
     {
         if (default_port == 0 && s->port != 0 && s->is_virtual == 0)
@@ -496,8 +441,15 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         s = s->next;
     }
 
-    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
+    for (certInfo = g_certificateFileList; certInfo != NULL; certInfo = certInfo->next)
+    {
+        certificate_count++;
+    }
+
+	text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
                         vhost_count);
+    display_error(cfg, text, 0, 0);
+	text = apr_psprintf(ptemp, "cimprov: Count of certificates: %d", certificate_count);
     display_error(cfg, text, 0, 0);
 
     /*
@@ -506,7 +458,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
 
     apr_status_t status;
     apr_size_t mapSize = sizeof(mmap_server_data) + (sizeof(mmap_server_modules) * module_count)
-                       + sizeof(mmap_vhost_data) + (sizeof(mmap_vhost_elements) * vhost_count);
+                       + sizeof(mmap_vhost_data) + (sizeof(mmap_vhost_elements) * vhost_count)
+                       + sizeof(mmap_certificate_data) + (sizeof(mmap_certificate_elements) * certificate_count);
 
     /* Region may already be mapped (due to a crash or something); try removing it just in case */
     /* (If successful, indicates improper shutdown, so log informationally; otherwise ignore error) */
@@ -530,8 +483,10 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     cfg->vhost_hash = apr_hash_make(pool);
 
     /* Assign global pointers */
-    cfg->server_data = apr_shm_baseaddr_get(cfg->mmap_region);
-    cfg->vhost_data = (void *) (cfg->server_data->modules + module_count);
+    cfg->server_data = (mmap_server_data*)apr_shm_baseaddr_get(cfg->mmap_region);
+    cfg->vhost_data = (mmap_vhost_data*)(cfg->server_data->modules + module_count);
+    cfg->certificate_data = (mmap_certificate_data*)(cfg->vhost_data->vhosts + vhost_count);
+
     memset(cfg->server_data, 0, mapSize);
 
     /*
@@ -581,7 +536,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         }
 
         apr_cpystrn(cfg->server_data->modules[index++].moduleName, modp->name, sizeof(cfg->server_data->modules[0].moduleName));
-
     }
 
     /* Initialize the memory mapped region for virtual host data */
@@ -623,35 +577,33 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
             // TODO: Populate logCustom, but not obvious in server_rec
             // TODO: Populate logAccess, but not obvious in server_rec
             cfg->vhost_data->vhosts[vhost_element].port_http = s->port ? s->port : default_port;
-            find_certificate_files_and_consume_entry(cfg,
-                                                     s->server_hostname,
-                                                     s->port,
-                                                     cfg->vhost_data->vhosts[vhost_element].certificateFiles[0],
-                                                     cfg->vhost_data->vhosts[vhost_element].certificateFiles[1],
-                                                     sizeof cfg->vhost_data->vhosts[vhost_element].certificateFiles[0]);
             vhost_element--;
         }
 
         s = s->next;
     }
 
-    /* set certificate file for default host to the first unclaimed item in cert. file list, if any */
-    (void)find_certificate_files_and_consume_entry(cfg,
-                                                   NULL,
-                                                   0,
-                                                   cfg->vhost_data->vhosts[1].certificateFiles[0],
-                                                   cfg->vhost_data->vhosts[1].certificateFiles[1],
-                                                   sizeof cfg->vhost_data->vhosts[1].certificateFiles[0]);
-
-    /* delete any remaining unclaimed items in certificate file list */
-    if (find_certificate_files_and_consume_entry(cfg, NULL, 0, NULL, NULL, 0))
+    /* Initialize the memory mapped region for certificate file data */
+    cfg->certificate_data->count = certificate_count;
+    certificate_element = certificate_count - 1;
+    for (certInfo = g_certificateFileList; certInfo != NULL; certInfo = certInfo->next)
     {
-        display_error(cfg, "SSL certificate file name for unknown host", 0, 0);
-        while (find_certificate_files_and_consume_entry(cfg, NULL, 0, NULL, NULL, 0))
-        {
-            ;
-        }
+        apr_pool_t* pool;
+
+        /* save first host and port that use this certificate file */
+        apr_cpystrn(cfg->certificate_data->certificates[certificate_element].certificateFile,
+                    certInfo->certificateFileName, MAX_VIRTUALHOST_NAME_LEN);
+        apr_cpystrn(cfg->certificate_data->certificates[certificate_element].hostName,
+                    certInfo->hostName, MAX_VIRTUALHOST_NAME_LEN);
+        cfg->certificate_data->certificates[certificate_element].port = certInfo->port;
+
+        /* delete this item and its containing pool after saving its data */
+        pool = certInfo->pool;
+        apr_pool_destroy(pool);
+        certificate_element--;
     }
+
+    g_certificateFileList = NULL;
 
     display_error(cfg, "cimprov: mmap_region_create says buh bye", 0, 0);
 

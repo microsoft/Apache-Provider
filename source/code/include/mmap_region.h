@@ -4,7 +4,8 @@
 
 #include <time.h>
 #include <stdint.h>
-#include "apr.h"
+#include <apr.h>
+#include <apr_file_info.h>
 
 /*
  * Memory mapped region layout
@@ -14,6 +15,8 @@
  *     mmap_server_modules:       Array (size based on Apache Config) for each module loaded in configuration
  *   mmap_vhost_data:           Size marker to indicate number of virtual tables allocated.  This includes:
  *     mmap_vhost_elements:       Array (size based on Apache Config) for each virtual host in configuraiton
+ *   mmap_certificate_data:     Size marker to indicate number of certificate file information blocks allocated.  This includes:
+ *     mmap_certificate_elements: Array (size based on Apache Config) for each certificate file
  */
 
 // Length of the virtual host name (Wikipedia claims max length=253 for any DNS name)
@@ -54,11 +57,6 @@ typedef struct
     char logError[PATH_MAX];
     char logCustom[PATH_MAX];
     char logAccess[PATH_MAX];
-
-    /* SSL certificate information */
-    char certificateFiles[2][PATH_MAX];
-    char certificateExpirationCimTimes[2][32];
-    time_t certificateExpirationPosixTimes[2];
 
     // Need: IPAddresses[], ServerAliases[] in some way to avoid maximum lengths.
     // Perhaps variable length ending in \0\0 like "val1\0val2\0val3\0\0" ?
@@ -105,6 +103,23 @@ typedef struct
     apr_size_t count;                   // Number of elements of mmap_vhost_elements that follow
     mmap_vhost_elements vhosts[0];      // Array of mmap_vhost_elements (virtual host information)
 } mmap_vhost_data;
+
+typedef struct
+{
+    /* SSL certificate information */
+    char certificateFile[PATH_MAX];             /* name of file containing certificate */
+    char hostName[MAX_VIRTUALHOST_NAME_LEN];    /* name of first host that uses this certificate */
+    apr_uint16_t port;                          /* port of first host that uses this certificate */
+    char certificateExpirationCimTime[32];      /* expiration time in CIM format; filled in by provider */
+    apr_time_t certificateExpirationAprTime;    /* expiration time in APR format; filled in by provider */
+    apr_time_t certificateFileMtime;            /* last time file was modified; filled in by provider */
+} mmap_certificate_elements;
+
+typedef struct
+{
+    apr_size_t count;                           /* Number of elements of mmap_certificate_elements that follow */
+    mmap_certificate_elements certificates[0];  /* Array of mmap_certificate_elements */
+} mmap_certificate_data;
 
 #define PROVIDER_MMAP_NAME      "/var/opt/microsoft/apache-cimprov/run/Provider_Region"
 #define MUTEX_INIT_NAME         "/var/opt/microsoft/apache-cimprov/run/mutexInit.lock"

@@ -53,6 +53,9 @@ public:
     static apr_size_t GetVHostCount() { return ms_vhost_data->count; }
     static mmap_vhost_elements *GetVHostElements() { return ms_vhost_data->vhosts; }
 
+    static apr_size_t GetCertificateCount() { return ms_certificate_data->count; }
+    static mmap_certificate_elements *GetCertificateElements() { return ms_certificate_data->certificates; }
+
     static apr_status_t LockMutex() { return apr_global_mutex_lock(ms_mutexMapRW); }
     static apr_status_t UnlockMutex() { return apr_global_mutex_unlock(ms_mutexMapRW); }
 
@@ -63,6 +66,7 @@ private:
     static apr_shm_t *ms_mmap_region;
     static mmap_server_data *ms_server_data;
     static mmap_vhost_data *ms_vhost_data;
+    static mmap_certificate_data *ms_certificate_data;
 
     static apr_global_mutex_t *ms_mutexMapRW;
 
