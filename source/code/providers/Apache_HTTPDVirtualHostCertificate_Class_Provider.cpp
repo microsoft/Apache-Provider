@@ -1,7 +1,9 @@
 /* @migen@ */
 #include <stdio.h>
+
 #include <apr.h>
 #include <apr_strings.h>
+#include <apr_memcache.h>
 #include <apr_errno.h>
 
 #include <string>
@@ -221,9 +223,30 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
     {
         Apache_HTTPDVirtualHostCertificate_Class inst;
 
+        // Create the instance ID from the name of the certificate file
+#if defined(_WIN32)
+        inst.InstanceID_value(certs[i].certificateFile);    // since Windows is case-insensitive, just use the file name
+#else
+        // For case-sensitive file systems, make an ID from the base file name + a hash of the entire path
+        apr_uint32_t hash = apr_memcache_hash_crc32(NULL, certs[i].certificateFile, strlen(certs[i].certificateFile));
+        char* ptr = strrchr(certs[i].certificateFile, '/');
+
+        if (ptr == NULL)
+        {
+            ptr = certs[i].certificateFile;
+        }
+        else
+        {
+            ptr++;
+        }
+        const char* idStr = apr_psprintf(pool.Get(), "%s*%08x", ptr, (unsigned int)hash);
+
+        const mi::String idMiString(idStr);
+        inst.InstanceID_value(idMiString);
+#endif
+
         if (!keysOnly)
         {
-            char buf[PATH_MAX + 8];
             apr_finfo_t fileInfo;
             apr_time_t timeNow;
             std::vector<mi::String> certificateFileNamesArray;
@@ -231,8 +254,8 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
             std::vector<mi::Uint16> certificateDaysUntilExpirationArray;
 
             // Insert the host:port name for the first host
-            sprintf(buf, "%s:%d", certs[i].hostName, certs[i].port);
-            inst.ServerName_value(buf);
+            const char* hostStr = apr_psprintf(pool.Get(), "%s:%d", certs[i].hostName, certs[i].port);
+            inst.ServerName_value(hostStr);
 
             // Insert the certificate file dates
             timeNow = apr_time_now();
@@ -253,13 +276,12 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
             }
 
             // Convert the the certificate information to MI types and put in into the instance
-            mi::String certificateFileName(certs[i].certificateFile);
             mi::Datetime certificateExpirationCimTime;
             certificateExpirationCimTime.Set(certs[i].certificateExpirationCimTime);
             mi::Uint16 certificateDaysUntilExpiration((unsigned short)((certs[i].certificateExpirationAprTime - timeNow) /
                                                                        ((apr_int64_t)1000000 * 60 * 60 * 24)));
 
-            inst.FileName_value(certificateFileName);
+            inst.FileName_value(certs[i].certificateFile);
             inst.ExpirationDate_value(certificateExpirationCimTime);
             inst.DaysUntilExpiration_value(certificateDaysUntilExpiration);
         }
