@@ -22,7 +22,7 @@ static void EnumerateOneInstance(Context& context,
     mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
 
     // Insert the key into the instance
-    inst.InstanceID_value(vhosts[item].name);
+    inst.InstanceID_value(vhosts[item].instanceID);
 
     if (! keysOnly)
     {

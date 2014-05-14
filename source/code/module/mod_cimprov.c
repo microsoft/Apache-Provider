@@ -17,6 +17,8 @@
 # include <errno.h>
 #endif
 
+#include <string.h>
+
 #include <apr_atomic.h>
 #include <apr_hash.h>
 #include <apr_strings.h>
@@ -446,10 +448,10 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         certificate_count++;
     }
 
-	text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
+        text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
                         vhost_count);
     display_error(cfg, text, 0, 0);
-	text = apr_psprintf(ptemp, "cimprov: Count of certificates: %d", certificate_count);
+        text = apr_psprintf(ptemp, "cimprov: Count of certificates: %d", certificate_count);
     display_error(cfg, text, 0, 0);
 
     /*
@@ -556,32 +558,56 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     s = head;
     while (s != NULL)
     {
+        mmap_vhost_elements *vhost;
+        vhost = s->is_virtual ? &cfg->vhost_data->vhosts[vhost_element] : &cfg->vhost_data->vhosts[1];
+
+        /* Create the InstanceID for uniquely tracking this virtual host */
+
+        char *instanceHost = apr_pstrdup(ptemp, s->server_hostname ? s->server_hostname : "_default_");
+
+        server_addr_rec* addrs = s->addrs;
+        while (addrs != NULL)
+        {
+            char *nextEntry = apr_psprintf(ptemp, 
+                                           ",%s:%d",
+                                           addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
+                                           (unsigned int) addrs->host_addr->port);
+            instanceHost = apr_pstrcat(ptemp, instanceHost, nextEntry, NULL);
+            addrs = addrs->next;
+        }
+        strncpy(vhost->instanceID, instanceHost, sizeof(vhost->instanceID));
+        vhost->instanceID[sizeof(vhost->instanceID)-1] = '\0';
+
         if (s->is_virtual)
         {
-            apr_hash_set(cfg->vhost_hash, s->server_hostname, APR_HASH_KEY_STRING, (void *) vhost_element);
+            /* Create the hash table based on the server record address */
+            apr_hash_set(cfg->vhost_hash, s, sizeof(s), (void *) vhost_element);
 
-            apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].name, s->server_hostname, MAX_VIRTUALHOST_NAME_LEN);
+            /* Populate the remainder of the virtual host */
+            apr_cpystrn(vhost->name, s->server_hostname, MAX_VIRTUALHOST_NAME_LEN);
             // TODO: Populate documentRoot, but not obvious in server_rec (it's not s->path)
             //if (s->path)
             //{
-            //    apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].documentRoot, s->path, sizeof(g_vhost_entries->documentRoot));
+            //    apr_cpystrn(vhost->documentRoot, s->path, sizeof(vhost->documentRoot));
             //}
             if (s->server_admin)
             {
-                apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].serverAdmin, s->server_admin, sizeof(cfg->vhost_data->vhosts[0].serverAdmin));
+                apr_cpystrn(vhost->serverAdmin, s->server_admin, sizeof(vhost->serverAdmin));
             }
             if (s->error_fname)
             {
-                apr_cpystrn(cfg->vhost_data->vhosts[vhost_element].logError, s->error_fname, sizeof(cfg->vhost_data->vhosts[0].logError));
+                apr_cpystrn(vhost->logError, s->error_fname, sizeof(vhost->logError));
             }
             // TODO: Populate logCustom, but not obvious in server_rec
             // TODO: Populate logAccess, but not obvious in server_rec
-            cfg->vhost_data->vhosts[vhost_element].port_http = s->port ? s->port : default_port;
+            vhost->port_http = s->port ? s->port : default_port;
             vhost_element--;
         }
 
         s = s->next;
     }
+
+    strncpy(cfg->vhost_data->vhosts[0].instanceID, "_Total", sizeof(cfg->vhost_data->vhosts[0].instanceID));
 
     /* Initialize the memory mapped region for certificate file data */
     cfg->certificate_data->count = certificate_count;
@@ -721,7 +747,7 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
     int http_status = r->status;
 
     /* Find the hash value of the server name */
-    apr_size_t element = (apr_size_t) apr_hash_get(cfg->vhost_hash, serverName, APR_HASH_KEY_STRING);
+    apr_size_t element = (apr_size_t) apr_hash_get(cfg->vhost_hash, r->server, sizeof(r->server));
 
     if ( element < 2 || element >= cfg->vhost_data->count )
     {

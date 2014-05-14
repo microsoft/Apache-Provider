@@ -54,6 +54,7 @@ typedef struct
     char name[MAX_VIRTUALHOST_NAME_LEN];
     char documentRoot[PATH_MAX];
     char serverAdmin[MAX_VIRTUALHOST_NAME_LEN+32];
+    char instanceID[PATH_MAX];          // This length is arbitrary; we really need string optimization!
     char logError[PATH_MAX];
     char logCustom[PATH_MAX];
     char logAccess[PATH_MAX];
