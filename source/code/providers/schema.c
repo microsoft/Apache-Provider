@@ -2265,35 +2265,18 @@ static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHost_IPAddresses_prop =
     NULL,
 };
 
-/* property Apache_HTTPDVirtualHost.HTTPPort */
-static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHost_HTTPPort_prop =
+/* property Apache_HTTPDVirtualHost.Ports */
+static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHost_Ports_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
-    0x00687408, /* code */
-    MI_T("HTTPPort"), /* name */
+    0x00707305, /* code */
+    MI_T("Ports"), /* name */
     NULL, /* qualifiers */
     0, /* numQualifiers */
-    MI_UINT16, /* type */
+    MI_UINT16A, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(Apache_HTTPDVirtualHost, HTTPPort), /* offset */
-    MI_T("Apache_HTTPDVirtualHost"), /* origin */
-    MI_T("Apache_HTTPDVirtualHost"), /* propagator */
-    NULL,
-};
-
-/* property Apache_HTTPDVirtualHost.HTTPSPort */
-static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHost_HTTPSPort_prop =
-{
-    MI_FLAG_PROPERTY, /* flags */
-    0x00687409, /* code */
-    MI_T("HTTPSPort"), /* name */
-    NULL, /* qualifiers */
-    0, /* numQualifiers */
-    MI_UINT16, /* type */
-    NULL, /* className */
-    0, /* subscript */
-    offsetof(Apache_HTTPDVirtualHost, HTTPSPort), /* offset */
+    offsetof(Apache_HTTPDVirtualHost, Ports), /* offset */
     MI_T("Apache_HTTPDVirtualHost"), /* origin */
     MI_T("Apache_HTTPDVirtualHost"), /* propagator */
     NULL,
@@ -2446,8 +2429,7 @@ static MI_PropertyDecl MI_CONST* MI_CONST Apache_HTTPDVirtualHost_props[] =
     &CIM_SoftwareElement_IdentificationCode_prop,
     &CIM_SoftwareElement_LanguageEdition_prop,
     &Apache_HTTPDVirtualHost_IPAddresses_prop,
-    &Apache_HTTPDVirtualHost_HTTPPort_prop,
-    &Apache_HTTPDVirtualHost_HTTPSPort_prop,
+    &Apache_HTTPDVirtualHost_Ports_prop,
     &Apache_HTTPDVirtualHost_ServerName_prop,
     &Apache_HTTPDVirtualHost_ServerAlias_prop,
     &Apache_HTTPDVirtualHost_DocumentRoot_prop,
@@ -2529,18 +2511,18 @@ MI_CONST MI_ClassDecl Apache_HTTPDVirtualHost_rtti =
 **==============================================================================
 */
 
-/* property Apache_HTTPDVirtualHostCertificate.FileName */
-static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHostCertificate_FileName_prop =
+/* property Apache_HTTPDVirtualHostCertificate.ServerName */
+static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHostCertificate_ServerName_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
-    0x00666508, /* code */
-    MI_T("FileName"), /* name */
+    0x0073650A, /* code */
+    MI_T("ServerName"), /* name */
     NULL, /* qualifiers */
     0, /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(Apache_HTTPDVirtualHostCertificate, FileName), /* offset */
+    offsetof(Apache_HTTPDVirtualHostCertificate, ServerName), /* offset */
     MI_T("Apache_HTTPDVirtualHostCertificate"), /* origin */
     MI_T("Apache_HTTPDVirtualHostCertificate"), /* propagator */
     NULL,
@@ -2580,18 +2562,18 @@ static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHostCertificate_DaysUntilExpi
     NULL,
 };
 
-/* property Apache_HTTPDVirtualHostCertificate.ServerName */
-static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHostCertificate_ServerName_prop =
+/* property Apache_HTTPDVirtualHostCertificate.FileName */
+static MI_CONST MI_PropertyDecl Apache_HTTPDVirtualHostCertificate_FileName_prop =
 {
     MI_FLAG_PROPERTY, /* flags */
-    0x0073650A, /* code */
-    MI_T("ServerName"), /* name */
+    0x00666508, /* code */
+    MI_T("FileName"), /* name */
     NULL, /* qualifiers */
     0, /* numQualifiers */
     MI_STRING, /* type */
     NULL, /* className */
     0, /* subscript */
-    offsetof(Apache_HTTPDVirtualHostCertificate, ServerName), /* offset */
+    offsetof(Apache_HTTPDVirtualHostCertificate, FileName), /* offset */
     MI_T("Apache_HTTPDVirtualHostCertificate"), /* origin */
     MI_T("Apache_HTTPDVirtualHostCertificate"), /* propagator */
     NULL,
@@ -2624,10 +2606,10 @@ static MI_PropertyDecl MI_CONST* MI_CONST Apache_HTTPDVirtualHostCertificate_pro
     &CIM_SoftwareElement_CodeSet_prop,
     &CIM_SoftwareElement_IdentificationCode_prop,
     &CIM_SoftwareElement_LanguageEdition_prop,
-    &Apache_HTTPDVirtualHostCertificate_FileName_prop,
+    &Apache_HTTPDVirtualHostCertificate_ServerName_prop,
     &Apache_HTTPDVirtualHostCertificate_ExpirationDate_prop,
     &Apache_HTTPDVirtualHostCertificate_DaysUntilExpiration_prop,
-    &Apache_HTTPDVirtualHostCertificate_ServerName_prop,
+    &Apache_HTTPDVirtualHostCertificate_FileName_prop,
 };
 
 static MI_CONST MI_ProviderFT Apache_HTTPDVirtualHostCertificate_funcs =

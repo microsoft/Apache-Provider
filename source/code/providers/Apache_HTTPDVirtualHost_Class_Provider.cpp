@@ -30,8 +30,6 @@ static void EnumerateOneInstance(Context& context,
 
         inst.ServerName_value(vhosts[item].name);
 
-        inst.HTTPPort_value(vhosts[item].port_http);
-        inst.HTTPSPort_value(vhosts[item].port_https);
         inst.DocumentRoot_value(vhosts[item].documentRoot);
         inst.ServerAdmin_value(vhosts[item].serverAdmin);
         inst.ErrorLog_value(vhosts[item].logError);

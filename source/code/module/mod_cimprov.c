@@ -411,7 +411,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     size_t certificate_element;
     char *text;
     server_rec *s = head;
-    apr_port_t default_port = 0;
 
     /* Walk the list of loaded modules to determine the count */
 
@@ -424,14 +423,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
 
     while (s != NULL)
     {
-        if (default_port == 0 && s->port != 0 && s->is_virtual == 0)
-        {
-            default_port = s->port;
-            text = apr_psprintf(ptemp, "cimprov: *** Default port has been set to %d ***",
-                                default_port);
-            display_error(cfg, text, 0, 0);
-        }
-
         text = apr_psprintf(ptemp, "cimprov: Server Vhost Name=%s, port=%d, is_virtual=%d",
                                   s->server_hostname ? s->server_hostname : "NULL",
                                   s->port, s->is_virtual);
@@ -601,7 +592,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
             }
             // TODO: Populate logCustom, but not obvious in server_rec
             // TODO: Populate logAccess, but not obvious in server_rec
-            vhost->port_http = s->port ? s->port : default_port;
             vhost_element--;
         }
 

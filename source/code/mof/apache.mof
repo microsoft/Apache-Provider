@@ -69,10 +69,7 @@ class Apache_HTTPDVirtualHost : CIM_SoftwareElement {
     string IPAddresses[];
 
     [ Description ( "Listening HTTP Port for the virtual host") ]
-    uint16 HTTPPort;
-        
-    [ Description ( "Listening HTTPS Port for the virtual host") ]
-    uint16 HTTPSPort;
+    uint16 Ports[];
 
     [ Description ( "Hostname and port that identifies the virtual host") ]
     string ServerName;

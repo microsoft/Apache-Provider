@@ -61,8 +61,7 @@ typedef struct _Apache_HTTPDVirtualHost /* extends CIM_SoftwareElement */
     MI_ConstStringField LanguageEdition;
     /* Apache_HTTPDVirtualHost properties */
     MI_ConstStringAField IPAddresses;
-    MI_ConstUint16Field HTTPPort;
-    MI_ConstUint16Field HTTPSPort;
+    MI_ConstUint16AField Ports;
     MI_ConstStringField ServerName;
     MI_ConstStringAField ServerAlias;
     MI_ConstStringField DocumentRoot;
@@ -889,36 +888,44 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_IPAddresses(
         25);
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_HTTPPort(
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_Ports(
     Apache_HTTPDVirtualHost* self,
-    MI_Uint16 x)
+    const MI_Uint16* data,
+    MI_Uint32 size)
 {
-    ((MI_Uint16Field*)&self->HTTPPort)->value = x;
-    ((MI_Uint16Field*)&self->HTTPPort)->exists = 1;
-    return MI_RESULT_OK;
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        26,
+        (MI_Value*)&arr,
+        MI_UINT16A,
+        0);
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_HTTPPort(
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_Ports(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Uint16* data,
+    MI_Uint32 size)
+{
+    MI_Array arr;
+    arr.data = (void*)data;
+    arr.size = size;
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        26,
+        (MI_Value*)&arr,
+        MI_UINT16A,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_Ports(
     Apache_HTTPDVirtualHost* self)
 {
-    memset((void*)&self->HTTPPort, 0, sizeof(self->HTTPPort));
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_HTTPSPort(
-    Apache_HTTPDVirtualHost* self,
-    MI_Uint16 x)
-{
-    ((MI_Uint16Field*)&self->HTTPSPort)->value = x;
-    ((MI_Uint16Field*)&self->HTTPSPort)->exists = 1;
-    return MI_RESULT_OK;
-}
-
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_HTTPSPort(
-    Apache_HTTPDVirtualHost* self)
-{
-    memset((void*)&self->HTTPSPort, 0, sizeof(self->HTTPSPort));
-    return MI_RESULT_OK;
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        26);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerName(
@@ -927,7 +934,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        28,
+        27,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -939,7 +946,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        28,
+        27,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -950,7 +957,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerName(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        28);
+        27);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAlias(
@@ -963,7 +970,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAlias(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        29,
+        28,
         (MI_Value*)&arr,
         MI_STRINGA,
         0);
@@ -979,7 +986,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerAlias(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        29,
+        28,
         (MI_Value*)&arr,
         MI_STRINGA,
         MI_FLAG_BORROW);
@@ -990,7 +997,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerAlias(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        29);
+        28);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_DocumentRoot(
@@ -999,7 +1006,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_DocumentRoot(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        30,
+        29,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1011,7 +1018,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_DocumentRoot(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        30,
+        29,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1022,7 +1029,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_DocumentRoot(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        30);
+        29);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAdmin(
@@ -1031,7 +1038,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAdmin(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        31,
+        30,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1043,7 +1050,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerAdmin(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        31,
+        30,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1054,7 +1061,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerAdmin(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        31);
+        30);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ErrorLog(
@@ -1063,7 +1070,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ErrorLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        32,
+        31,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1075,7 +1082,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ErrorLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        32,
+        31,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1086,7 +1093,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ErrorLog(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        32);
+        31);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_CustomLog(
@@ -1095,7 +1102,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_CustomLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        33,
+        32,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1107,7 +1114,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_CustomLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        33,
+        32,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1118,7 +1125,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_CustomLog(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        33);
+        32);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_AccessLog(
@@ -1127,7 +1134,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_AccessLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        34,
+        33,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1139,7 +1146,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_AccessLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        34,
+        33,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1150,7 +1157,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_AccessLog(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        34);
+        33);
 }
 
 /*
@@ -1320,83 +1327,43 @@ public:
     }
 
     //
-    // Apache_HTTPDVirtualHost_Class.HTTPPort
+    // Apache_HTTPDVirtualHost_Class.Ports
     //
     
-    const Field<Uint16>& HTTPPort() const
+    const Field<Uint16A>& Ports() const
     {
-        const size_t n = offsetof(Self, HTTPPort);
-        return GetField<Uint16>(n);
+        const size_t n = offsetof(Self, Ports);
+        return GetField<Uint16A>(n);
     }
     
-    void HTTPPort(const Field<Uint16>& x)
+    void Ports(const Field<Uint16A>& x)
     {
-        const size_t n = offsetof(Self, HTTPPort);
-        GetField<Uint16>(n) = x;
+        const size_t n = offsetof(Self, Ports);
+        GetField<Uint16A>(n) = x;
     }
     
-    const Uint16& HTTPPort_value() const
+    const Uint16A& Ports_value() const
     {
-        const size_t n = offsetof(Self, HTTPPort);
-        return GetField<Uint16>(n).value;
+        const size_t n = offsetof(Self, Ports);
+        return GetField<Uint16A>(n).value;
     }
     
-    void HTTPPort_value(const Uint16& x)
+    void Ports_value(const Uint16A& x)
     {
-        const size_t n = offsetof(Self, HTTPPort);
-        GetField<Uint16>(n).Set(x);
+        const size_t n = offsetof(Self, Ports);
+        GetField<Uint16A>(n).Set(x);
     }
     
-    bool HTTPPort_exists() const
+    bool Ports_exists() const
     {
-        const size_t n = offsetof(Self, HTTPPort);
-        return GetField<Uint16>(n).exists ? true : false;
+        const size_t n = offsetof(Self, Ports);
+        return GetField<Uint16A>(n).exists ? true : false;
     }
     
-    void HTTPPort_clear()
+    void Ports_clear()
     {
-        const size_t n = offsetof(Self, HTTPPort);
-        GetField<Uint16>(n).Clear();
-    }
-
-    //
-    // Apache_HTTPDVirtualHost_Class.HTTPSPort
-    //
-    
-    const Field<Uint16>& HTTPSPort() const
-    {
-        const size_t n = offsetof(Self, HTTPSPort);
-        return GetField<Uint16>(n);
-    }
-    
-    void HTTPSPort(const Field<Uint16>& x)
-    {
-        const size_t n = offsetof(Self, HTTPSPort);
-        GetField<Uint16>(n) = x;
-    }
-    
-    const Uint16& HTTPSPort_value() const
-    {
-        const size_t n = offsetof(Self, HTTPSPort);
-        return GetField<Uint16>(n).value;
-    }
-    
-    void HTTPSPort_value(const Uint16& x)
-    {
-        const size_t n = offsetof(Self, HTTPSPort);
-        GetField<Uint16>(n).Set(x);
-    }
-    
-    bool HTTPSPort_exists() const
-    {
-        const size_t n = offsetof(Self, HTTPSPort);
-        return GetField<Uint16>(n).exists ? true : false;
-    }
-    
-    void HTTPSPort_clear()
-    {
-        const size_t n = offsetof(Self, HTTPSPort);
-        GetField<Uint16>(n).Clear();
+        const size_t n = offsetof(Self, Ports);
+        GetField<Uint16A>(n).Clear();
     }
 
     //

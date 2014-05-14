@@ -59,14 +59,10 @@ typedef struct
     char logCustom[PATH_MAX];
     char logAccess[PATH_MAX];
 
-    // Need: IPAddresses[], ServerAliases[] in some way to avoid maximum lengths.
+    // Need: IPAddresses[], Ports[], ServerAliases[] in some way to avoid maximum lengths.
     // Perhaps variable length ending in \0\0 like "val1\0val2\0val3\0\0" ?
-    // It needs to fit in the memory segment.  Mulling on this.
-    //
-    // Another option is to impose a maximum length.  Discussing w/Kris.
-
-    apr_uint16_t port_http;
-    apr_uint16_t port_https;
+    // Makes most sense to implement string table, determining lengths up front and then
+    // creating appropriately sized string table for this data.
 
     // Counters are kept as 32-bit values, for APR compatibility. Overflow to be
     // recognized by and compensated by the provider. This works because we are
