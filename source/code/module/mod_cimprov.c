@@ -448,10 +448,10 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         certificate_count++;
     }
 
-        text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
+    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
                         vhost_count);
     display_error(cfg, text, 0, 0);
-        text = apr_psprintf(ptemp, "cimprov: Count of certificates: %d", certificate_count);
+    text = apr_psprintf(ptemp, "cimprov: Count of certificates: %d", certificate_count);
     display_error(cfg, text, 0, 0);
 
     /*
@@ -581,7 +581,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         if (s->is_virtual)
         {
             /* Create the hash table based on the server record address */
-            apr_hash_set(cfg->vhost_hash, s, sizeof(s), (void *) vhost_element);
+            /* Note: It would be nice to use server_rec pointer, but that didn't work properly */
+            apr_hash_set(cfg->vhost_hash, apr_off_t_toa(ptemp, (apr_off_t) s), APR_HASH_KEY_STRING, (void *) vhost_element);
 
             /* Populate the remainder of the virtual host */
             apr_cpystrn(vhost->name, s->server_hostname, MAX_VIRTUALHOST_NAME_LEN);
@@ -747,7 +748,7 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
     int http_status = r->status;
 
     /* Find the hash value of the server name */
-    apr_size_t element = (apr_size_t) apr_hash_get(cfg->vhost_hash, r->server, sizeof(r->server));
+    apr_size_t element = (apr_size_t) apr_hash_get(cfg->vhost_hash, apr_off_t_toa(r->pool, (apr_off_t) r->server), APR_HASH_KEY_STRING);
 
     if ( element < 2 || element >= cfg->vhost_data->count )
     {
