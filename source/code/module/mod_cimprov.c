@@ -86,7 +86,9 @@ typedef struct {
     apr_shm_t *mmap_region;             /* APR's memory mapped region handle */
     mmap_server_data *server_data;      /* Pointer to server data within memory mapped region */
     mmap_vhost_data *vhost_data;        /* Pointer to vhost data within memory mapped region */
-    mmap_certificate_data *certificate_data;    /* Pointer to certificate file data within memory mapped region */
+    mmap_certificate_data *certificate_data; /* Pointer to certificate file data within memory mapped region */
+    mmap_string_table *string_data;     /* Pointer to string table within memory mapped region */
+    char *stable;                       /* Convenience pointer to the strings themselves within region */
     apr_hash_t *vhost_hash;             /* APR hash to virtual hosts in memory mapped region */
 
     apr_global_mutex_t *mutexMapInit;   /* APR handle to Initialization Mutex */
@@ -409,6 +411,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     int certificate_count = 0;          /* Number of certificate information blocks */
     config_sslCertFile* certInfo;       /* Ptr. to information about a certificate file */
     size_t certificate_element;
+    size_t stable_elements = 0;         /* Number of elements in string table */
+    size_t stable_length = 2;           /* Enough space for two null bytes as terminator */
     char *text;
     server_rec *s = head;
 
@@ -452,7 +456,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     apr_status_t status;
     apr_size_t mapSize = sizeof(mmap_server_data) + (sizeof(mmap_server_modules) * module_count)
                        + sizeof(mmap_vhost_data) + (sizeof(mmap_vhost_elements) * vhost_count)
-                       + sizeof(mmap_certificate_data) + (sizeof(mmap_certificate_elements) * certificate_count);
+                       + sizeof(mmap_certificate_data) + (sizeof(mmap_certificate_elements) * certificate_count)
+                       + sizeof(mmap_string_table) + stable_length;
 
     /* Region may already be mapped (due to a crash or something); try removing it just in case */
     /* (If successful, indicates improper shutdown, so log informationally; otherwise ignore error) */
@@ -479,6 +484,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     cfg->server_data = (mmap_server_data*)apr_shm_baseaddr_get(cfg->mmap_region);
     cfg->vhost_data = (mmap_vhost_data*)(cfg->server_data->modules + module_count);
     cfg->certificate_data = (mmap_certificate_data*)(cfg->vhost_data->vhosts + vhost_count);
+    cfg->string_data = (mmap_string_table*) (cfg->certificate_data->certificates + certificate_count);
+    cfg->stable = cfg->string_data->data;
 
     memset(cfg->server_data, 0, mapSize);
 
@@ -621,6 +628,10 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     }
 
     g_certificateFileList = NULL;
+
+    /* Final initialization for string table */
+    cfg->string_data->total_elements = stable_elements;
+    cfg->string_data->total_length = stable_length;
 
     display_error(cfg, "cimprov: mmap_region_create says buh bye", 0, 0);
 

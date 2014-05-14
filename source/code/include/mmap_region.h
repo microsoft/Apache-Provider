@@ -118,6 +118,13 @@ typedef struct
     mmap_certificate_elements certificates[0];  /* Array of mmap_certificate_elements */
 } mmap_certificate_data;
 
+typedef struct
+{
+    apr_size_t total_elements;          /* Number of elements stored in string table */
+    apr_size_t total_length;            /* Total length of the string table */
+    char data[0];                       /* Pointer to beginning of table */
+} mmap_string_table;
+
 #define PROVIDER_MMAP_NAME      "/var/opt/microsoft/apache-cimprov/run/Provider_Region"
 #define MUTEX_INIT_NAME         "/var/opt/microsoft/apache-cimprov/run/mutexInit.lock"
 #define MUTEX_RW_NAME           "/var/opt/microsoft/apache-cimprov/run/mutexRW.lock"

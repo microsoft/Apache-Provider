@@ -56,6 +56,8 @@ public:
     static apr_size_t GetCertificateCount() { return ms_certificate_data->count; }
     static mmap_certificate_elements *GetCertificateElements() { return ms_certificate_data->certificates; }
 
+    static char *GetStrings() { return ms_string_data->data; }
+
     static apr_status_t LockMutex() { return apr_global_mutex_lock(ms_mutexMapRW); }
     static apr_status_t UnlockMutex() { return apr_global_mutex_unlock(ms_mutexMapRW); }
 
@@ -67,6 +69,7 @@ private:
     static mmap_server_data *ms_server_data;
     static mmap_vhost_data *ms_vhost_data;
     static mmap_certificate_data *ms_certificate_data;
+    static mmap_string_table *ms_string_data;
 
     static apr_global_mutex_t *ms_mutexMapRW;
 

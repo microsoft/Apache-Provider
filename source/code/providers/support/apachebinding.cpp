@@ -23,6 +23,7 @@ apr_shm_t *ApacheBinding::ms_mmap_region = NULL;
 mmap_server_data *ApacheBinding::ms_server_data = NULL;
 mmap_vhost_data *ApacheBinding::ms_vhost_data = NULL;
 mmap_certificate_data *ApacheBinding::ms_certificate_data = NULL;
+mmap_string_table *ApacheBinding::ms_string_data = NULL;
 apr_global_mutex_t *ApacheBinding::ms_mutexMapRW = NULL;
 
 DataSampler ApacheBinding::ms_sampler;
@@ -123,6 +124,7 @@ apr_status_t ApacheBinding::Load(const char *text)
         ms_server_data = reinterpret_cast<mmap_server_data*> (apr_shm_baseaddr_get(ms_mmap_region));
         ms_vhost_data = reinterpret_cast<mmap_vhost_data*> (ms_server_data->modules + ms_server_data->moduleCount);
         ms_certificate_data = reinterpret_cast<mmap_certificate_data*> (ms_vhost_data->vhosts + ms_vhost_data->count);
+        ms_string_data = reinterpret_cast<mmap_string_table*> (ms_certificate_data->certificates + ms_certificate_data->count);
 
         /* Launch thread to count time-based statistics */
         DisplayError(0, apr_psprintf(ms_apr_pool, "ApacheBinding::Load (%s): Launching worker thread", text ? text : "Unspecified"));
