@@ -61,7 +61,7 @@ endif
 
 COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
 
-LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1 -laprutil-1
+LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1
 
 SHARED_FLAGS := -shared
 

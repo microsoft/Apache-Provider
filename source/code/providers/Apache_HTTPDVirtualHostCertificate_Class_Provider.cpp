@@ -3,7 +3,6 @@
 
 #include <apr.h>
 #include <apr_strings.h>
-#include <apr_memcache.h>
 #include <apr_errno.h>
 
 #include <string>
@@ -154,6 +153,23 @@ static int GetCertificateExpirationDate(
     return 0;
 }
 
+#if !defined(_WIN32)
+
+static apr_uint32_t QuickHash(const char* str)
+{
+    apr_uint32_t hash = 0x4F3AB917;
+    apr_uint32_t c;
+
+    while ((c = (apr_uint32_t)(unsigned char)*str++) != '\0')
+    {
+        hash *= 37;
+        hash += (c + 19);
+    }
+    return hash;
+}
+
+#endif
+
 MI_BEGIN_NAMESPACE
 
 Apache_HTTPDVirtualHostCertificate_Class_Provider::Apache_HTTPDVirtualHostCertificate_Class_Provider(
@@ -231,7 +247,7 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
 #else
         // For case-sensitive file systems, make the instance ID from the base certificate file name +
         // a hash of the entire path
-        apr_uint32_t hash = apr_memcache_hash_crc32(NULL, certificateFileName, strlen(certificateFileName));
+        apr_uint32_t hash = QuickHash(certificateFileName);
 
         const char* ptr = strrchr(certificateFileName, '/');
 
