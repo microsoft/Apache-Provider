@@ -500,7 +500,7 @@ static apr_status_t collect_vhost_data(
                     string_table_len,
                     "_Total",
                     vhost_data != NULL ? &vhost_data->vhosts[0].hostNameOffset : NULL);
-    if (vhost_Data != NULL)
+    if (vhost_data != NULL)
     {
         /* make instanceID be "_Total" also */
         vhost_data->vhosts[0].instanceIDOffset = vhost_data->vhosts[0].hostNameOffset;
