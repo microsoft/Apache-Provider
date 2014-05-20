@@ -96,7 +96,7 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
         std::vector<mi::String> strArrary;
         for (apr_size_t moduleNum = 0; moduleNum < g_apache.GetModuleCount(); moduleNum++)
         {
-            strArrary.push_back(g_apache.GetServerModules()[moduleNum].moduleName);
+            strArrary.push_back(g_apache.GetDataString(g_apache.GetServerModules()[moduleNum].moduleNameOffset));
         }
         mi::StringA modules(&strArrary[0], g_apache.GetModuleCount());
         inst.InstalledModules_value(modules);

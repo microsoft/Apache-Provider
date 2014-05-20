@@ -170,7 +170,16 @@ int ApacheBinding::Unload(const char *text)
     return APR_SUCCESS;
 }
 
-// Only construct class once - no need to load shared memory multime times
+const char* ApacheBinding::GetDataString(apr_size_t offset)
+{
+    if (offset == 0 || (apr_size_t)offset >= ms_string_data->total_length)
+    {
+        return "";
+    }
+    return ms_string_data->data + offset;
+}
+
+// Only construct class once - no need to load shared memory multiple times
 ApacheBinding g_apache;
 
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/

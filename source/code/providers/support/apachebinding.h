@@ -41,8 +41,10 @@ public:
     static apr_status_t Load(const char *text);
     static apr_status_t Unload(const char *text);
 
-    static const char *GetServerConfigFile() { return ms_server_data->configFile; }
-    static const char *GetServerProcessName() { return ms_server_data->processName; }
+    static const char* GetDataString(apr_size_t offset);
+
+    static const char *GetServerConfigFile() { return GetDataString(ms_server_data->configFileOffset); }
+    static const char *GetServerProcessName() { return GetDataString(ms_server_data->processNameOffset); }
     static int GetOperatingStatus() { return ms_server_data->operatingStatus; }
     static apr_size_t GetModuleCount() { return ms_server_data->moduleCount; }
     static mmap_server_modules *GetServerModules() { return ms_server_data->modules; }
@@ -55,8 +57,6 @@ public:
 
     static apr_size_t GetCertificateCount() { return ms_certificate_data->count; }
     static mmap_certificate_elements *GetCertificateElements() { return ms_certificate_data->certificates; }
-
-    static char *GetStrings() { return ms_string_data->data; }
 
     static apr_status_t LockMutex() { return apr_global_mutex_lock(ms_mutexMapRW); }
     static apr_status_t UnlockMutex() { return apr_global_mutex_unlock(ms_mutexMapRW); }

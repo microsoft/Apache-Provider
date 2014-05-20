@@ -222,18 +222,22 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
     for (i = 0; i < g_apache.GetCertificateCount(); i++)
     {
         Apache_HTTPDVirtualHostCertificate_Class inst;
+        const char* certificateFileName = g_apache.GetDataString(certs[i].certificateFileNameOffset);
 
-        // Create the instance ID from the name of the certificate file
 #if defined(_WIN32)
-        inst.InstanceID_value(certs[i].certificateFile);    // since Windows is case-insensitive, just use the file name
+        // Since Windows file names are case-insensitive, just use the certificate file name
+        // as the instance ID
+        inst.InstanceID_value(certificateFileName);
 #else
-        // For case-sensitive file systems, make an ID from the base file name + a hash of the entire path
-        apr_uint32_t hash = apr_memcache_hash_crc32(NULL, certs[i].certificateFile, strlen(certs[i].certificateFile));
-        char* ptr = strrchr(certs[i].certificateFile, '/');
+        // For case-sensitive file systems, make the instance ID from the base certificate file name +
+        // a hash of the entire path
+        apr_uint32_t hash = apr_memcache_hash_crc32(NULL, certificateFileName, strlen(certificateFileName));
+
+        const char* ptr = strrchr(certificateFileName, '/');
 
         if (ptr == NULL)
         {
-            ptr = certs[i].certificateFile;
+            ptr = certificateFileName;
         }
         else
         {
@@ -253,20 +257,23 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
             std::vector<mi::Datetime> certificateExpirationCimTimesArray;
             std::vector<mi::Uint16> certificateDaysUntilExpirationArray;
 
-            // Insert the host:port name for the first host
-            const char* hostStr = apr_psprintf(pool.Get(), "%s:%d", certs[i].hostName, certs[i].port);
+            // Insert the host:port name for the first host that uses this certificate file
+            const char* hostStr = apr_psprintf(pool.Get(),
+                                               "%s:%d",
+                                               g_apache.GetDataString(certs[i].hostNameOffset),
+                                               certs[i].port);
             inst.ServerName_value(hostStr);
 
             // Insert the certificate file dates
             timeNow = apr_time_now();
 
             // See if the file is newer that the stored dates
-            status = apr_stat(&fileInfo, certs[i].certificateFile, APR_FINFO_MTIME, pool.Get());
+            status = apr_stat(&fileInfo, certificateFileName, APR_FINFO_MTIME, pool.Get());
             if (status != APR_SUCCESS || fileInfo.mtime != certs[i].certificateFileMtime)
             {
                 // Get an updated copy of the certificate date information
                 certs[i].certificateFileMtime = fileInfo.mtime;
-                if (GetCertificateExpirationDate(certs[i].certificateFile,
+                if (GetCertificateExpirationDate(certificateFileName,
                                                  pool.Get(),
                                                  certs[i].certificateExpirationCimTime,
                                                  &certs[i].certificateExpirationAprTime) < 0)
@@ -281,7 +288,7 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
             mi::Uint16 certificateDaysUntilExpiration((unsigned short)((certs[i].certificateExpirationAprTime - timeNow) /
                                                                        ((apr_int64_t)1000000 * 60 * 60 * 24)));
 
-            inst.FileName_value(certs[i].certificateFile);
+            inst.FileName_value(certificateFileName);
             inst.ExpirationDate_value(certificateExpirationCimTime);
             inst.DaysUntilExpiration_value(certificateDaysUntilExpiration);
         }

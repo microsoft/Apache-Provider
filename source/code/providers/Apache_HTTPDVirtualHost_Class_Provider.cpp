@@ -22,19 +22,19 @@ static void EnumerateOneInstance(Context& context,
     mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
 
     // Insert the key into the instance
-    inst.InstanceID_value(vhosts[item].instanceID);
+    inst.InstanceID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
 
     if (! keysOnly)
     {
         // Insert the values into the instance
 
-        inst.ServerName_value(vhosts[item].name);
+        inst.ServerName_value(g_apache.GetDataString(vhosts[item].hostNameOffset));
 
-        inst.DocumentRoot_value(vhosts[item].documentRoot);
-        inst.ServerAdmin_value(vhosts[item].serverAdmin);
-        inst.ErrorLog_value(vhosts[item].logError);
-        inst.CustomLog_value(vhosts[item].logCustom);
-        inst.AccessLog_value(vhosts[item].logAccess);
+        inst.DocumentRoot_value(g_apache.GetDataString(vhosts[item].documentRootOffset));
+        inst.ServerAdmin_value(g_apache.GetDataString(vhosts[item].serverAdminOffset));
+        inst.ErrorLog_value(g_apache.GetDataString(vhosts[item].logErrorOffset));
+        inst.CustomLog_value(g_apache.GetDataString(vhosts[item].logCustomOffset));
+        inst.AccessLog_value(g_apache.GetDataString(vhosts[item].logAccessOffset));
     }
 
     context.Post(inst);

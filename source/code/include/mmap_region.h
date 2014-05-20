@@ -1,4 +1,3 @@
-
 #ifndef MMAP_REGION_H
 #define MMAP_REGION_H
 
@@ -24,13 +23,13 @@
 
 typedef struct
 {
-    char moduleName[NAME_MAX+1];
+    apr_size_t moduleNameOffset;
 } mmap_server_modules;
 
 typedef struct
 {
-    char configFile[PATH_MAX];          // Apache configuration file name
-    char processName[NAME_MAX+1];       // Process name
+    apr_size_t configFileOffset;        // Apache configuration file name
+    apr_size_t processNameOffset;       // Process name
     int operatingStatus;                // Operating status
 
     apr_uint32_t idleApacheWorkers;     // Number of workers that are currently idle (from Apache)
@@ -51,13 +50,13 @@ typedef struct
 
 typedef struct
 {
-    char name[MAX_VIRTUALHOST_NAME_LEN];
-    char documentRoot[PATH_MAX];
-    char serverAdmin[MAX_VIRTUALHOST_NAME_LEN+32];
-    char instanceID[PATH_MAX];          // This length is arbitrary; we really need string optimization!
-    char logError[PATH_MAX];
-    char logCustom[PATH_MAX];
-    char logAccess[PATH_MAX];
+    apr_size_t hostNameOffset;
+    apr_size_t documentRootOffset;
+    apr_size_t serverAdminOffset;
+    apr_size_t instanceIDOffset;
+    apr_size_t logErrorOffset;
+    apr_size_t logCustomOffset;
+    apr_size_t logAccessOffset;
 
     // Need: IPAddresses[], Ports[], ServerAliases[] in some way to avoid maximum lengths.
     // Perhaps variable length ending in \0\0 like "val1\0val2\0val3\0\0" ?
@@ -104,8 +103,8 @@ typedef struct
 typedef struct
 {
     /* SSL certificate information */
-    char certificateFile[PATH_MAX];             /* name of file containing certificate */
-    char hostName[MAX_VIRTUALHOST_NAME_LEN];    /* name of first host that uses this certificate */
+    apr_size_t certificateFileNameOffset;       /* name of file containing certificate */
+    apr_size_t hostNameOffset;                  /* name of first host that uses this certificate */
     apr_uint16_t port;                          /* port of first host that uses this certificate */
     char certificateExpirationCimTime[32];      /* expiration time in CIM format; filled in by provider */
     apr_time_t certificateExpirationAprTime;    /* expiration time in APR format; filled in by provider */
@@ -120,7 +119,6 @@ typedef struct
 
 typedef struct
 {
-    apr_size_t total_elements;          /* Number of elements stored in string table */
     apr_size_t total_length;            /* Total length of the string table */
     char data[0];                       /* Pointer to beginning of table */
 } mmap_string_table;

@@ -404,56 +404,367 @@ static apr_status_t mmap_region_cleanup(void *configuration)
     return APR_SUCCESS;
 }
 
+/* Add a string to the shared memory string table */
+
+static void add_data_string(
+    char* const string_table,
+    apr_size_t* pos,
+    const char* string,
+    apr_size_t* offset)
+{
+    size_t len = strlen(string) + 1;
+
+    if (len > PATH_MAX)
+    {
+        len = PATH_MAX;
+    }
+    if (string_table != NULL)
+    {
+        apr_cpystrn(string_table + *pos, string, len);
+    }
+
+    if (offset != NULL)
+    {
+        *offset = (apr_size_t)*pos;
+    }
+
+    *pos += len;
+    return;
+}
+
+/* Get the data for the server */
+static apr_status_t collect_server_data(
+    mmap_server_data* server_data,
+    char* const string_table,
+    apr_size_t* string_table_len,
+    module* top_module,
+    apr_size_t module_count,
+    const char* config_file,
+    const char* process_name,
+    int operating_status)
+{
+    apr_size_t index;
+    module* modp;
+
+    if (server_data != NULL)
+    {
+        server_data->moduleCount = module_count;
+        server_data->operatingStatus = operating_status;
+    }
+    add_data_string(string_table,
+               string_table_len,
+               config_file,
+               server_data != NULL ? &server_data->configFileOffset : NULL);
+
+    /* Add each of the loaded modules */
+    index = 0;
+    for (modp = top_module; modp != NULL; modp = modp->next)
+    {
+        if (index >= module_count)
+        {
+            return APR_EMISMATCH;
+        }
+        add_data_string(string_table,
+                   string_table_len,
+                   modp->name,
+                   server_data != NULL ? &server_data->modules[index].moduleNameOffset : NULL);
+        index++;
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t collect_vhost_data(
+    mmap_vhost_data* vhost_data,
+    char* const string_table,
+    apr_size_t* string_table_len,
+    apr_pool_t* ptemp,
+    apr_hash_t* vhost_hash,             /* APR hash to virtual hosts in memory mapped region */
+    const server_rec* head,
+    apr_size_t vhost_count)
+{
+    const server_rec* srec;
+    apr_size_t vhost_element;
+
+    if (vhost_data != NULL)
+    {
+        vhost_data->count = vhost_count;
+    }
+
+    /*
+     * VirtualHost [0] reserved for _Total
+     * VirtualHost [1] reserved for _Default
+     */
+
+    add_data_string(string_table,
+                    string_table_len,
+                    "_Total",
+                    vhost_data != NULL ? &vhost_data->vhosts[0].hostNameOffset : NULL);
+    if (vhost_Data != NULL)
+    {
+        /* make instanceID be "_Total" also */
+        vhost_data->vhosts[0].instanceIDOffset = vhost_data->vhosts[0].hostNameOffset;
+    }
+
+    add_data_string(string_table,
+                    string_table_len,
+                    "_Default",
+                    vhost_data != NULL ? &vhost_data->vhosts[1].hostNameOffset : NULL);
+
+    vhost_element = 1;
+    for (srec = head; srec != NULL; srec = srec->next)
+    {
+        apr_size_t vhost_target_element;
+        char* instanceHost;
+        server_addr_rec* addrs;
+
+        /* Set up virtual host map in reverse order since that's how server_rec comes to us */
+        if (srec->is_virtual)
+        {
+            vhost_target_element = vhost_count - vhost_element + 1;
+        }
+        else
+        {
+            vhost_target_element = 1;
+        }
+
+        /* Create the InstanceID for uniquely tracking this virtual host */
+
+        instanceHost = apr_pstrdup(ptemp, srec->server_hostname != NULL ? srec->server_hostname : "_default_");
+        for (addrs = srec->addrs; addrs != NULL; addrs = addrs->next)
+        {
+            char *nextEntry = apr_psprintf(ptemp,
+                                           ",%s:%d",
+                                           addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
+                                           (unsigned int)addrs->host_addr->port);
+            instanceHost = apr_pstrcat(ptemp, instanceHost, nextEntry, NULL);
+        }
+        add_data_string(string_table,
+                        string_table_len,
+                        instanceHost,
+                        vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].instanceIDOffset : NULL);
+
+        if (srec->is_virtual)
+        {
+            /* Create the hash table based on the server record address */
+            /* Note: It would be nice to use server_rec pointer, but that didn't work properly */
+            if (vhost_data != NULL)
+            {
+                apr_hash_set(vhost_hash, apr_off_t_toa(ptemp, (apr_off_t)srec), APR_HASH_KEY_STRING, (void*)vhost_target_element);
+            }
+
+            /* Populate the remainder of the virtual host */
+
+            add_data_string(string_table,
+                            string_table_len,
+                            srec->server_hostname,
+                            vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].hostNameOffset : NULL);
+
+            // TODO: Populate documentRoot, but not obvious in server_rec (it's not srec->path)
+            //if (srec->path != NULL)
+            //{
+            //    add_data_string(string_table,
+            //                    string_table_len,
+            //                    srec->path,
+            //                    vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].documentRootOffset : NULL);
+            //}
+
+            if (srec->server_admin != NULL)
+            {
+                add_data_string(string_table,
+                                string_table_len,
+                                srec->server_admin,
+                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].serverAdminOffset : NULL);
+            }
+
+            if (srec->error_fname != NULL)
+            {
+                add_data_string(string_table,
+                                string_table_len,
+                                srec->error_fname,
+                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].logErrorOffset : NULL);
+            }
+
+            // TODO: Populate logCustom, but not obvious in server_rec
+            // TODO: Populate logAccess, but not obvious in server_rec
+        }
+        vhost_element++;
+    }
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t collect_certificate_data(
+    mmap_certificate_data* certificate_data,
+    char* const string_table,
+    apr_size_t* string_table_len,
+    config_sslCertFile* head,
+    apr_size_t certificate_count)
+{
+    apr_size_t certificate_element;
+    config_sslCertFile* cert_file_info;
+
+    if (certificate_data != NULL)
+    {
+        certificate_data->count = certificate_count;
+    }
+
+    certificate_element = certificate_count - 1;
+    for (cert_file_info = head; cert_file_info != NULL; cert_file_info = cert_file_info->next)
+    {
+        /* save first host and port that use this certificate file */
+        add_data_string(string_table,
+                   string_table_len,
+                   cert_file_info->certificateFileName,
+                   certificate_data != NULL ? &certificate_data->certificates[certificate_element].certificateFileNameOffset : NULL);
+        add_data_string(string_table,
+                   string_table_len,
+                   cert_file_info->hostName,
+                   certificate_data != NULL ? &certificate_data->certificates[certificate_element].hostNameOffset : NULL);
+        if (certificate_data != NULL)
+        {
+            apr_pool_t* pool = cert_file_info->pool;
+
+            certificate_data->certificates[certificate_element].port = cert_file_info->port;
+
+            /* if the second pass, delete this item and its containing pool after saving its data */
+            apr_pool_destroy(pool);
+        }
+        certificate_element--;
+    }
+    return APR_SUCCESS;
+}
+
 static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
-    int module_count = 0;               /* Number of modules loaded into server */
-    int vhost_count = 2;                /* Save space for _Total and _Default */
-    int certificate_count = 0;          /* Number of certificate information blocks */
-    config_sslCertFile* certInfo;       /* Ptr. to information about a certificate file */
-    size_t certificate_element;
-    size_t stable_elements = 0;         /* Number of elements in string table */
-    size_t stable_length = 2;           /* Enough space for two null bytes as terminator */
-    char *text;
-    server_rec *s = head;
+    apr_size_t module_count;            /* Number of modules loaded into server */
+    apr_size_t vhost_count;             /* Save space for _Total and _Default */
+    apr_size_t certificate_count;       /* Number of certificate information blocks */
+	apr_status_t status;
+    config_sslCertFile* cert_file_info; /* Ptr. to information about a certificate file */
+    size_t stable_length;               /* Enough space for two null bytes as terminator */
+    char* text;
+    char* process_name;
+    server_rec* srec;
+    module *modp;
 
     /* Walk the list of loaded modules to determine the count */
 
-    module *modp = NULL;
-    for (modp = ap_top_module; modp; modp = modp->next) {
+    module_count = 0;
+    for (modp = ap_top_module; modp != NULL; modp = modp->next) {
         module_count++;
     }
 
     /* Walk the list of server_rec structures to determine the count of virtual hosts */
 
-    while (s != NULL)
+    vhost_count = 2;
+    for (srec = head; srec != NULL; srec = srec->next)
     {
         text = apr_psprintf(ptemp, "cimprov: Server Vhost Name=%s, port=%d, is_virtual=%d",
-                                  s->server_hostname ? s->server_hostname : "NULL",
-                                  s->port, s->is_virtual);
+                                   srec->server_hostname ? srec->server_hostname : "NULL",
+                                   srec->port, srec->is_virtual);
         display_error(cfg, text, 0, 0);
 
-        if (s->is_virtual && s->server_hostname != NULL)
+        if (srec->is_virtual && srec->server_hostname != NULL)
             vhost_count++;
-
-        s = s->next;
     }
 
-    for (certInfo = g_certificateFileList; certInfo != NULL; certInfo = certInfo->next)
+    /* Walk the list of certificate files to determine the count */
+
+    certificate_count = 0;
+    for (cert_file_info = g_certificateFileList; cert_file_info != NULL; cert_file_info = cert_file_info->next)
     {
         certificate_count++;
     }
 
-    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %d (including _Default & _Total)",
-                        vhost_count);
+    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %u (including _Default & _Total)",
+                        (unsigned int)vhost_count);
     display_error(cfg, text, 0, 0);
-    text = apr_psprintf(ptemp, "cimprov: Count of certificates: %d", certificate_count);
+    text = apr_psprintf(ptemp, "cimprov: Count of certificates: %u", (unsigned int)certificate_count);
     display_error(cfg, text, 0, 0);
+
+    /* Find the process name
+     *
+     * Process name is the second part of configuration filename:
+     *   If configuration file is: /etc/httpd/conf/httpd.conf, we pick: httpd
+     *   If configuration file is: /etc/apache2/apache2.conf, we pick: apache2
+     *   If configuration file is: /etc/apache2/httpd.conf, we pick: apache2
+     * So just pick the second directory in the configuration filename.
+     *
+     *   If the configuration file begins with "/usr/local", treat the "/usr/local"
+     *   just like the "/etc", above.
+     *
+     * Note: If config filename isn't one of those, keep blank (unknown installation)
+     */
+
+    {
+        char *tok_last;
+        char *processName = apr_pstrdup(ptemp, ap_conftree->filename);
+        char *token = apr_strtok(processName, "/", &tok_last);
+
+        process_name = "";
+        if (token != NULL)
+        {
+            /* Skip /usr/local for install by source compiles */
+            if (0 == apr_strnatcasecmp(token, "local"))
+            {
+                token = apr_strtok(NULL, "/", &tok_last);
+            }
+            if (0 == apr_strnatcasecmp(token, "apache2") || 0 == apr_strnatcasecmp(token, "httpd"))
+            {
+                process_name = token;
+            }
+        }
+    }
+
+    /*
+     * Compute the size of the string table
+     */
+
+    stable_length = 1;                  /* reserve space for a single empty string at the beginning of the string table */
+
+    status = collect_server_data(NULL,
+                                 NULL,
+                                 &stable_length,
+                                 ap_top_module,
+                                 module_count,
+                                 ap_conftree->filename,
+                                 process_name,
+                                 2);
+    if (status != APR_SUCCESS)
+    {
+        display_error(cfg, "cimprov: collection of server data failed", status, 0);
+        return status;
+    }
+
+    status = collect_vhost_data(NULL,
+                                NULL,
+                                &stable_length,
+                                ptemp,
+                                NULL,
+                                head,
+                                vhost_count);
+    if (status != APR_SUCCESS)
+    {
+        display_error(cfg, "cimprov: collection of virtual host data failed", status, 0);
+        return status;
+    }
+
+    status = collect_certificate_data(NULL,
+                                      NULL,
+                                      &stable_length,
+                                      g_certificateFileList,
+                                      certificate_count);
+    if (status != APR_SUCCESS)
+    {
+        display_error(cfg, "cimprov: collection of certificate data failed", status, 0);
+        return status;
+    }
 
     /*
      * Create the memory mapped region
      */
 
-    apr_status_t status;
     apr_size_t mapSize = sizeof(mmap_server_data) + (sizeof(mmap_server_modules) * module_count)
                        + sizeof(mmap_vhost_data) + (sizeof(mmap_vhost_elements) * vhost_count)
                        + sizeof(mmap_certificate_data) + (sizeof(mmap_certificate_elements) * certificate_count)
@@ -478,164 +789,73 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         return status;
     }
 
-    cfg->vhost_hash = apr_hash_make(pool);
+    /*
+     * Populate memory map.
+     */
 
     /* Assign global pointers */
     cfg->server_data = (mmap_server_data*)apr_shm_baseaddr_get(cfg->mmap_region);
     cfg->vhost_data = (mmap_vhost_data*)(cfg->server_data->modules + module_count);
     cfg->certificate_data = (mmap_certificate_data*)(cfg->vhost_data->vhosts + vhost_count);
-    cfg->string_data = (mmap_string_table*) (cfg->certificate_data->certificates + certificate_count);
-    cfg->stable = cfg->string_data->data;
-
+    cfg->string_data = (mmap_string_table*)(cfg->certificate_data->certificates + certificate_count);
     memset(cfg->server_data, 0, mapSize);
 
-    /*
-     * Initialize the memory mapped region for server data
-     *
-     * Process name is the second part of configuration filename:
-     *   If configuration file is: /etc/httpd/conf/httpd.conf, we pick: httpd
-     *   If configuration file is: /etc/apache2/apache2.conf, we pick: apache2
-     *   If configuration file is: /etc/apache2/httpd.conf, we pick: apache2
-     * So just pick the second directory in the configuration filename.
-     *
-     *   If the configuration file begins with "/usr/local", treat the "/usr/local"
-     *   just like the "/etc", above.
-     *
-     * Note: If config filename isn't one of those, keep blank (unknown installation)
-     */
+    /* Assign some other values */
+    cfg->vhost_hash = apr_hash_make(pool);
+    cfg->stable = cfg->string_data->data;
+    *cfg->stable = '\0';                /* reserve a single empty string at the beginning of the string table */
+    stable_length = 1;                  /* so that zero offsets result in empty strings */
 
-    cfg->server_data->moduleCount = module_count;
-    apr_cpystrn(cfg->server_data->configFile, ap_conftree->filename, sizeof(cfg->server_data->configFile));
-
-    char *tok_last;
-    char *processName = apr_pstrdup(ptemp, ap_conftree->filename);
-    char *token = apr_strtok(processName, "/", &tok_last);
-
-    /* Skip /usr/local for install by source compiles */
-    if (0 == apr_strnatcasecmp(token, "local"))
+    /* Initialize the memory mapped region for server data */
+    status = collect_server_data(cfg->server_data,
+                                 cfg->stable,
+                                 &stable_length,
+                                 ap_top_module,
+                                 module_count,
+                                 ap_conftree->filename,
+                                 process_name,
+                                 2);
+    if (status != APR_SUCCESS)
     {
-        token = apr_strtok(NULL, "/", &tok_last);
-    }
-
-    if (0 == apr_strnatcasecmp(token, "apache2") || 0 == apr_strnatcasecmp(token, "httpd"))
-    {
-        apr_cpystrn(cfg->server_data->processName, token, sizeof(cfg->server_data->processName));
-    }
-
-    cfg->server_data->operatingStatus = 2 /* From MOF file: OPERATING_STATUS_OK */;
-
-    /* Add each of the loaded modules */
-
-    int index = 0;
-    for (modp = ap_top_module; modp; modp = modp->next) {
-        if (index >= module_count)
-        {
-            status = APR_EMISMATCH;
-            display_error(cfg, "cimprov: mmap_region_create failed to allocate module storage properly", status, 0);
-            return status;
-        }
-
-        apr_cpystrn(cfg->server_data->modules[index++].moduleName, modp->name, sizeof(cfg->server_data->modules[0].moduleName));
+        display_error(cfg, "cimprov: collection of server data failed", status, 0);
+        return status;
     }
 
     /* Initialize the memory mapped region for virtual host data */
 
-    cfg->vhost_data->count = vhost_count;
-
-    /*
-     * VirtualHost [0] reserved for _Total
-     * VirtualHost [1] reserved for _Default
-     */
-
-    apr_cpystrn(cfg->vhost_data->vhosts[0].name, "_Total", MAX_VIRTUALHOST_NAME_LEN);
-    apr_cpystrn(cfg->vhost_data->vhosts[1].name, "_Default", MAX_VIRTUALHOST_NAME_LEN);
-
-    /* Set up virtual host map in reverse order since that's how server_rc comes to us */
-
-    apr_size_t vhost_element = vhost_count - 1; /* Since count is 1-based, reference the last element */
-    s = head;
-    while (s != NULL)
+    status = collect_vhost_data(cfg->vhost_data,
+                                cfg->stable,
+                                &stable_length,
+                                ptemp,
+                                cfg->vhost_hash,
+                                head,
+                                vhost_count);
+    if (status != APR_SUCCESS)
     {
-        mmap_vhost_elements *vhost;
-        vhost = s->is_virtual ? &cfg->vhost_data->vhosts[vhost_element] : &cfg->vhost_data->vhosts[1];
-
-        /* Create the InstanceID for uniquely tracking this virtual host */
-
-        char *instanceHost = apr_pstrdup(ptemp, s->server_hostname ? s->server_hostname : "_default_");
-
-        server_addr_rec* addrs = s->addrs;
-        while (addrs != NULL)
-        {
-            char *nextEntry = apr_psprintf(ptemp, 
-                                           ",%s:%d",
-                                           addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
-                                           (unsigned int) addrs->host_addr->port);
-            instanceHost = apr_pstrcat(ptemp, instanceHost, nextEntry, NULL);
-            addrs = addrs->next;
-        }
-        strncpy(vhost->instanceID, instanceHost, sizeof(vhost->instanceID));
-        vhost->instanceID[sizeof(vhost->instanceID)-1] = '\0';
-
-        if (s->is_virtual)
-        {
-            /* Create the hash table based on the server record address */
-            /* Note: It would be nice to use server_rec pointer, but that didn't work properly */
-            apr_hash_set(cfg->vhost_hash, apr_off_t_toa(ptemp, (apr_off_t) s), APR_HASH_KEY_STRING, (void *) vhost_element);
-
-            /* Populate the remainder of the virtual host */
-            apr_cpystrn(vhost->name, s->server_hostname, MAX_VIRTUALHOST_NAME_LEN);
-            // TODO: Populate documentRoot, but not obvious in server_rec (it's not s->path)
-            //if (s->path)
-            //{
-            //    apr_cpystrn(vhost->documentRoot, s->path, sizeof(vhost->documentRoot));
-            //}
-            if (s->server_admin)
-            {
-                apr_cpystrn(vhost->serverAdmin, s->server_admin, sizeof(vhost->serverAdmin));
-            }
-            if (s->error_fname)
-            {
-                apr_cpystrn(vhost->logError, s->error_fname, sizeof(vhost->logError));
-            }
-            // TODO: Populate logCustom, but not obvious in server_rec
-            // TODO: Populate logAccess, but not obvious in server_rec
-            vhost_element--;
-        }
-
-        s = s->next;
+        display_error(cfg, "cimprov: collection of virtual host data failed", status, 0);
+        return status;
     }
-
-    strncpy(cfg->vhost_data->vhosts[0].instanceID, "_Total", sizeof(cfg->vhost_data->vhosts[0].instanceID));
 
     /* Initialize the memory mapped region for certificate file data */
-    cfg->certificate_data->count = certificate_count;
-    certificate_element = certificate_count - 1;
-    for (certInfo = g_certificateFileList; certInfo != NULL; certInfo = certInfo->next)
+
+    status = collect_certificate_data(cfg->certificate_data,
+                                      cfg->stable,
+                                      &stable_length,
+                                      g_certificateFileList,
+                                      certificate_count);
+    if (status != APR_SUCCESS)
     {
-        apr_pool_t* pool;
-
-        /* save first host and port that use this certificate file */
-        apr_cpystrn(cfg->certificate_data->certificates[certificate_element].certificateFile,
-                    certInfo->certificateFileName, MAX_VIRTUALHOST_NAME_LEN);
-        apr_cpystrn(cfg->certificate_data->certificates[certificate_element].hostName,
-                    certInfo->hostName, MAX_VIRTUALHOST_NAME_LEN);
-        cfg->certificate_data->certificates[certificate_element].port = certInfo->port;
-
-        /* delete this item and its containing pool after saving its data */
-        pool = certInfo->pool;
-        apr_pool_destroy(pool);
-        certificate_element--;
+        display_error(cfg, "cimprov: collection of certificate data failed", status, 0);
+        return status;
     }
 
-    g_certificateFileList = NULL;
-
     /* Final initialization for string table */
-    cfg->string_data->total_elements = stable_elements;
+
     cfg->string_data->total_length = stable_length;
 
     display_error(cfg, "cimprov: mmap_region_create says buh bye", 0, 0);
 
-    // Register a cleanup handler
+    /* Register a cleanup handler */
     apr_pool_cleanup_register(pool, cfg, mmap_region_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;

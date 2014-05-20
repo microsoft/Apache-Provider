@@ -17,13 +17,13 @@ static void EnumerateOneInstance(Context& context,
     mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
 
     // Insert the key into the instance
-    inst.InstanceID_value(vhosts[item].instanceID);
+    inst.InstanceID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
 
     if (! keysOnly)
     {
         // Insert the values into the instance
 
-        inst.ServerName_value(vhosts[item].name);
+        inst.ServerName_value(g_apache.GetDataString(vhosts[item].hostNameOffset));
         inst.RequestsTotal_value(vhosts[item].requestsTotal);
         inst.RequestsTotalBytes_value(vhosts[item].requestsBytes);
         inst.ErrorCount400_value(vhosts[item].errorCount400);
