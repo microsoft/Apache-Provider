@@ -2,6 +2,9 @@
 #include <MI.h>
 #include "Apache_HTTPDVirtualHost_Class_Provider.h"
 
+#include <string>
+#include <vector>
+
 // Apache Portable Runtime definitions
 #include "apr.h"
 #include "apr_errno.h"
@@ -11,6 +14,13 @@
 // Virtual host memory mapped file definitions
 #include "apachebinding.h"
 
+// Convert a string encoded in this project's base-64 encoding into a 16-bit integer
+static apr_uint16_t decode64(const char* str)
+{
+    return (((apr_uint16_t)(unsigned char)*str       - 0x0030) << 12) |
+           (((apr_uint16_t)(unsigned char)*(str + 1) - 0x0030) <<  6) |
+            ((apr_uint16_t)(unsigned char)*(str + 2) - 0x0030);
+}
 
 MI_BEGIN_NAMESPACE
 
@@ -26,6 +36,21 @@ static void EnumerateOneInstance(Context& context,
 
     if (! keysOnly)
     {
+        // Get the IP addresses and ports from the array of (IP address, port) items
+        // corresponding to this host
+
+        std::vector<mi::String> ipAddressesArray;
+        std::vector<mi::Uint16> portsArray;
+
+        const char* ptr = g_apache.GetDataString(vhosts[item].addressesAndPortsOffsets);
+        while (*ptr != '\0')
+        {
+            ipAddressesArray.push_back(ptr);
+            ptr += strlen(ptr) + 1;
+            portsArray.push_back(decode64(ptr));
+            ptr += strlen(ptr) + 1;
+        }
+
         // Insert the values into the instance
 
         inst.ServerName_value(g_apache.GetDataString(vhosts[item].hostNameOffset));
@@ -35,6 +60,10 @@ static void EnumerateOneInstance(Context& context,
         inst.ErrorLog_value(g_apache.GetDataString(vhosts[item].logErrorOffset));
         inst.CustomLog_value(g_apache.GetDataString(vhosts[item].logCustomOffset));
         inst.AccessLog_value(g_apache.GetDataString(vhosts[item].logAccessOffset));
+        mi::StringA ipAddressesA(&ipAddressesArray[0], (MI_Uint32)ipAddressesArray.size());
+        inst.IPAddresses_value(ipAddressesA);
+        mi::Uint16A portsA(&portsArray[0], (MI_Uint32)portsArray.size());
+        inst.Ports_value(portsA);
     }
 
     context.Post(inst);

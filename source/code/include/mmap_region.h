@@ -58,10 +58,8 @@ typedef struct
     apr_size_t logCustomOffset;
     apr_size_t logAccessOffset;
 
-    // Need: IPAddresses[], Ports[], ServerAliases[] in some way to avoid maximum lengths.
-    // Perhaps variable length ending in \0\0 like "val1\0val2\0val3\0\0" ?
-    // Makes most sense to implement string table, determining lengths up front and then
-    // creating appropriately sized string table for this data.
+    apr_size_t addressesAndPortsOffsets;
+    // Note: need ServerAliases[]
 
     // Counters are kept as 32-bit values, for APR compatibility. Overflow to be
     // recognized by and compensated by the provider. This works because we are

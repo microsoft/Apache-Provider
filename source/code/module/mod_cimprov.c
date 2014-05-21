@@ -404,6 +404,21 @@ static apr_status_t mmap_region_cleanup(void *configuration)
     return APR_SUCCESS;
 }
 
+/* A simple base-64 encoding of a 2-byte integer into 3 printable characters.
+ * This is not the base-64 encoding used in MIME, because MIME uses a table of
+ * legal output characters to avoid most punctuation; that is not needed here.
+ */
+
+static char s_encode_buf[4];
+
+static char* encode64(apr_uint16_t value)
+{
+    s_encode_buf[0] = (char)(((value >> 12) & 0x000F) + 0x0030);
+    s_encode_buf[1] = (char)(((value >>  6) & 0x003F) + 0x0030);
+    s_encode_buf[2] = (char)(( value        & 0x003F) + 0x0030);
+    s_encode_buf[3] = '\0';
+    return s_encode_buf;
+}
 /* Add a string to the shared memory string table */
 
 static void add_data_string(
@@ -433,6 +448,7 @@ static void add_data_string(
 }
 
 /* Get the data for the server */
+
 static apr_status_t collect_server_data(
     mmap_server_data* server_data,
     char* const string_table,
@@ -474,6 +490,8 @@ static apr_status_t collect_server_data(
     return APR_SUCCESS;
 }
 
+/* Get the data for the virtual hosts */
+
 static apr_status_t collect_vhost_data(
     mmap_vhost_data* vhost_data,
     char* const string_table,
@@ -485,6 +503,7 @@ static apr_status_t collect_vhost_data(
 {
     const server_rec* srec;
     apr_size_t vhost_element;
+    int first;
 
     if (vhost_data != NULL)
     {
@@ -550,7 +569,7 @@ static apr_status_t collect_vhost_data(
             /* Note: It would be nice to use server_rec pointer, but that didn't work properly */
             if (vhost_data != NULL)
             {
-                apr_hash_set(vhost_hash, apr_off_t_toa(ptemp, (apr_off_t)srec), APR_HASH_KEY_STRING, (void*)vhost_target_element);
+                apr_hash_set(vhost_hash, apr_psprintf(ptemp, "%pp", srec), APR_HASH_KEY_STRING, (void*)vhost_target_element);
             }
 
             /* Populate the remainder of the virtual host */
@@ -588,11 +607,34 @@ static apr_status_t collect_vhost_data(
             // TODO: Populate logCustom, but not obvious in server_rec
             // TODO: Populate logAccess, but not obvious in server_rec
         }
+
+        /* Populate the array of (IP address, port) */
+        first = 1;
+        for (addrs = srec->addrs; addrs != NULL; addrs = addrs->next)
+        {
+            add_data_string(string_table,
+                            string_table_len,
+                            addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
+                            first && vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].addressesAndPortsOffsets : NULL);
+            add_data_string(string_table,
+                            string_table_len,
+                            encode64(addrs->host_addr->port),
+                            NULL);
+            first = 0;
+        }
+        /* Terminate the array of IP addresses and ports */
+        add_data_string(string_table,
+                        string_table_len,
+                        "",
+                        NULL);
+
         vhost_element++;
     }
 
     return APR_SUCCESS;
 }
+
+/* Get the data for the SSL certificates */
 
 static apr_status_t collect_certificate_data(
     mmap_certificate_data* certificate_data,
@@ -634,6 +676,8 @@ static apr_status_t collect_certificate_data(
     }
     return APR_SUCCESS;
 }
+
+/* Create and populate the shared memory region */
 
 static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
@@ -677,10 +721,10 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         certificate_count++;
     }
 
-    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %u (including _Default & _Total)",
-                        (unsigned int)vhost_count);
+    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %pS (including _Default & _Total)",
+                        &vhost_count);
     display_error(cfg, text, 0, 0);
-    text = apr_psprintf(ptemp, "cimprov: Count of certificates: %u", (unsigned int)certificate_count);
+    text = apr_psprintf(ptemp, "cimprov: Count of certificates: %pS", &certificate_count);
     display_error(cfg, text, 0, 0);
 
     /* Find the process name
@@ -778,8 +822,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         display_error(cfg, "cimprov: mmap_region_create: delete success", status, 0);
     }
 
-    text = apr_psprintf(ptemp, "cimprov: mmap_region_create: creating memory map %s with size %lu",
-                        PROVIDER_MMAP_NAME, mapSize);
+    text = apr_psprintf(ptemp, "cimprov: mmap_region_create: creating memory map %s with size %pS",
+                        PROVIDER_MMAP_NAME, &mapSize);
     display_error(cfg, text, 0, 0);
 
     status = apr_shm_create(&cfg->mmap_region, mapSize, PROVIDER_MMAP_NAME, pool);
@@ -969,7 +1013,7 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
     int http_status = r->status;
 
     /* Find the hash value of the server name */
-    apr_size_t element = (apr_size_t) apr_hash_get(cfg->vhost_hash, apr_off_t_toa(r->pool, (apr_off_t) r->server), APR_HASH_KEY_STRING);
+    apr_size_t element = (apr_size_t)apr_hash_get(cfg->vhost_hash, apr_psprintf(r->pool, "%pp", r->server), APR_HASH_KEY_STRING);
 
     if ( element < 2 || element >= cfg->vhost_data->count )
     {
@@ -982,9 +1026,9 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
     if (cfg->enablelogging)
     {
         char *text = apr_psprintf(r->pool,
-                                  "cimprov: Access result: Name=%s, status=%d, index=%lu",
+                                  "cimprov: Access result: Name=%s, status=%d, index=%pS",
                                   serverName ? serverName : "NULL",
-                                  http_status, element);
+                                  http_status, &element);
         display_error(cfg, text, 0, 0);
     }
 
@@ -1041,7 +1085,7 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
         if (cfg->enablehystericallogging)
         {
             char *text = apr_psprintf(r->pool, "DEBUG: lastUpdateTime=%lu, currentTime=%lu, freq=%d",
-                                      lastUpdateTime, currentTime, cfg->busyrefreshfrequency);
+                                      (unsigned long)lastUpdateTime, (unsigned long)currentTime, cfg->busyrefreshfrequency);
             display_error(cfg, text, 0, 0);
         }
 

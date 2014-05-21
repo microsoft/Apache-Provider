@@ -269,9 +269,6 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
         {
             apr_finfo_t fileInfo;
             apr_time_t timeNow;
-            std::vector<mi::String> certificateFileNamesArray;
-            std::vector<mi::Datetime> certificateExpirationCimTimesArray;
-            std::vector<mi::Uint16> certificateDaysUntilExpirationArray;
 
             // Insert the host:port name for the first host that uses this certificate file
             const char* hostStr = apr_psprintf(pool.Get(),
