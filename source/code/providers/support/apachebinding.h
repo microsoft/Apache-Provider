@@ -20,9 +20,11 @@
 #include <apr_errno.h>
 #include <apr_global_mutex.h>
 #include <apr_shm.h>
+#include <apr_strings.h>
 
 #include "mmap_region.h"
 #include "datasampler.h"
+#include "temppool.h"
 
 
 /*------------------------------------------------------------------------------*/
@@ -80,6 +82,53 @@ private:
 };
 
 extern ApacheBinding g_apache;
+
+
+//
+// The providers should have an exception handler wrapping all activity.  This
+// helps guarantee that the agent won't crash if there's an unhandled exception.
+// In the Pegasus model, this was done in the base class.  Since we don't have
+// that luxury here, we'll have macros to make it easier.
+//
+// PEX = Provider Exception
+//
+// There's an assumption here that, since this is used in the OMI-generated code,
+// "context" always exists for posting the result to.
+//
+
+#define PEX_ERROR_CODE APR_EGENERAL
+
+#define CIM_PEX_BEGIN \
+    try
+
+#define CIM_PEX_END(module) \
+    catch (std::exception &e) { \
+        TemporaryPool ptemp( g_apache.GetPool() ); \
+        char *etext = apr_psprintf(ptemp.Get(), "%s - Exception occurred! Exception %s", module, e.what()); \
+        g_apache.DisplayError( PEX_ERROR_CODE, etext ); \
+        context.Post(MI_RESULT_FAILED); \
+    } \
+    catch (...) \
+    { \
+        TemporaryPool ptemp( g_apache.GetPool() ); \
+        char *etext = apr_psprintf(ptemp.Get(), "%s - Unknown exception occurred!", module); \
+        g_apache.DisplayError( PEX_ERROR_CODE, etext ); \
+        context.Post(MI_RESULT_FAILED); \
+    }
+
+//
+// Have a little function to make it easy to break into a provider (as a debugging aid)
+//
+// The idea here is that we sleep indefinitely; if you break in with a debugger, then
+// you can set f_break to true and then step through the code.
+//
+
+#define CIM_PROVIDER_WAIT_FOR_ATTACH         \
+    {                                        \
+        volatile bool f_break = false;       \
+        while ( !f_break )                   \
+            sleep(1);                        \
+    }
 
 #endif /* APACHEBINDING_H */
 

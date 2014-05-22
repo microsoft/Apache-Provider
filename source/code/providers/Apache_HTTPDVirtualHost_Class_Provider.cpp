@@ -82,32 +82,40 @@ Apache_HTTPDVirtualHost_Class_Provider::~Apache_HTTPDVirtualHost_Class_Provider(
 void Apache_HTTPDVirtualHost_Class_Provider::Load(
         Context& context)
 {
-    if (APR_SUCCESS != g_apache.Load("VirtualHost"))
+    CIM_PEX_BEGIN
     {
-        context.Post(MI_RESULT_FAILED);
-        return;
-    }
+        if (APR_SUCCESS != g_apache.Load("VirtualHost"))
+        {
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
 
-    // Notify that we don't wish to unload
-    MI_Result r = context.RefuseUnload();
-    if ( MI_RESULT_OK != r )
-    {
-        g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDVirtualHost_Class_Provider refuses to not unload");
-    }
+        // Notify that we don't wish to unload
+        MI_Result r = context.RefuseUnload();
+        if ( MI_RESULT_OK != r )
+        {
+            g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDVirtualHost_Class_Provider refuses to not unload");
+        }
 
-    context.Post(MI_RESULT_OK);
+        context.Post(MI_RESULT_OK);
+    }
+    CIM_PEX_END( "Apache_HTTPDVirtualHost_Class_Provider::Load" );
 }
 
 void Apache_HTTPDVirtualHost_Class_Provider::Unload(
         Context& context)
 {
-    if (APR_SUCCESS != g_apache.Unload("VirtualHost"))
+    CIM_PEX_BEGIN
     {
-        context.Post(MI_RESULT_FAILED);
-        return;
-    }
+        if (APR_SUCCESS != g_apache.Unload("VirtualHost"))
+        {
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
 
-    context.Post(MI_RESULT_OK);
+        context.Post(MI_RESULT_OK);
+    }
+    CIM_PEX_END( "Apache_HTTPDVirtualHost_Class_Provider::Load" );
 }
 
 void Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances(
@@ -118,26 +126,31 @@ void Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances(
     const MI_Filter* filter)
 {
     apr_status_t status;
-    apr_size_t i;
 
-    /* Lock the mutex to walk the list */
-    if (APR_SUCCESS != (status = g_apache.LockMutex()))
+    CIM_PEX_BEGIN
     {
-        g_apache.DisplayError(status, "VirtualHost::EnumerateInstances: failed to lock mutex");
-        context.Post(MI_RESULT_FAILED);
-        return;
+        /* Lock the mutex to walk the list */
+        if (APR_SUCCESS != (status = g_apache.LockMutex()))
+        {
+            g_apache.DisplayError(status, "VirtualHost::EnumerateInstances: failed to lock mutex");
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
+
+        for (apr_size_t i = 2; i <= g_apache.GetVHostCount() - 1; i++)
+        {
+            EnumerateOneInstance(context, keysOnly, i);
+        }
+
+        // Also display _Default
+        EnumerateOneInstance(context, keysOnly, 1);
+
+        context.Post(MI_RESULT_OK);
     }
+    CIM_PEX_END( "Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances" );
 
-    for (i = 2; i <= g_apache.GetVHostCount() - 1; i++)
-    {
-        EnumerateOneInstance(context, keysOnly, i);
-    }
-
-    // Also display _Default
-    EnumerateOneInstance(context, keysOnly, 1);
-
+    // Be sure mutex gets unlocked, regardless if an exception occurs
     g_apache.UnlockMutex();
-    context.Post(MI_RESULT_OK);
 }
 
 void Apache_HTTPDVirtualHost_Class_Provider::GetInstance(

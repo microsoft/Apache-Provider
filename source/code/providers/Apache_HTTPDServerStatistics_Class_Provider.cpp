@@ -23,32 +23,40 @@ Apache_HTTPDServerStatistics_Class_Provider::~Apache_HTTPDServerStatistics_Class
 void Apache_HTTPDServerStatistics_Class_Provider::Load(
         Context& context)
 {
-    if (APR_SUCCESS != g_apache.Load("ServerStatistics"))
+    CIM_PEX_BEGIN
     {
-        context.Post(MI_RESULT_FAILED);
-        return;
-    }
+        if (APR_SUCCESS != g_apache.Load("ServerStatistics"))
+        {
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
 
-    // Notify that we don't wish to unload
-    MI_Result r = context.RefuseUnload();
-    if ( MI_RESULT_OK != r )
-    {
-        g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDServerStatistics_Class_Provider refuses to not unload");
-    }
+        // Notify that we don't wish to unload
+        MI_Result r = context.RefuseUnload();
+        if ( MI_RESULT_OK != r )
+        {
+            g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDServerStatistics_Class_Provider refuses to not unload");
+        }
 
-    context.Post(MI_RESULT_OK);
+        context.Post(MI_RESULT_OK);
+    }
+    CIM_PEX_END( "Apache_HTTPDServerStatistics_Class_Provider::Load" );
 }
 
 void Apache_HTTPDServerStatistics_Class_Provider::Unload(
         Context& context)
 {
-    if (APR_SUCCESS != g_apache.Unload("VirtualHostStatistics"))
+    CIM_PEX_BEGIN
     {
-        context.Post(MI_RESULT_FAILED);
-        return;
-    }
+        if (APR_SUCCESS != g_apache.Unload("VirtualHostStatistics"))
+        {
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
 
-    context.Post(MI_RESULT_OK);
+        context.Post(MI_RESULT_OK);
+    }
+    CIM_PEX_END( "Apache_HTTPDServerStatistics_Class_Provider::Unload" );
 }
 
 void Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances(
@@ -58,33 +66,37 @@ void Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances(
     bool keysOnly,
     const MI_Filter* filter)
 {
-    Apache_HTTPDServerStatistics_Class inst;
-
-    // Insert the key into the instance
-
-    inst.InstanceID_value(g_apache.GetServerConfigFile());
-
-    if (! keysOnly)
+    CIM_PEX_BEGIN
     {
-        // Insert the values into the instance
+        Apache_HTTPDServerStatistics_Class inst;
 
-        inst.ConfigurationFile_value(g_apache.GetServerConfigFile());
+        // Insert the key into the instance
 
-        // Insert time-based values into the instance
+        inst.InstanceID_value(g_apache.GetServerConfigFile());
 
-        inst.TotalPctCPU_value(g_apache.GetCPUUtilization());
+        if (! keysOnly)
+        {
+            // Insert the values into the instance
 
-        apr_uint32_t idleWorkers = g_apache.GetWorkerCountIdle();
-        apr_uint32_t busyWorkers = g_apache.GetWorkerCountBusy();
-        apr_uint32_t totalWorkers = idleWorkers + busyWorkers;
+            inst.ConfigurationFile_value(g_apache.GetServerConfigFile());
 
-        inst.IdleWorkers_value(idleWorkers);
-        inst.BusyWorkers_value(busyWorkers);
-        inst.PctBusyWorkers_value(totalWorkers ? (busyWorkers * 100) / totalWorkers : 0);
+            // Insert time-based values into the instance
+
+            inst.TotalPctCPU_value(g_apache.GetCPUUtilization());
+
+            apr_uint32_t idleWorkers = g_apache.GetWorkerCountIdle();
+            apr_uint32_t busyWorkers = g_apache.GetWorkerCountBusy();
+            apr_uint32_t totalWorkers = idleWorkers + busyWorkers;
+
+            inst.IdleWorkers_value(idleWorkers);
+            inst.BusyWorkers_value(busyWorkers);
+            inst.PctBusyWorkers_value(totalWorkers ? (busyWorkers * 100) / totalWorkers : 0);
+        }
+
+        context.Post(inst);
+        context.Post(MI_RESULT_OK);
     }
-
-    context.Post(inst);
-    context.Post(MI_RESULT_OK);
+    CIM_PEX_END( "Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances" );
 }
 
 void Apache_HTTPDServerStatistics_Class_Provider::GetInstance(
