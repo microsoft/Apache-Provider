@@ -18,8 +18,8 @@
  *     mmap_certificate_elements: Array (size based on Apache Config) for each certificate file
  */
 
-// Length of the virtual host name (Wikipedia claims max length=253 for any DNS name)
-#define MAX_VIRTUALHOST_NAME_LEN 256
+// Length of the host name (Wikipedia claims max length=253 for any DNS name)
+#define MAX_HOST_NAME_LEN 256
 
 typedef struct
 {
@@ -71,8 +71,8 @@ typedef struct
     volatile apr_uint32_t errorCount500;
 
     // Following information kept by provider, not by Apache module. It's here
-    // for convenience only. This data must be per-VirtualHost, and since the
-    // above data is per-VirtualHost structure, here is a good a place as any.
+    // for convenience only. This data must be per-host, and since the above
+    // data is per-VHost structure, here is a good a place as any.
 
     apr_uint32_t requestsTotalPrior;
     apr_uint32_t requestsTotalBytesPrior;
@@ -95,7 +95,7 @@ typedef struct
 typedef struct
 {
     apr_size_t count;                   // Number of elements of mmap_vhost_elements that follow
-    mmap_vhost_elements vhosts[0];      // Array of mmap_vhost_elements (virtual host information)
+    mmap_vhost_elements vhosts[0];      // Array of mmap_vhost_elements (host information)
 } mmap_vhost_data;
 
 typedef struct

@@ -82,8 +82,8 @@ struct config_sslCertFile {
     config_sslCertFile* next;           /* Pointer to next certificate structure */
     apr_pool_t* pool;                   /* The temporary pool that contains this item (and nothing else) */
     char certificateFileName[PATH_MAX]; /* Name of the the certificate file */
-    char hostName[MAX_VIRTUALHOST_NAME_LEN];    /* Name of virtual host for this certficate (or _Default) */
-    apr_uint16_t port;                  /* Port of virtual host that uses this certificate */
+    char hostName[MAX_HOST_NAME_LEN];   /* Name of host for this certficate (or _Default) */
+    apr_uint16_t port;                  /* Port of host that uses this certificate */
 };
 
 /*
@@ -108,7 +108,7 @@ typedef struct {
     mmap_certificate_data *certificate_data; /* Pointer to certificate file data within memory mapped region */
     mmap_string_table *string_data;     /* Pointer to string table within memory mapped region */
     char *stable;                       /* Convenience pointer to the strings themselves within region */
-    apr_hash_t *vhost_hash;             /* APR hash to virtual hosts in memory mapped region */
+    apr_hash_t *vhost_hash;             /* APR hash to hosts in memory mapped region */
 
     apr_global_mutex_t *mutexMapInit;   /* APR handle to Initialization Mutex */
     apr_global_mutex_t *mutexMapRW;     /* APR handle to Read/Write Mutex */
@@ -588,14 +588,14 @@ static apr_status_t collect_server_data(
     return APR_SUCCESS;
 }
 
-/* Get the data for the virtual hosts */
+/* Get the data for the hosts */
 static apr_status_t collect_vhost_data(
     mmap_vhost_data* vhost_data,
     char* const string_table,
     apr_size_t* string_table_len,
     persist_cfg* cfg,
     apr_pool_t* ptemp,
-    apr_hash_t* vhost_hash,             /* APR hash to virtual hosts in memory mapped region */
+    apr_hash_t* vhost_hash,             /* APR hash to hosts in memory mapped region */
     const server_rec* head,
     apr_size_t vhost_count)
 {
@@ -609,43 +609,35 @@ static apr_status_t collect_vhost_data(
     }
 
     /*
-     * VirtualHost [0] reserved for _Total
-     * VirtualHost [1] reserved for _Default
+     * VHost [0] reserved for _Total
+     * VHost [1] reserved for _Unknown
      */
 
     add_data_string(string_table,
                     string_table_len,
                     "_Total",
                     vhost_data != NULL ? &vhost_data->vhosts[0].hostNameOffset : NULL);
-    if (vhost_data != NULL)
-    {
-        /* make instanceID be "_Total" also */
-        vhost_data->vhosts[0].instanceIDOffset = vhost_data->vhosts[0].hostNameOffset;
-    }
 
     add_data_string(string_table,
                     string_table_len,
-                    "_Default",
+                    "_Unknown",
                     vhost_data != NULL ? &vhost_data->vhosts[1].hostNameOffset : NULL);
 
-    vhost_element = 1;
+    if (vhost_data != NULL)
+    {
+        /* Match instanceID with hostName for _Total and _Unknown */
+        vhost_data->vhosts[0].instanceIDOffset = vhost_data->vhosts[0].hostNameOffset;
+        vhost_data->vhosts[1].instanceIDOffset = vhost_data->vhosts[1].hostNameOffset;
+    }
+
+    vhost_element = 2;
     for (srec = head; srec != NULL; srec = srec->next)
     {
-        apr_size_t vhost_target_element;
         char* instanceHost;
         server_addr_rec* addrs;
+        config_hostInfo* hostInfo;
 
-        /* Set up virtual host map in reverse order since that's how server_rec comes to us */
-        if (srec->is_virtual)
-        {
-            vhost_target_element = vhost_count - vhost_element + 1;
-        }
-        else
-        {
-            vhost_target_element = 1;
-        }
-
-        /* Create the InstanceID for uniquely tracking this virtual host */
+        /* Create the InstanceID for uniquely tracking this host */
 
         instanceHost = apr_pstrdup(ptemp, srec->server_hostname != NULL ? srec->server_hostname : "_default_");
         for (addrs = srec->addrs; addrs != NULL; addrs = addrs->next)
@@ -659,61 +651,56 @@ static apr_status_t collect_vhost_data(
         add_data_string(string_table,
                         string_table_len,
                         instanceHost,
-                        vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].instanceIDOffset : NULL);
+                        vhost_data != NULL ? &vhost_data->vhosts[vhost_element].instanceIDOffset : NULL);
 
-        if (srec->is_virtual)
+        /* Create the hash table based on the server record address */
+        /* Note: It would be nice to use server_rec pointer, but that didn't work properly */
+        if (vhost_data != NULL)
         {
-            config_hostInfo* hostInfo;
+            apr_hash_set(vhost_hash, apr_psprintf(ptemp, "%pp", srec), APR_HASH_KEY_STRING, (void*)vhost_element);
+        }
 
-            /* Create the hash table based on the server record address */
-            /* Note: It would be nice to use server_rec pointer, but that didn't work properly */
-            if (vhost_data != NULL)
-            {
-                apr_hash_set(vhost_hash, apr_psprintf(ptemp, "%pp", srec), APR_HASH_KEY_STRING, (void*)vhost_target_element);
-            }
+        /* Populate the remainder of the host */
 
-            /* Populate the remainder of the virtual host */
+        add_data_string(string_table,
+                        string_table_len,
+                        srec->server_hostname,
+                        vhost_data != NULL ? &vhost_data->vhosts[vhost_element].hostNameOffset : NULL);
 
+        if (srec->server_admin != NULL)
+        {
             add_data_string(string_table,
                             string_table_len,
-                            srec->server_hostname,
-                            vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].hostNameOffset : NULL);
-
-            if (srec->server_admin != NULL)
-            {
-                add_data_string(string_table,
-                                string_table_len,
-                                srec->server_admin,
-                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].serverAdminOffset : NULL);
-            }
-
-            if (srec->error_fname != NULL)
-            {
-                add_data_string(string_table,
-                                string_table_len,
-                                srec->error_fname,
-                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].logErrorOffset : NULL);
-            }
-
-            hostInfo = find_host_info(cfg, srec);
-            if (hostInfo != NULL)
-            {
-                add_data_string(string_table,
-                                string_table_len,
-                                hostInfo->transferLogFileName,
-                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].logAccessOffset : NULL);
-                add_data_string(string_table,
-                                string_table_len,
-                                hostInfo->customLogFileName,
-                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].logCustomOffset : NULL);
-                add_data_string(string_table,
-                                string_table_len,
-                                hostInfo->documentRoot,
-                                vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].documentRootOffset : NULL);
-            }
-
-            // TODO: Populate logAccess, but not obvious in server_rec
+                            srec->server_admin,
+                            vhost_data != NULL ? &vhost_data->vhosts[vhost_element].serverAdminOffset : NULL);
         }
+
+        if (srec->error_fname != NULL)
+        {
+            add_data_string(string_table,
+                            string_table_len,
+                            srec->error_fname,
+                            vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logErrorOffset : NULL);
+        }
+
+        hostInfo = find_host_info(cfg, srec);
+        if (hostInfo != NULL)
+        {
+            add_data_string(string_table,
+                            string_table_len,
+                            hostInfo->transferLogFileName,
+                            vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logAccessOffset : NULL);
+            add_data_string(string_table,
+                            string_table_len,
+                            hostInfo->customLogFileName,
+                            vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logCustomOffset : NULL);
+            add_data_string(string_table,
+                            string_table_len,
+                            hostInfo->documentRoot,
+                            vhost_data != NULL ? &vhost_data->vhosts[vhost_element].documentRootOffset : NULL);
+        }
+
+        // TODO: Populate logAccess, but not obvious in server_rec
 
         /* Populate the array of (IP address, port) */
         first = 1;
@@ -722,7 +709,7 @@ static apr_status_t collect_vhost_data(
             add_data_string(string_table,
                             string_table_len,
                             addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
-                            first && vhost_data != NULL ? &vhost_data->vhosts[vhost_target_element].addressesAndPortsOffsets : NULL);
+                            first && vhost_data != NULL ? &vhost_data->vhosts[vhost_element].addressesAndPortsOffsets : NULL);
             add_data_string(string_table,
                             string_table_len,
                             encode64(addrs->host_addr->port),
@@ -783,7 +770,7 @@ static apr_status_t collect_certificate_data(
 static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_pool_t *ptemp, server_rec *head)
 {
     apr_size_t module_count;            /* Number of modules loaded into server */
-    apr_size_t vhost_count;             /* Save space for _Total and _Default */
+    apr_size_t vhost_count;             /* Save space for _Total and _Unknown */
     apr_size_t certificate_count;       /* Number of certificate information blocks */
     apr_status_t status;
     config_sslCertFile* cert_file_info; /* Ptr. to information about a certificate file */
@@ -800,7 +787,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         module_count++;
     }
 
-    /* Walk the list of server_rec structures to determine the count of virtual hosts */
+    /* Walk the list of server_rec structures to determine the count of hosts */
 
     vhost_count = 2;
     for (srec = head; srec != NULL; srec = srec->next)
@@ -809,9 +796,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                    srec->server_hostname ? srec->server_hostname : "NULL",
                                    srec->port, srec->is_virtual);
         display_error(cfg, text, 0, 0);
-
-        if (srec->is_virtual && srec->server_hostname != NULL)
-            vhost_count++;
+        vhost_count++;
     }
 
     /* Walk the list of certificate files to determine the count */
@@ -822,7 +807,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         certificate_count++;
     }
 
-    text = apr_psprintf(ptemp, "cimprov: Count of virtual hosts: %pS (including _Default & _Total)",
+    text = apr_psprintf(ptemp, "cimprov: Count of hosts: %pS (including _Unknown & _Total)",
                         &vhost_count);
     display_error(cfg, text, 0, 0);
     text = apr_psprintf(ptemp, "cimprov: Count of certificates: %pS", &certificate_count);
@@ -892,7 +877,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                 vhost_count);
     if (status != APR_SUCCESS)
     {
-        display_error(cfg, "cimprov: collection of virtual host data failed", status, 0);
+        display_error(cfg, "cimprov: collection of vhost data failed", status, 0);
         return status;
     }
 
@@ -967,7 +952,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
         return status;
     }
 
-    /* Initialize the memory mapped region for virtual host data */
+    /* Initialize the memory mapped region for vhost data */
 
     status = collect_vhost_data(cfg->vhost_data,
                                 cfg->stable,
@@ -979,7 +964,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                 vhost_count);
     if (status != APR_SUCCESS)
     {
-        display_error(cfg, "cimprov: collection of virtual host data failed", status, 0);
+        display_error(cfg, "cimprov: collection of vhost data failed", status, 0);
         return status;
     }
 
@@ -1110,7 +1095,7 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
     return OK;
 }
 
-static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
+static apr_status_t handle_VHostStatistics(const request_rec *r)
 {
     persist_cfg *cfg = ap_get_module_config(r->server->module_config, &cimprov_module);
     const char *serverName = "_Default";
@@ -1124,7 +1109,7 @@ static apr_status_t handle_VirtualHostStatistics(const request_rec *r)
 
     if ( element < 2 || element >= cfg->vhost_data->count )
     {
-        /* Umm, somehow we got a virtual host that wasn't in the hash; use _Default */
+        /* Umm, somehow we got a host that wasn't in the hash; use _Unknown */
         element = 1;
     }
 
@@ -1334,7 +1319,7 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
 static int log_request_handler(request_rec *r)
 {
     /* Handle the request here */
-    handle_VirtualHostStatistics(r);
+    handle_VHostStatistics(r);
     handle_WorkerStatistics(r);
 
     return DECLINED;
