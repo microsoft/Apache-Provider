@@ -60,18 +60,17 @@ module AP_MODULE_DECLARE_DATA cimprov_module;
 typedef struct config_hostInfo config_hostInfo;
 struct config_hostInfo {
     config_hostInfo* next;              /* Pointer to next host information structure */
-    apr_pool_t* pool;                   /* The temporary pool that contains this item (and nothing else) */
     server_rec* srec;                   /* The record of the host to which this applies */
-	char transferLogFileName[PATH_MAX]; /* Name of the transfer log file */
-	char customLogFileName[PATH_MAX];   /* Name of the custom log file */
+    char transferLogFileName[PATH_MAX]; /* Name of the transfer log file */
+    char customLogFileName[PATH_MAX];   /* Name of the custom log file */
     char documentRoot[PATH_MAX];        /* Name of the host's document root directory */
 };
 
 typedef enum
 {
-	DOCUMENT_ROOT,
-	TRANSFER_LOG_FILE_NAME,
-	CUSTOM_LOG_FILE_NAME
+    DOCUMENT_ROOT,
+    TRANSFER_LOG_FILE_NAME,
+    CUSTOM_LOG_FILE_NAME
 } host_info_type;
 
 /*
@@ -786,7 +785,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     apr_size_t module_count;            /* Number of modules loaded into server */
     apr_size_t vhost_count;             /* Save space for _Total and _Default */
     apr_size_t certificate_count;       /* Number of certificate information blocks */
-	apr_status_t status;
+    apr_status_t status;
     config_sslCertFile* cert_file_info; /* Ptr. to information about a certificate file */
     size_t stable_length;               /* Enough space for two null bytes as terminator */
     char* text;
@@ -1025,7 +1024,8 @@ static void *create_config(apr_pool_t *pool, server_rec *s)
      *   persist_cfg *cfg = ap_get_module_config(r->server->module_config, &cimprov_module);
      */
 
-    if (!s->is_virtual && g_persistConfig == NULL)
+    /* Create ONE configuration structure for all virtual and physical hosts */
+    if (g_persistConfig == NULL)
     {
         persist_cfg *cfg = apr_pcalloc(pool, sizeof(persist_cfg));
 
