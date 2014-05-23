@@ -223,16 +223,6 @@
 
   </Target>
 
-  <Target Name="CoreTest">
-    <Message Text="CoreTest: Building and Running Tests on $(UnixBuildServer)"/>
-    <Message Text="CoreTest: Core Compile on $(UnixBuildServer)" />
-    <Message Text="CoreTest: UnixWorkSpaceName: $(UnixWorkSpaceName)" />
-    <Message Text="CoreTest: ConfigToBuild: $(ConfigToBuild) " />
-    <Exec WorkingDirectory='$(WorkspaceFolder)\bootstrap'
-          Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/bootstrap/RunUnitTest.bsh $(UnixWorkSpaceName)/Apache $(MakeTargetToBuild) $(ConfigToBuild)'
-          IgnoreExitCode='true' />
-  </Target>
-
   <!-- Only do GenerateDocumentation on one machine, currently SuSE 10.0 x86_32 -->
   <Target Name="GenerateDocumentation" Condition=" '$(DocumentationGeneration)' == 'true' ">
     <Message Text="Generating documentation with Doxygen on $(UnixBuildServer)" />
