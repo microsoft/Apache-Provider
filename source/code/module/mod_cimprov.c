@@ -526,23 +526,33 @@ static void add_data_string(
     const char* string,
     apr_size_t* offset)
 {
-    size_t len = strlen(string) + 1;
-
-    if (len > PATH_MAX)
+    if (string != NULL)
     {
-        len = PATH_MAX;
-    }
-    if (string_table != NULL)
-    {
-        apr_cpystrn(string_table + *pos, string, len);
-    }
+        size_t len = strlen(string) + 1;
 
-    if (offset != NULL)
-    {
-        *offset = (apr_size_t)*pos;
-    }
+        if (len > PATH_MAX)
+        {
+            len = PATH_MAX;
+        }
+        if (string_table != NULL)
+        {
+            apr_cpystrn(string_table + *pos, string, len);
+        }
 
-    *pos += len;
+        if (offset != NULL)
+        {
+            *offset = (apr_size_t)*pos;
+        }
+
+        *pos += len;
+    }
+    else
+    {
+        if (offset != NULL)
+        {
+            *offset = 0;
+        }
+    }
     return;
 }
 
@@ -588,6 +598,16 @@ static apr_status_t collect_server_data(
     return APR_SUCCESS;
 }
 
+/* Merge two strings by using the "from" string's offset if the "to" string's offset is zero */
+static void merge_data_strings(apr_size_t* toOffset, apr_size_t fromOffset)
+{
+    if (*toOffset == 0)
+    {
+        *toOffset = fromOffset;
+    }
+    return;
+}
+
 /* Get the data for the hosts */
 static apr_status_t collect_vhost_data(
     mmap_vhost_data* vhost_data,
@@ -601,6 +621,7 @@ static apr_status_t collect_vhost_data(
 {
     const server_rec* srec;
     apr_size_t vhost_element;
+    apr_size_t physical_host_element;
     int first;
 
     if (vhost_data != NULL)
@@ -631,6 +652,7 @@ static apr_status_t collect_vhost_data(
     }
 
     vhost_element = 2;
+    physical_host_element = vhost_count;    /* initialize to an invalid value */
     for (srec = head; srec != NULL; srec = srec->next)
     {
         char* instanceHost;
@@ -671,7 +693,7 @@ static apr_status_t collect_vhost_data(
         {
             add_data_string(string_table,
                             string_table_len,
-                            srec->server_admin,
+                            srec->server_admin[0] != '\0' ? srec->server_admin : NULL,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].serverAdminOffset : NULL);
         }
 
@@ -679,7 +701,7 @@ static apr_status_t collect_vhost_data(
         {
             add_data_string(string_table,
                             string_table_len,
-                            srec->error_fname,
+                            srec->error_fname[0] != '\0' ? srec->error_fname : NULL,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logErrorOffset : NULL);
         }
 
@@ -688,15 +710,15 @@ static apr_status_t collect_vhost_data(
         {
             add_data_string(string_table,
                             string_table_len,
-                            hostInfo->transferLogFileName,
+                            hostInfo->transferLogFileName[0] != '\0' ? hostInfo->transferLogFileName : NULL,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logAccessOffset : NULL);
             add_data_string(string_table,
                             string_table_len,
-                            hostInfo->customLogFileName,
+                            hostInfo->customLogFileName[0] != '\0' ? hostInfo->customLogFileName : NULL,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logCustomOffset : NULL);
             add_data_string(string_table,
                             string_table_len,
-                            hostInfo->documentRoot,
+                            hostInfo->documentRoot[0] != '\0' ? hostInfo->documentRoot : NULL,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].documentRootOffset : NULL);
         }
 
@@ -716,6 +738,12 @@ static apr_status_t collect_vhost_data(
                             NULL);
             first = 0;
         }
+
+        if (!srec->is_virtual)
+        {
+            physical_host_element = vhost_element;
+        }
+
         /* Terminate the array of IP addresses and ports */
         add_data_string(string_table,
                         string_table_len,
@@ -723,6 +751,26 @@ static apr_status_t collect_vhost_data(
                         NULL);
 
         vhost_element++;
+    }
+
+    /* if there is a physical host, merge empty mergable properties of virtual hosts
+     * with physical host properties */
+    if (vhost_data != NULL && physical_host_element < vhost_count)
+    {
+        for (vhost_element = 2; vhost_element < vhost_count; vhost_element++)
+        {
+            if (vhost_element != physical_host_element)
+            {
+                merge_data_strings(&vhost_data->vhosts[vhost_element].logErrorOffset,
+                                   vhost_data->vhosts[physical_host_element].logErrorOffset);
+                merge_data_strings(&vhost_data->vhosts[vhost_element].logAccessOffset,
+                                   vhost_data->vhosts[physical_host_element].logAccessOffset);
+                merge_data_strings(&vhost_data->vhosts[vhost_element].logCustomOffset,
+                                   vhost_data->vhosts[physical_host_element].logCustomOffset);
+                merge_data_strings(&vhost_data->vhosts[vhost_element].documentRootOffset,
+                                    vhost_data->vhosts[physical_host_element].documentRootOffset);
+            }
+        }
     }
 
     return APR_SUCCESS;
