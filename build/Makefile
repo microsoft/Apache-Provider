@@ -10,6 +10,7 @@ OMI_ROOT := $(shell cd ../../omi/distro; pwd -P)
 SCXPAL_DIR := $(shell cd ../../pal; pwd -P)
 
 PF_POSIX := 1
+include $(SCXPAL_DIR)/build/config.mak
 include $(BASE_DIR)/build/config.mak
 include $(BASE_DIR)/build/Makefile.version
 include $(SCXPAL_DIR)/build/Makefile.pal
@@ -19,7 +20,11 @@ $(error "ENABLE_DEBUG is not set.  Please re-run configure")
 endif
 
 SOURCE_DIR := $(BASE_DIR)/source/code
+TEST_DIR := $(BASE_DIR)/test/code
+
 PROVIDER_DIR := $(SOURCE_DIR)/providers
+PROVIDER_TEST_DIR := $(TEST_DIR)/providers
+PAL_TESTUTILS_DIR := $(SCXPAL_DIR)/test/code/testutils
 
 TARGET_DIR := $(BASE_DIR)/target/$(BUILD_CONFIGURATION)
 PROVIDER_LIBRARY := $(TARGET_DIR)/libApacheHttpdProvider.so
@@ -36,7 +41,7 @@ endif
 
 # If building with Apache source code, handle appropriately
 APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
-ifeq ($(APACHE_SOURCE_DIR),"")
+ifeq ($(APACHE_SOURCE_DIR),)
 APACHE_SOURCE_INCLUDE_PATH_OPTION :=
 APACHE_SOURCE_LIB_PATH_OPTION :=
 else
@@ -48,12 +53,15 @@ endif
 
 INCLUDE_VHOST := $(SOURCE_DIR)/include/mmap_region.h
 INCLUDE_VERSION := $(TARGET_DIR)/buildversion.h
+INCLUDE_DEFINES := $(TARGET_DIR)/defines.h
 
 # Compiler flags
 
 OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
 MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
 PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support -I$(TARGET_DIR)
+
+PROVIDER_TEST_INCLUDE_FLAGS := -I$(OMI_ROOT) -I$(OMI_ROOT)/common $(PROVIDER_INCLUDE_FLAGS) -I$(SCXPAL_DIR)/source/code/include -I$(SCXPAL_DIR)/test/code/include -I$(PROVIDER_DIR) -I$(BASE_DIR)/test/ext/include -I$(BASE_DIR)/test/code/include
 
 ifeq ($(ENABLE_DEBUG),1)
 PROV_DEBUG_FLAGS := -g
@@ -62,6 +70,7 @@ endif
 COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
 
 LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1
+PROVIDER_TEST_LINK_LIBRARIES := -lbase -L$(SCXPAL_TARGET_DIR) -lscxcore $(BASE_DIR)/test/ext/lib/linux/$(ARCH)/cppunit/libcppunit.a -lpthread -lrt
 
 SHARED_FLAGS := -shared
 
@@ -79,13 +88,17 @@ all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 endif
 
 clean :
-	-rm -rf $(BASE_DIR)/target
+	-rm -rf $(BASE_DIR)/target $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 
 distclean : clean
 	-rm $(BASE_DIR)/build/config.mak
 	-make -C $(OMI_ROOT) distclean
+	-make -C $(SCXPAL_DIR)/build clean
 	-rm -rf $(OMI_ROOT)/output*
+	-$(RM) $(SCXPAL_DIR)/build/config.mak
+	-$(RM) $(SCXPAL_DIR)/build/Makefile.config_cache
+	-$(RM) -rf $(SCXPAL_DIR)/intermediate $(SCXPAL_DIR)/target
 
 # Install both the Apache module and the OMI provider
 # This assumes that:
@@ -125,12 +138,31 @@ ifeq ($(PERFORM_OMI_MAKEINSTALL),1)
 endif
 
 #--------------------------------------------------------------------------------
+# PAL build
+#
+# Build the PAL (Platform Abstraction Layer)
+#
+# Technically, we should go to build PAL all the time. But I'd rather not spend
+# the time doing it here EVERY TIME, when we never normally change PAL. This is
+# a good tradeoff (build if not built, otherwise assume all is well).
+#
+# Doing a 'make clean' in PAL directory will force us to rebuild.
+#
+# Note: Strictly speaking, PAL is only needed for the unit tests. However, due
+# to various makefile dependencies, we build it all the time (not as part of the
+# "test" rule).
+
+$(SCXPAL_INTERMEDIATE_DIR) :
+	@echo "========================= Performing Building PAL"
+	make -C $(SCXPAL_DIR)/build
+
+#--------------------------------------------------------------------------------
 # Version information header file
 #
 # Build the version header file
 
 $(INCLUDE_VERSION) : $(BASE_DIR)/build/Makefile.version
-	-$(MKPATH) $(TARGET_DIR)
+	-$(MKPATH) $(@D)
 	@$(ECHO) "Creating $@" 
 	@$(call pf_fwrite,"/*------------------------------------------------------------------------------",  $@)
 	@$(call pf_fappend,"    Copyright (C) 2007-2014 Microsoft Corp.                                     ", $@)
@@ -161,11 +193,75 @@ $(INCLUDE_VERSION) : $(BASE_DIR)/build/Makefile.version
 	@$(call pf_fappend,"/** Build number */                                                             ", $@)
 	@$(call pf_fappend,"const int CIMPROV_BUILDVERSION_BUILDNR = $(SCX_BUILDVERSION_BUILDNR);           ", $@)
 	@$(call pf_fappend,"/** Build date */                                                               ", $@)
-	@$(call pf_fappend,"const char *CIMPROV_BUILDVERSION_DATE = \"$(SCX_BUILDVERSION_DATE)\";           ", $@)
+	@$(call pf_fappend,"const std::string CIMPROV_BUILDVERSION_DATE(\"$(SCX_BUILDVERSION_DATE)\");      ", $@)
 	@$(call pf_fappend,"/** Build status */                                                             ", $@)
-	@$(call pf_fappend,"const char *CIMPROV_BUILDVERSION_STATUS = \"$(SCX_BUILDVERSION_STATUS)\";       ", $@)
+	@$(call pf_fappend,"const std::string CIMPROV_BUILDVERSION_STATUS(\"$(SCX_BUILDVERSION_STATUS)\");  ", $@)
 	@$(call pf_fappend,"                                                                                ", $@)
 	@$(call pf_fappend,"#endif /* BUILDVERSION_H */                                                     ", $@)
+	@$(call pf_fappend,"/*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/", $@)
+
+#================================================================================
+# File depends.h (compiler dependencies)
+#================================================================================
+
+$(INCLUDE_DEFINES) : $(BASE_DIR)/build/config.mak
+	-$(MKPATH) $(@D)
+	@$(ECHO) "Creating $@" 
+	@$(call pf_fwrite,"/*------------------------------------------------------------------------------",  $@)
+	@$(call pf_fappend,"    Copyright (C) 2007 Microsoft Corp.                                          ", $@)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"*/                                                                              ", $@)
+	@$(call pf_fappend,"/**                                                                             ", $@)
+	@$(call pf_fappend,"    \file                                                                       ", $@)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"    \brief       Auto generated file containing build definitions               ", $@)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"    \author      Automated Build System                                         ", $@)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"    DO NOT EDIT THIS FILE!                                                      ", $@)
+	@$(call pf_fappend,"    DO NOT CHECK IN THIS FILE!                                                  ", $@)
+	@$(call pf_fappend,"*/                                                                              ", $@)
+	@$(call pf_fappend,"/*----------------------------------------------------------------------------*/", $@)
+	@$(call pf_fappend,"#ifndef DEFINES_H                                                               ", $@)
+	@$(call pf_fappend,"#define DEFINES_H                                                               ", $@)
+	@$(call pf_fappend,"                                                                                ", $@)
+ifneq ($(PF_DISTRO),)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#ifndef PF_DISTRO_$(PF_DISTRO)                                                  ", $@)
+	@$(call pf_fappend,"#define PF_DISTRO_$(PF_DISTRO)                                                  ", $@)
+	@$(call pf_fappend,"#endif                                                                          ", $@)
+endif
+ifneq ($(PF_MAJOR),)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#ifndef PF_MAJOR                                                                 ", $@)
+	@$(call pf_fappend,"#define PF_MAJOR $(PF_MAJOR)                                                    ", $@)
+	@$(call pf_fappend,"#endif                                                                          ", $@)
+endif
+ifneq ($(PF_MINOR),)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#ifndef PF_MINOR                                                                 ", $@)
+	@$(call pf_fappend,"#define PF_MINOR $(PF_MINOR)                                                    ", $@)
+	@$(call pf_fappend,"#endif                                                                          ", $@)
+endif
+ifneq ($(ARCH),)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#ifndef $(ARCH)                                                                 ", $@)
+	@$(call pf_fappend,"#define $(ARCH)                                                                 ", $@)
+	@$(call pf_fappend,"#endif                                                                          ", $@)
+endif
+ifeq ($(BUILD_TYPE),Debug)
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#ifndef _DEBUG                                                                  ", $@)
+	@$(call pf_fappend,"#define _DEBUG                                                                  ", $@)
+	@$(call pf_fappend,"#endif                                                                          ", $@)
+else
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#ifndef NDEBUG                                                                  ", $@)
+	@$(call pf_fappend,"#define NDEBUG                                                                  ", $@)
+	@$(call pf_fappend,"#endif                                                                          ", $@)
+endif
+	@$(call pf_fappend,"                                                                                ", $@)
+	@$(call pf_fappend,"#endif /* DEFINES_H */                                                          ", $@)
 	@$(call pf_fappend,"/*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/", $@)
 
 #--------------------------------------------------------------------------------
@@ -201,6 +297,39 @@ $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_V
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
 
 #--------------------------------------------------------------------------------
+# Apache Provider Unit Tests
+#
+# Build and run the Provider Unit Tests
+
+# For now, providertestutils.cpp lives in PAL, but is built in OM.  This creates
+# some build issues.  To resolve, create a link to the real file.
+
+$(PROVIDER_TEST_DIR)/providertestutils.cpp: $(PAL_TESTUTILS_DIR)/providertestutils.cpp
+# We need to recreate the symlink if the link is older than what it points to.
+	rm -f $(PROVIDER_TEST_DIR)/providers/providertestutils.cpp
+	ln -s $(PAL_TESTUTILS_DIR)/providertestutils.cpp $(PROVIDER_TEST_DIR)/providertestutils.cpp
+
+STATIC_PROVIDER_UNITFILES = \
+	$(PROVIDER_TEST_DIR)/server_test.cpp \
+	\
+	$(PROVIDER_TEST_DIR)/productdependencies.cpp \
+	$(PROVIDER_TEST_DIR)/providertestutils.cpp \
+	$(PAL_TESTUTILS_DIR)/scxassert_cppunit.cpp \
+	$(PAL_TESTUTILS_DIR)/testrunner.cpp \
+	$(PAL_TESTUTILS_DIR)/testrunnerlogpolicy.cpp
+
+$(TARGET_DIR)/testrunner : $(STATIC_PROVDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
+	@echo "========================= Performing Building provider tests"
+	mkdir -p $(TARGET_DIR)
+	g++ $(COMPILE_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_TEST_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES) $(PROVIDER_TEST_LINK_LIBRARIES)
+
+testrun : test
+
+test : $(SCXPAL_INTERMEDIATE_DIR) $(TARGET_DIR)/testrunner
+	@echo "========================= Performing Apache testrun execution"
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(OMI_ROOT)/output/lib $(TARGET_DIR)/testrunner
+
+#--------------------------------------------------------------------------------
 # Apache Module
 
 APACHE_REAL_SOURCE := $(SOURCE_DIR)/module/$(APACHE_MODULE_BASENAME).c
@@ -225,10 +354,6 @@ $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 	@echo "========================= Performing Building RPM and DPKG packages"
 	mkdir -p $(INSTALLER_TMPDIR)
-
-#		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
-#		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
-
 	sudo rm -rf $(STAGING_DIR)
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
@@ -241,8 +366,8 @@ kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 		--PFDISTRO=$(PF_DISTRO) \
 		--PFMAJOR=$(PF_MAJOR) \
 		--PFMINOR=$(PF_MINOR) \
-		--VERSION=1.0.0 \
-		--RELEASE=100 \
+		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
 		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
 		base_apache.data linux.data linux_rpm.data
 
@@ -259,8 +384,8 @@ ifeq ($(ULINUX),1)
 		--PFDISTRO=$(PF_DISTRO) \
 		--PFMAJOR=$(PF_MAJOR) \
 		--PFMINOR=$(PF_MINOR) \
-		--VERSION=1.0.0 \
-		--RELEASE=100 \
+		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
 		--DPKG_LOCATION=$(SCXPAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH) \
 		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
 		base_apache.data linux.data linux_dpkg.data

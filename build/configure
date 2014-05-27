@@ -1,6 +1,7 @@
 #!/bin/bash
 
 scxomi_dir=`(cd ../../omi/distro; pwd -P)`
+scxpal_dir=`(cd ../../pal; pwd -P)`
 
 enable_debug=""
 enable_debug_flag=0
@@ -92,7 +93,7 @@ EOF
 fi
 
 omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${enable_omi_tools} ${omi_configure_quals}"
-
+pal_configure_quals="${enable_debug}"
 
 
 
@@ -199,6 +200,11 @@ ULINUX=$ULINUX
 BUILD_CONFIGURATION=$BUILD_CONFIGURATION
 EOF
 
+
 # Fix permissions in case they aren't executable - and then configure OMI
 chmod ug+x ${scxomi_dir}/configure ${scxomi_dir}/buildtool
 (cd ${scxomi_dir} && ./configure ${omi_configure_quals})
+
+# Fix permissions in case they aren't executable - and then configure PAL
+chmod ug+x ${scxpal_dir}/build/configure
+(cd ${scxpal_dir}/build && ./configure ${pal_configure_quals})
