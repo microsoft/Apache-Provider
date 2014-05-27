@@ -47,6 +47,7 @@ public:
 
     static const char *GetServerConfigFile() { return GetDataString(ms_server_data->configFileOffset); }
     static const char *GetServerProcessName() { return GetDataString(ms_server_data->processNameOffset); }
+    static const char *GetServerVersion() { return GetDataString(ms_server_data->serverVersionOffset); }
     static int GetOperatingStatus() { return ms_server_data->operatingStatus; }
     static apr_size_t GetModuleCount() { return ms_server_data->moduleCount; }
     static mmap_server_modules *GetServerModules() { return ms_server_data->modules; }

@@ -13,6 +13,7 @@
 
 // Virtual host memory mapped file definitions
 #include "apachebinding.h"
+#include "cimconstants.h"
 
 // Convert a string encoded in this project's base-64 encoding into a 16-bit integer
 static apr_uint16_t decode64(const char* str)
@@ -41,8 +42,9 @@ static void EnumerateOneInstance(Context& context,
 
         std::vector<mi::String> ipAddressesArray;
         std::vector<mi::Uint16> portsArray;
+        std::vector<mi::String> aliasesArray;
 
-        const char* ptr = g_apache.GetDataString(vhosts[item].addressesAndPortsOffsets);
+        const char* ptr = g_apache.GetDataString(vhosts[item].addressesAndPortsOffset);
         while (*ptr != '\0')
         {
             ipAddressesArray.push_back(ptr);
@@ -51,9 +53,20 @@ static void EnumerateOneInstance(Context& context,
             ptr += strlen(ptr) + 1;
         }
 
+        ptr = g_apache.GetDataString(vhosts[item].serverAliasesOffset);
+        while (*ptr != '\0')
+        {
+            aliasesArray.push_back(ptr);
+            ptr += strlen(ptr) + 1;
+        }
+
         // Insert the values into the instance
 
         inst.ServerName_value(g_apache.GetDataString(vhosts[item].hostNameOffset));
+        inst.Version_value(g_apache.GetServerVersion());
+        inst.SoftwareElementState_value(CIM_SOFTWARE_ELEMENT_STATE_RUNNING);
+        inst.SoftwareElementID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+        inst.TargetOperatingSystem_value(CIM_TARGET_OPERATING_SYSTEM);
 
         inst.DocumentRoot_value(g_apache.GetDataString(vhosts[item].documentRootOffset));
         inst.ServerAdmin_value(g_apache.GetDataString(vhosts[item].serverAdminOffset));
@@ -64,6 +77,8 @@ static void EnumerateOneInstance(Context& context,
         inst.IPAddresses_value(ipAddressesA);
         mi::Uint16A portsA(&portsArray[0], (MI_Uint32)portsArray.size());
         inst.Ports_value(portsA);
+        mi::StringA aliasesA(&aliasesArray[0], (MI_Uint32)aliasesArray.size());
+        inst.ServerAlias_value(aliasesA);
     }
 
     context.Post(inst);

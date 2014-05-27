@@ -30,6 +30,7 @@ typedef struct
 {
     apr_size_t configFileOffset;        // Apache configuration file name
     apr_size_t processNameOffset;       // Process name
+    apr_size_t serverVersionOffset;     // Version of Apache server
     int operatingStatus;                // Operating status
 
     apr_uint32_t idleApacheWorkers;     // Number of workers that are currently idle (from Apache)
@@ -58,8 +59,8 @@ typedef struct
     apr_size_t logCustomOffset;
     apr_size_t logAccessOffset;
 
-    apr_size_t addressesAndPortsOffsets;
-    // Note: need ServerAliases[]
+    apr_size_t addressesAndPortsOffset;
+    apr_size_t serverAliasesOffset;
 
     // Counters are kept as 32-bit values, for APR compatibility. Overflow to be
     // recognized by and compensated by the provider. This works because we are

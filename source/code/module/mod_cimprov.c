@@ -54,6 +54,16 @@ typedef enum
 module AP_MODULE_DECLARE_DATA cimprov_module;
 
 /*
+ * Representation of an ordered array of strings
+ */
+
+typedef struct string_array string_array;
+struct string_array {
+    string_array* next;                 /* Pointer to next string */
+    char string[PATH_MAX];              /* This string, either the source or destination of the the path portion of a URL */
+};
+
+/*
  * The module-wide list of hosts and some of their per-host configuration information
  */
 
@@ -64,13 +74,16 @@ struct config_hostInfo {
     char transferLogFileName[PATH_MAX]; /* Name of the transfer log file */
     char customLogFileName[PATH_MAX];   /* Name of the custom log file */
     char documentRoot[PATH_MAX];        /* Name of the host's document root directory */
+    string_array* aliases;              /* List of aliases for this server */
+    string_array* lastAlias;            /* Last item in *aliases, used to avoid walking to the end when adding */
 };
 
 typedef enum
 {
     DOCUMENT_ROOT,
     TRANSFER_LOG_FILE_NAME,
-    CUSTOM_LOG_FILE_NAME
+    CUSTOM_LOG_FILE_NAME,
+    PATH_ALIAS
 } host_info_type;
 
 /*
@@ -231,7 +244,7 @@ static config_sslCertFile* find_certificate_file(persist_cfg* cfg, const char* c
 }
 
 /* Add data to the host information item for a given server record */
-static const char *set_host_info(cmd_parms *cmd, void *dummy, host_info_type type, const char* value)
+static const char *set_host_info(cmd_parms *cmd, void *dummy, host_info_type type, const char* value1, const char* value2)
 {
     config_hostInfo* hostInfo;
     server_rec* s = cmd->server;
@@ -261,15 +274,49 @@ static const char *set_host_info(cmd_parms *cmd, void *dummy, host_info_type typ
     /* Set the appropriate data element in the list item */
     if (type == DOCUMENT_ROOT)
     {
-        apr_cpystrn(hostInfo->documentRoot, value, sizeof hostInfo->documentRoot);
+        apr_cpystrn(hostInfo->documentRoot, value1, sizeof hostInfo->documentRoot);
     }
     else if (type == TRANSFER_LOG_FILE_NAME)
     {
-        apr_cpystrn(hostInfo->transferLogFileName, value, sizeof hostInfo->transferLogFileName);
+        apr_cpystrn(hostInfo->transferLogFileName, value1, sizeof hostInfo->transferLogFileName);
     }
     else if (type == CUSTOM_LOG_FILE_NAME)
     {
-        apr_cpystrn(hostInfo->customLogFileName, value, sizeof hostInfo->customLogFileName);
+        apr_cpystrn(hostInfo->customLogFileName, value1, sizeof hostInfo->customLogFileName);
+    }
+    else if (type == PATH_ALIAS)
+    {
+        string_array* aliasSrc;
+        string_array* aliasTarget;
+
+        /* Allocate the strings in temporary memory */
+        aliasSrc = (string_array*)apr_pcalloc(g_persistConfig->configPool, sizeof (string_array));
+        if (aliasSrc == NULL)
+        {
+            display_error(g_persistConfig, "cimprov: unable to allocate memory for path alias item", APR_ENOMEM, 1);
+            return "cimprov: unable to allocate memory for path alias item";
+        }
+
+        aliasTarget = (string_array*)apr_pcalloc(g_persistConfig->configPool, sizeof (string_array));
+        if (aliasTarget == NULL)
+        {
+            display_error(g_persistConfig, "cimprov: unable to allocate memory for path alias item", APR_ENOMEM, 1);
+            return "cimprov: unable to allocate memory for path alias item";
+        }
+
+        aliasSrc->next = aliasTarget;   /* put the new strings into the array */
+        if (hostInfo->aliases == NULL)
+        {
+            hostInfo->aliases = aliasSrc;
+        }
+        else
+        {
+            hostInfo->lastAlias->next = aliasSrc;
+        }        
+        hostInfo->lastAlias = aliasTarget;
+
+        apr_cpystrn(aliasSrc->string, value1, PATH_MAX);    /* populate the strings */
+        apr_cpystrn(aliasTarget->string, value2, PATH_MAX);
     }
     else
     {
@@ -283,19 +330,25 @@ static const char *set_host_info(cmd_parms *cmd, void *dummy, host_info_type typ
 /* Add the name of the document root directory the list of host information */
 static const char *set_document_root(cmd_parms *cmd, void *dummy, const char *arg)
 {
-    return set_host_info(cmd, dummy, DOCUMENT_ROOT, arg);
+    return set_host_info(cmd, dummy, DOCUMENT_ROOT, arg, NULL);
 }
 
 /* Add the name of a transfer log file to the list of host information */
 static const char *set_transfer_log_file(cmd_parms *cmd, void *dummy, const char *arg)
 {
-    return set_host_info(cmd, dummy, TRANSFER_LOG_FILE_NAME, arg);
+    return set_host_info(cmd, dummy, TRANSFER_LOG_FILE_NAME, arg, NULL);
 }
 
 /* Add the name of a custom log file to the list of host information */
 static const char *set_custom_log_file(cmd_parms *cmd, void *dummy, const char *arg1, const char *arg2)
 {
-    return set_host_info(cmd, dummy, CUSTOM_LOG_FILE_NAME, arg1);
+    return set_host_info(cmd, dummy, CUSTOM_LOG_FILE_NAME, arg1, NULL);
+}
+
+/* Add the name of a custom log file to the list of host information */
+static const char *set_path_alias(cmd_parms *cmd, void *dummy, const char *arg1, const char *arg2)
+{
+    return set_host_info(cmd, dummy, PATH_ALIAS, arg1, arg2);
 }
 
 /* Add the name of a server certificate file for a given host and port to the certificate file names list */
@@ -358,6 +411,8 @@ static const command_rec cimprov_module_cmds[] =
       "Set the name of the transfer log file for the host."),
     AP_INIT_TAKE2("CustomLog", set_custom_log_file, NULL, RSRC_CONF,
       "Set the name of the custom log file for the host host."),
+    AP_INIT_TAKE2("Alias", set_path_alias, NULL, RSRC_CONF,
+      "Set the mapping for a server alias for the host."),
     AP_INIT_TAKE1("SSLCertificateFile", set_server_certificate_file, NULL, RSRC_CONF,
       "Set the name of the SSL certificate file for the host."),
     {NULL}
@@ -518,6 +573,23 @@ static char* encode64(apr_uint16_t value)
     s_encode_buf[3] = '\0';
     return s_encode_buf;
 }
+
+/* Terminate a data string array in the shared memory string table */
+
+static void terminate_data_string_array(
+    char* const string_table,
+    apr_size_t* pos)
+{
+    if (string_table != NULL)
+    {
+        *(string_table + *pos) = '\0';
+    }
+
+    *pos += 1;
+
+    return;
+}
+
 /* Add a string to the shared memory string table */
 
 static void add_data_string(
@@ -526,7 +598,7 @@ static void add_data_string(
     const char* string,
     apr_size_t* offset)
 {
-    if (string != NULL)
+    if (string != NULL && *string != '\0')
     {
         size_t len = strlen(string) + 1;
 
@@ -569,16 +641,25 @@ static apr_status_t collect_server_data(
 {
     apr_size_t index;
     module* modp;
+    const char* version = ap_get_server_version();
+    
+    /* Add the name of the configuration file */
+    add_data_string(string_table,
+               string_table_len,
+               config_file,
+               server_data != NULL ? &server_data->configFileOffset : NULL);
+
+    /* Add the Apache server version */
+    add_data_string(string_table,
+                    string_table_len,
+                    version,
+                    server_data != NULL ? &server_data->serverVersionOffset : NULL);
 
     if (server_data != NULL)
     {
         server_data->moduleCount = module_count;
         server_data->operatingStatus = operating_status;
     }
-    add_data_string(string_table,
-               string_table_len,
-               config_file,
-               server_data != NULL ? &server_data->configFileOffset : NULL);
 
     /* Add each of the loaded modules */
     index = 0;
@@ -660,7 +741,6 @@ static apr_status_t collect_vhost_data(
         config_hostInfo* hostInfo;
 
         /* Create the InstanceID for uniquely tracking this host */
-
         instanceHost = apr_pstrdup(ptemp, srec->server_hostname != NULL ? srec->server_hostname : "_default_");
         for (addrs = srec->addrs; addrs != NULL; addrs = addrs->next)
         {
@@ -693,7 +773,7 @@ static apr_status_t collect_vhost_data(
         {
             add_data_string(string_table,
                             string_table_len,
-                            srec->server_admin[0] != '\0' ? srec->server_admin : NULL,
+                            srec->server_admin,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].serverAdminOffset : NULL);
         }
 
@@ -701,28 +781,39 @@ static apr_status_t collect_vhost_data(
         {
             add_data_string(string_table,
                             string_table_len,
-                            srec->error_fname[0] != '\0' ? srec->error_fname : NULL,
+                            srec->error_fname,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logErrorOffset : NULL);
         }
 
         hostInfo = find_host_info(cfg, srec);
         if (hostInfo != NULL)
         {
+            string_array* alias;        /* List of aliases for this server */
+
             add_data_string(string_table,
                             string_table_len,
-                            hostInfo->transferLogFileName[0] != '\0' ? hostInfo->transferLogFileName : NULL,
+                            hostInfo->transferLogFileName,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logAccessOffset : NULL);
             add_data_string(string_table,
                             string_table_len,
-                            hostInfo->customLogFileName[0] != '\0' ? hostInfo->customLogFileName : NULL,
+                            hostInfo->customLogFileName,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].logCustomOffset : NULL);
             add_data_string(string_table,
                             string_table_len,
-                            hostInfo->documentRoot[0] != '\0' ? hostInfo->documentRoot : NULL,
+                            hostInfo->documentRoot,
                             vhost_data != NULL ? &vhost_data->vhosts[vhost_element].documentRootOffset : NULL);
+            first = 1;
+            for (alias = hostInfo->aliases; alias != NULL; alias = alias->next)
+            {
+                add_data_string(string_table,
+                                string_table_len,
+                                alias->string,
+                                first && vhost_data != NULL ? &vhost_data->vhosts[vhost_element].serverAliasesOffset : NULL);
+                first = 0;
+            }
+            /* Terminate the array of IP addresses and ports */
+            terminate_data_string_array(string_table, string_table_len);
         }
-
-        // TODO: Populate logAccess, but not obvious in server_rec
 
         /* Populate the array of (IP address, port) */
         first = 1;
@@ -731,7 +822,7 @@ static apr_status_t collect_vhost_data(
             add_data_string(string_table,
                             string_table_len,
                             addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
-                            first && vhost_data != NULL ? &vhost_data->vhosts[vhost_element].addressesAndPortsOffsets : NULL);
+                            first && vhost_data != NULL ? &vhost_data->vhosts[vhost_element].addressesAndPortsOffset : NULL);
             add_data_string(string_table,
                             string_table_len,
                             encode64(addrs->host_addr->port),
@@ -745,10 +836,7 @@ static apr_status_t collect_vhost_data(
         }
 
         /* Terminate the array of IP addresses and ports */
-        add_data_string(string_table,
-                        string_table_len,
-                        "",
-                        NULL);
+        terminate_data_string_array(string_table, string_table_len);
 
         vhost_element++;
     }
