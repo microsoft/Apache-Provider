@@ -307,9 +307,9 @@ void DataSampler::PerformComputations()
         // since that's how providers will access them. It's better to not grab mutex in provider enumerations since
         // that can happen potentially more often, impacting overall Apache performanace.
 
-        apr_atomic_set32(&g_apache.ms_server_data->idleWorkers, g_apache.ms_server_data->idleApacheWorkers);
-        apr_atomic_set32(&g_apache.ms_server_data->busyWorkers, g_apache.ms_server_data->busyApacheWorkers);
-        clock_t cpuUtilization = g_apache.ms_server_data->apacheCpuUtilization;
+        apr_atomic_set32(&g_apache.m_server_data->idleWorkers, g_apache.m_server_data->idleApacheWorkers);
+        apr_atomic_set32(&g_apache.m_server_data->busyWorkers, g_apache.m_server_data->busyApacheWorkers);
+        clock_t cpuUtilization = g_apache.m_server_data->apacheCpuUtilization;
 
         if (APR_SUCCESS != (status = g_apache.UnlockMutex()))
         {
@@ -323,10 +323,10 @@ void DataSampler::PerformComputations()
 //      mod_cimprov.c stores (tu + ts + tcu + tcs) / tick in apacheCpuUtilization;
 
         // TODO: Not quite sure here - Kris will get back to me on how to compute this
-        apr_atomic_set32(&g_apache.ms_server_data->percentCPU, 0);
+        apr_atomic_set32(&g_apache.m_server_data->percentCPU, 0);
 
         // Save the current clock value as the prior value for the next time 'round
-        g_apache.ms_server_data->cpuUtilizationPrior = cpuUtilization;
+        g_apache.m_server_data->cpuUtilizationPrior = cpuUtilization;
     } while (false);
 
     // TODO: Lock the process mutex (thread mutex?  Don't think we need process mutex for virtual hosts)

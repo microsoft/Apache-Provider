@@ -88,17 +88,17 @@ all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 endif
 
 clean :
-	-rm -rf $(BASE_DIR)/target $(PROVIDER_TEST_DIR)/providertestutils.cpp
+	$(RMDIR) $(BASE_DIR)/target $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 
 distclean : clean
-	-rm $(BASE_DIR)/build/config.mak
+	$(RM) $(BASE_DIR)/build/config.mak
 	-make -C $(OMI_ROOT) distclean
 	-make -C $(SCXPAL_DIR)/build clean
-	-rm -rf $(OMI_ROOT)/output*
+	-$(RMDIR) $(OMI_ROOT)/output*
 	-$(RM) $(SCXPAL_DIR)/build/config.mak
 	-$(RM) $(SCXPAL_DIR)/build/Makefile.config_cache
-	-$(RM) -rf $(SCXPAL_DIR)/intermediate $(SCXPAL_DIR)/target
+	-$(RMDIR) $(SCXPAL_DIR)/intermediate $(SCXPAL_DIR)/target
 
 # Install both the Apache module and the OMI provider
 # This assumes that:
@@ -293,7 +293,7 @@ PROVIDER_HEADERS = \
 
 $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"
-	mkdir -p $(TARGET_DIR)
+	$(MKPATH) $(TARGET_DIR)
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
 
 #--------------------------------------------------------------------------------
@@ -306,7 +306,7 @@ $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_V
 
 $(PROVIDER_TEST_DIR)/providertestutils.cpp: $(PAL_TESTUTILS_DIR)/providertestutils.cpp
 # We need to recreate the symlink if the link is older than what it points to.
-	rm -f $(PROVIDER_TEST_DIR)/providers/providertestutils.cpp
+	$(RM) $(PROVIDER_TEST_DIR)/providers/providertestutils.cpp
 	ln -s $(PAL_TESTUTILS_DIR)/providertestutils.cpp $(PROVIDER_TEST_DIR)/providertestutils.cpp
 
 STATIC_PROVIDER_UNITFILES = \
@@ -318,9 +318,9 @@ STATIC_PROVIDER_UNITFILES = \
 	$(PAL_TESTUTILS_DIR)/testrunner.cpp \
 	$(PAL_TESTUTILS_DIR)/testrunnerlogpolicy.cpp
 
-$(TARGET_DIR)/testrunner : $(STATIC_PROVDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
+$(TARGET_DIR)/testrunner : $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	@echo "========================= Performing Building provider tests"
-	mkdir -p $(TARGET_DIR)
+	$(MKPATH) $(TARGET_DIR)
 	g++ $(COMPILE_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_TEST_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES) $(PROVIDER_TEST_LINK_LIBRARIES)
 
 testrun : test
@@ -336,7 +336,7 @@ APACHE_REAL_SOURCE := $(SOURCE_DIR)/module/$(APACHE_MODULE_BASENAME).c
 APACHE_TARGET_SOURCE := $(TARGET_DIR)/module/$(APACHE_MODULE_BASENAME).c
 
 $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
-	mkdir -p $(TARGET_DIR)/module
+	$(MKPATH) $(TARGET_DIR)/module
 	ln -s  $(APACHE_REAL_SOURCE) $(APACHE_TARGET_SOURCE)
 
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
@@ -353,8 +353,8 @@ $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 
 kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 	@echo "========================= Performing Building RPM and DPKG packages"
-	mkdir -p $(INSTALLER_TMPDIR)
-	sudo rm -rf $(STAGING_DIR)
+	$(MKPATH) $(INSTALLER_TMPDIR)
+	sudo $(RMDIR) $(STAGING_DIR)
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
 		--TARGET_DIR=$(TARGET_DIR) \
@@ -372,7 +372,7 @@ kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 		base_apache.data linux.data linux_rpm.data
 
 ifeq ($(ULINUX),1)
-	sudo rm -rf $(STAGING_DIR)
+	sudo $(RMDIR) $(STAGING_DIR)
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
 		--TARGET_DIR=$(TARGET_DIR) \
@@ -417,13 +417,13 @@ MOF_DIR = $(SOURCE_DIR)/mof
 schema_gen :
 	# The omigen facility is unhappy if no ~/.omigenrc file exists, so create one for this run
 	touch ~/.omigenrc
-	mkdir -p $(TARGET_DIR)/omi
+	$(MKPATH) $(TARGET_DIR)/omi
 	cd $(TARGET_DIR)/omi; $(OMIGEN) $(MOF_DIR)/apache.mof -d $(PROVIDER_DIR) $(CLASSES) --cpp -I $(OMI_DIR)/share/omischema
-	rm ~/.omigenrc
+	$(RM) ~/.omigenrc
 
 omi_reg :
-	mkdir -p $(TARGET_DIR)/omi
-	mkdir -p $(OMI_DIR)/etc/omiregister/root-apache
+	$(MKPATH) $(TARGET_DIR)/omi
+	$(MKPATH) $(OMI_DIR)/etc/omiregister/root-apache
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(TARGET_DIR)/omi; $(OMI_BINDIR)/omireg -n root/apache -o root $(PROVIDER_LIBRARY)
 	cp -r $(OMI_DIR)/etc/omiregister/root-apache $(TARGET_DIR)/omi
 

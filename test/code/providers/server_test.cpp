@@ -16,6 +16,7 @@
 #include <testutils/providertestutils.h>
 
 #include "Apache_HTTPDServer_Class_Provider.h"
+#include "apachebinding.h"
 
 /*
 using namespace SCXCore;
@@ -23,7 +24,7 @@ using namespace SCXCoreLib;
 using namespace SCXSystemLib;
 */
 
-class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture
+class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, ApacheBinding
 {
     CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test  );
     CPPUNIT_TEST( callDumpStringForCoverage );
@@ -47,6 +48,9 @@ private:
 public:
     void setUp(void)
     {
+        InhibitStatusOutput();
+        Initialize();
+
 /*
         std::wstring errMsg;
         TestableContext context;

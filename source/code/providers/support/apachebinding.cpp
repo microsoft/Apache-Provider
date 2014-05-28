@@ -3,7 +3,7 @@
  *      
  *           */
  /**
-        \file        apache_interface.cpp
+        \file        apachebinding.cpp
 
         \brief       Provider helper functions for Apache module/provider bindings
 
@@ -12,22 +12,17 @@
 /*----------------------------------------------------------------------------*/
 
 #include <stdio.h>
+#include <unistd.h>
 #include <apr_strings.h>
 
 #include "apachebinding.h"
 #include "datasampler.h"
 
-// Static member initialization
-apr_pool_t *ApacheBinding::ms_apr_pool = NULL;
-apr_shm_t *ApacheBinding::ms_mmap_region = NULL;
-mmap_server_data *ApacheBinding::ms_server_data = NULL;
-mmap_vhost_data *ApacheBinding::ms_vhost_data = NULL;
-mmap_certificate_data *ApacheBinding::ms_certificate_data = NULL;
-mmap_string_table *ApacheBinding::ms_string_data = NULL;
-apr_global_mutex_t *ApacheBinding::ms_mutexMapRW = NULL;
+// Define single global copy - no need to load shared memory multiple times
+ApacheBinding g_apache;
 
-DataSampler ApacheBinding::ms_sampler;
-int ApacheBinding::ms_loadCount = 0;
+bool ApacheBinding::sm_fAprInitialized = false;
+
 
 void ApacheBinding::DisplayError(apr_status_t status, const char *text)
 {
@@ -38,8 +33,11 @@ void ApacheBinding::DisplayError(apr_status_t status, const char *text)
 
     if (0 == status)
     {
-        fprintf(stderr, "[%s] %s\n",
-                dateStr, (text != NULL ? text : "Unexpected error occurred"));
+        if ( m_fStatusOutput )
+        {
+            fprintf(stderr, "[%s] %s\n",
+                    dateStr, (text != NULL ? text : "Unexpected error occurred"));
+        }
     }
     else if (status < APR_OS_START_USERERR)
     {
@@ -69,24 +67,20 @@ void ApacheBinding::DisplayError(apr_status_t status, const char *text)
 
 apr_status_t ApacheBinding::Load(const char *text)
 {
-    if ( 1 == ++ms_loadCount )
+    if ( 1 == ++m_loadCount )
     {
         apr_status_t status;
         char buffer[256];
 
-        // Initialize the APR (Apache Portable Runtime)
-        snprintf(buffer, sizeof(buffer), "ApacheBinding::Load (%s): Initializing the APR", text ? text : "Unspecified");
-        DisplayError(0, buffer);
-        if (APR_SUCCESS != (status = apr_initialize()))
+        // One time initialization ...
+        if ( APR_SUCCESS != (status = Initialize()) )
         {
-            snprintf(buffer, sizeof(buffer), "ApacheBinding::Load (%s): Failed to initialize APR", text ? text : "Unspecified");
-            DisplayError(status, buffer);
             return status;
         }
 
         snprintf(buffer, sizeof(buffer), "ApacheBinding::Load (%s): Creating memory pool", text ? text : "Unspecified");
         DisplayError(0, buffer);
-        if (APR_SUCCESS != (status = apr_pool_create(&ms_apr_pool, NULL)))
+        if (APR_SUCCESS != (status = apr_pool_create(&m_apr_pool, NULL)))
         {
             snprintf(buffer, sizeof(buffer), "ApacheBinding::Load (%s): Failed to create memory pool", text ? text : "Unspecified");
             DisplayError(status, buffer);
@@ -99,10 +93,10 @@ apr_status_t ApacheBinding::Load(const char *text)
 
         // Initialize the mutex that we need
         // FAIL???  We can lock the INIT lock when Apache should be holding, investigate!
-        DisplayError(0, apr_psprintf(ms_apr_pool, "ApacheBinding::Load (%s): Creating mutex", text ? text : "Unspecified"));
-        if (APR_SUCCESS != (status = apr_global_mutex_create(&ms_mutexMapRW, MUTEX_INIT_NAME, APR_LOCK_DEFAULT, ms_apr_pool)))
+        DisplayError(0, apr_psprintf(m_apr_pool, "ApacheBinding::Load (%s): Creating mutex", text ? text : "Unspecified"));
+        if (APR_SUCCESS != (status = apr_global_mutex_create(&m_mutexMapRW, MUTEX_INIT_NAME, APR_LOCK_DEFAULT, m_apr_pool)))
         {
-            DisplayError(status, apr_psprintf(ms_apr_pool, "ApacheBinding::Load (%s): failed to initialize the RW mutex", text ? text : "Unspecified"));
+            DisplayError(status, apr_psprintf(m_apr_pool, "ApacheBinding::Load (%s): failed to initialize the RW mutex", text ? text : "Unspecified"));
             return status;
         }
 
@@ -113,22 +107,22 @@ apr_status_t ApacheBinding::Load(const char *text)
         */
 
         // Map the shared memory region
-        DisplayError(0, apr_psprintf(ms_apr_pool, "ApacheBinding::Load (%s): Mapping region", text ? text : "Unspecified"));
-        if (APR_SUCCESS != (status = apr_shm_attach(&ms_mmap_region, PROVIDER_MMAP_NAME, ms_apr_pool)))
+        DisplayError(0, apr_psprintf(m_apr_pool, "ApacheBinding::Load (%s): Mapping region", text ? text : "Unspecified"));
+        if (APR_SUCCESS != (status = apr_shm_attach(&m_mmap_region, PROVIDER_MMAP_NAME, m_apr_pool)))
         {
-            DisplayError(0, apr_psprintf(ms_apr_pool, "ApacheBinding::Load (%s): failed to map shared memory", text ? text : "Unspecified"));
+            DisplayError(0, apr_psprintf(m_apr_pool, "ApacheBinding::Load (%s): failed to map shared memory", text ? text : "Unspecified"));
             return status;
         }
 
         /* Assign global pointers */
-        ms_server_data = reinterpret_cast<mmap_server_data*> (apr_shm_baseaddr_get(ms_mmap_region));
-        ms_vhost_data = reinterpret_cast<mmap_vhost_data*> (ms_server_data->modules + ms_server_data->moduleCount);
-        ms_certificate_data = reinterpret_cast<mmap_certificate_data*> (ms_vhost_data->vhosts + ms_vhost_data->count);
-        ms_string_data = reinterpret_cast<mmap_string_table*> (ms_certificate_data->certificates + ms_certificate_data->count);
+        m_server_data = reinterpret_cast<mmap_server_data*> (apr_shm_baseaddr_get(m_mmap_region));
+        m_vhost_data = reinterpret_cast<mmap_vhost_data*> (m_server_data->modules + m_server_data->moduleCount);
+        m_certificate_data = reinterpret_cast<mmap_certificate_data*> (m_vhost_data->vhosts + m_vhost_data->count);
+        m_string_data = reinterpret_cast<mmap_string_table*> (m_certificate_data->certificates + m_certificate_data->count);
 
         /* Launch thread to count time-based statistics */
-        DisplayError(0, apr_psprintf(ms_apr_pool, "ApacheBinding::Load (%s): Launching worker thread", text ? text : "Unspecified"));
-        if (APR_SUCCESS != (status = ms_sampler.Launch()))
+        DisplayError(0, apr_psprintf(m_apr_pool, "ApacheBinding::Load (%s): Launching worker thread", text ? text : "Unspecified"));
+        if (APR_SUCCESS != (status = m_sampler.Launch()))
         {
             return status;
         }
@@ -139,32 +133,34 @@ apr_status_t ApacheBinding::Load(const char *text)
 
 int ApacheBinding::Unload(const char *text)
 {
-    if (0 == --ms_loadCount)
+    if (0 == --m_loadCount)
     {
         apr_status_t status;
 
         // Shut down the sampler thread
-        if (APR_SUCCESS != (status = ms_sampler.WaitForCompletion()))
+        if (APR_SUCCESS != (status = m_sampler.WaitForCompletion()))
         {
-            DisplayError(status, apr_psprintf(ms_apr_pool, "ApacheBinding::Unload (%s): failed to terminate worker thread", text ? text : "Unspecified"));
+            DisplayError(status, apr_psprintf(m_apr_pool, "ApacheBinding::Unload (%s): failed to terminate worker thread", text ? text : "Unspecified"));
             // Shouldn't terminate shutdown for this - fall through
         }
 
         // Unmap the shared memory region and clean up resources
-        if (APR_SUCCESS != (status = apr_shm_detach(ms_mmap_region)))
+        if (APR_SUCCESS != (status = apr_shm_detach(m_mmap_region)))
         {
-            DisplayError(status, apr_psprintf(ms_apr_pool, "ApacheBinding::Unload (%s): failed to unmap shared memory", text ? text : "Unspecified"));
+            DisplayError(status, apr_psprintf(m_apr_pool, "ApacheBinding::Unload (%s): failed to unmap shared memory", text ? text : "Unspecified"));
             // Shouldn't terminate shutdown for this - fall through
         }
 
-        if (APR_SUCCESS != (status = apr_global_mutex_destroy(ms_mutexMapRW)))
+        if (APR_SUCCESS != (status = apr_global_mutex_destroy(m_mutexMapRW)))
         {
-            DisplayError(status, apr_psprintf(ms_apr_pool, "ApacheBinding::Unload (%s): failed to clean up mutex", text ? text : "Unspecified"));
+            DisplayError(status, apr_psprintf(m_apr_pool, "ApacheBinding::Unload (%s): failed to clean up mutex", text ? text : "Unspecified"));
             // Shouldn't terminate shutdown for this - fall through
         }
 
-        apr_pool_clear(ms_apr_pool);
-        apr_terminate();
+        apr_pool_clear(m_apr_pool);
+
+        // Don't bother terminating the APR - makes unit tests easier,
+        // and no real point if we're just going to exit the process anyway
     }
 
     return APR_SUCCESS;
@@ -172,14 +168,35 @@ int ApacheBinding::Unload(const char *text)
 
 const char* ApacheBinding::GetDataString(apr_size_t offset)
 {
-    if (offset == 0 || (apr_size_t)offset >= ms_string_data->total_length)
+    if (offset == 0 || (apr_size_t)offset >= m_string_data->total_length)
     {
         return "";
     }
-    return ms_string_data->data + offset;
+    return m_string_data->data + offset;
 }
 
-// Only construct class once - no need to load shared memory multiple times
-ApacheBinding g_apache;
+apr_status_t ApacheBinding::Initialize()
+{
+    // Initialize the APR (Apache Portable Runtime)
+    if (! sm_fAprInitialized)
+    {
+        apr_status_t status;
+        char buffer[256];
+
+        sm_fAprInitialized = true;
+
+        snprintf(buffer, sizeof(buffer), "ApacheBinding::Load: Initializing the APR");
+        DisplayError(0, buffer);
+
+        if (APR_SUCCESS != (status = apr_initialize()))
+        {
+            snprintf(buffer, sizeof(buffer), "ApacheBinding::Load: Failed to initialize APR");
+            DisplayError(status, buffer);
+            return status;
+        }
+    }
+
+    return APR_SUCCESS;
+}
 
 /*----------------------------E-N-D---O-F---F-I-L-E---------------------------*/
