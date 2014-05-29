@@ -84,8 +84,6 @@
          only on the platforms where documentation is generated, usually
          just one platform -->
     <!-- This can be set to a invalid target to test doc build failure -->
-    <DoxygenMakeTarget>doxygen_corelib</DoxygenMakeTarget>
-    <DoxygenDropFolder Condition=" '$(DoxygenDropFolder)' == '' ">Core/Docs/currentdoxygen</DoxygenDropFolder>
 
     <DocumentationGeneration Condition=" '$(DocumentationGeneration)' == '' ">false</DocumentationGeneration>
     <DropDocumentation Condition=" '$(DropDocumentation)' == '' ">false</DropDocumentation>
@@ -221,17 +219,6 @@
           IgnoreStandardErrorWarningFormat='true'
           />
 
-  </Target>
-
-  <!-- Only do GenerateDocumentation on one machine, currently SuSE 10.0 x86_32 -->
-  <Target Name="GenerateDocumentation" Condition=" '$(DocumentationGeneration)' == 'true' ">
-    <Message Text="Generating documentation with Doxygen on $(UnixBuildServer)" />
-    <Exec WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\Apache\bootstrap"
-          Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/bootstrap/RunBuild.bsh $(UnixWorkspaceName)/Apache $(DoxygenMakeTarget) $(ConfigToBuild)' />
-    <Exec Condition=" '$(DropDocumentation)' == 'true' "
-          WorkingDirectory="$(MSBuildProjectDirectory)\..\sources\Apache\bootstrap"
-          Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/bootstrap/DropDocumentation.bsh $(UnixWorkspaceName)/Apache $(DropShare) $(DoxygenDropFolder)'
-          />
   </Target>
 
   <Target Name="BeforeDropBuild">
