@@ -54,6 +54,8 @@ public:
     const char *GetServerConfigFile() { return GetDataString(m_server_data->configFileOffset); }
     const char *GetServerProcessName() { return GetDataString(m_server_data->processNameOffset); }
     const char *GetServerVersion() { return GetDataString(m_server_data->serverVersionOffset); }
+    const char *GetServerRoot() { return GetDataString(m_server_data->serverRootOffset); }
+    const char *GetServerID() { return GetDataString(m_server_data->serverIDOffset); }
     int GetOperatingStatus() { return m_server_data->operatingStatus; }
     apr_size_t GetModuleCount() { return m_server_data->moduleCount; }
     mmap_server_modules *GetServerModules() { return m_server_data->modules; }

@@ -1,5 +1,6 @@
 /* @migen@ */
 #include <stdio.h>
+#include <string.h>
 
 #include <apr.h>
 #include <apr_strings.h>
@@ -13,6 +14,8 @@
 
 #include <mmap_region.h>
 #include "apachebinding.h"
+#include "cimconstants.h"
+#include "utils.h"
 #include "temppool.h"
 #include "Apache_HTTPDVirtualHostCertificate_Class_Provider.h"
 
@@ -172,6 +175,94 @@ static apr_uint32_t QuickHash(const char* str)
 
 MI_BEGIN_NAMESPACE
 
+static void EnumerateOneInstance(
+    Context& context,
+    bool keysOnly,
+    apr_size_t item,
+    TemporaryPool& pool)
+{
+    Apache_HTTPDVirtualHostCertificate_Class inst;
+    mmap_certificate_elements* certs = g_apache.GetCertificateElements();
+    const char* certificateFileName = g_apache.GetDataString(certs[item].certificateFileNameOffset);
+    const char* openSslVersion = GetApacheComponentVersion(g_apache.GetServerVersion(), "OpenSSL");
+
+#if defined(_WIN32)
+    // Since Windows file names are case-insensitive, just use the certificate file name
+    // as the instance ID
+    const mi::String idMiString(certificateFileName);
+#else
+    // For case-sensitive file systems, make the instance ID from the base certificate file name +
+    // a hash of the entire path
+    apr_uint32_t hash = QuickHash(certificateFileName);
+    const char* ptr = strrchr(certificateFileName, '/');
+
+    if (ptr == NULL)
+    {
+        ptr = certificateFileName;
+    }
+    else
+    {
+        ptr++;
+    }
+    const char* idStr = apr_psprintf(pool.Get(), "%s*%08x", ptr, (unsigned int)hash);
+
+    const mi::String idMiString(idStr);
+#endif
+
+    inst.Name_value(idMiString);
+    inst.Version_value(openSslVersion);
+    inst.SoftwareElementID_value(idMiString);
+    inst.TargetOperatingSystem_value(CIM_TARGET_OPERATING_SYSTEM);
+    inst.SoftwareElementState_value(CIM_SOFTWARE_ELEMENT_STATE_RUNNING);
+    inst.InstanceID_value(idMiString);
+
+    if (!keysOnly)
+    {
+        apr_finfo_t fileInfo;
+        apr_time_t timeNow;
+        apr_status_t status;
+
+        // Insert the host:port name for the first host that uses this certificate file
+        const char* hostStr = apr_psprintf(pool.Get(),
+                                           "%s:%d",
+                                           g_apache.GetDataString(certs[item].hostNameOffset),
+                                           certs[item].port);
+        inst.ServerName_value(hostStr);
+        inst.FileName_value(certificateFileName);
+
+        // Insert the certificate file dates
+        timeNow = apr_time_now();
+
+        // See if the file is newer that the stored dates
+        status = apr_stat(&fileInfo, certificateFileName, APR_FINFO_MTIME, pool.Get());
+        if (status != APR_SUCCESS || fileInfo.mtime != certs[item].certificateFileMtime)
+        {
+            // Get an updated copy of the certificate date information
+            certs[item].certificateFileMtime = fileInfo.mtime;
+            if (GetCertificateExpirationDate(certificateFileName,
+                                             pool.Get(),
+                                             certs[item].certificateExpirationCimTime,
+                                             &certs[item].certificateExpirationAprTime) < 0)
+            {
+                return;
+            }
+        }
+
+        // Convert the the certificate information to MI types and put in into the instance
+        mi::Datetime certificateExpirationCimTime;
+        certificateExpirationCimTime.Set(certs[item].certificateExpirationCimTime);
+
+        mi::Uint16 certificateDaysUntilExpiration((unsigned short)((certs[item].certificateExpirationAprTime - timeNow) /
+                                                                   ((apr_int64_t)1000000 * 60 * 60 * 24)));
+        inst.ExpirationDate_value(certificateExpirationCimTime);
+        inst.DaysUntilExpiration_value(certificateDaysUntilExpiration);
+    }
+
+    context.Post(inst);
+
+    return;
+}
+
 Apache_HTTPDVirtualHostCertificate_Class_Provider::Apache_HTTPDVirtualHostCertificate_Class_Provider(
     Module* module) :
     m_Module(module)
@@ -231,7 +322,6 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
     CIM_PEX_BEGIN
     {
         apr_status_t status;
-        apr_size_t i;
 
         // Lock the mutex to walk the list
         if (APR_SUCCESS != (status = g_apache.LockMutex()))
@@ -242,79 +332,10 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
         }
 
         TemporaryPool pool(g_apache.GetPool());
-
-        mmap_certificate_elements* certs = g_apache.GetCertificateElements();
-        for (i = 0; i < g_apache.GetCertificateCount(); i++)
+        apr_size_t item;
+        for (item = 0; item < g_apache.GetCertificateCount(); item++)
         {
-            Apache_HTTPDVirtualHostCertificate_Class inst;
-            const char* certificateFileName = g_apache.GetDataString(certs[i].certificateFileNameOffset);
-
-#if defined(_WIN32)
-            // Since Windows file names are case-insensitive, just use the certificate file name
-            // as the instance ID
-            inst.InstanceID_value(certificateFileName);
-#else
-            // For case-sensitive file systems, make the instance ID from the base certificate file name +
-            // a hash of the entire path
-            apr_uint32_t hash = QuickHash(certificateFileName);
-
-            const char* ptr = strrchr(certificateFileName, '/');
-
-            if (ptr == NULL)
-            {
-                ptr = certificateFileName;
-            }
-            else
-            {
-                ptr++;
-            }
-            const char* idStr = apr_psprintf(pool.Get(), "%s*%08x", ptr, (unsigned int)hash);
-
-            const mi::String idMiString(idStr);
-            inst.InstanceID_value(idMiString);
-#endif
-
-            if (!keysOnly)
-            {
-                apr_finfo_t fileInfo;
-                apr_time_t timeNow;
-
-                // Insert the host:port name for the first host that uses this certificate file
-                const char* hostStr = apr_psprintf(pool.Get(),
-                                                   "%s:%d",
-                                                   g_apache.GetDataString(certs[i].hostNameOffset),
-                                                   certs[i].port);
-                inst.ServerName_value(hostStr);
-
-                // Insert the certificate file dates
-                timeNow = apr_time_now();
-
-                // See if the file is newer that the stored dates
-                status = apr_stat(&fileInfo, certificateFileName, APR_FINFO_MTIME, pool.Get());
-                if (status != APR_SUCCESS || fileInfo.mtime != certs[i].certificateFileMtime)
-                {
-                    // Get an updated copy of the certificate date information
-                    certs[i].certificateFileMtime = fileInfo.mtime;
-                    if (GetCertificateExpirationDate(certificateFileName,
-                                                     pool.Get(),
-                                                     certs[i].certificateExpirationCimTime,
-                                                     &certs[i].certificateExpirationAprTime) < 0)
-                    {
-                        continue;
-                    }
-                }
-
-                // Convert the the certificate information to MI types and put in into the instance
-                mi::Datetime certificateExpirationCimTime;
-                certificateExpirationCimTime.Set(certs[i].certificateExpirationCimTime);
-                mi::Uint16 certificateDaysUntilExpiration((unsigned short)((certs[i].certificateExpirationAprTime - timeNow) /
-                                                                           ((apr_int64_t)1000000 * 60 * 60 * 24)));
-
-                inst.FileName_value(certificateFileName);
-                inst.ExpirationDate_value(certificateExpirationCimTime);
-                inst.DaysUntilExpiration_value(certificateDaysUntilExpiration);
-            }
-            context.Post(inst);
+            EnumerateOneInstance(context, keysOnly, item, pool);
         }
 
         context.Post(MI_RESULT_OK);

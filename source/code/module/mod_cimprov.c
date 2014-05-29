@@ -35,6 +35,11 @@
 #endif // AP_NEED_SET_MUTEX_PERMS
 #include "mmap_region.h"
 
+/* The extern for ap_server_root. This is the documented way to access it, instead
+ * of including http_main.h
+ */
+extern const char* ap_server_root;
+
 #ifdef HAVE_TIMES
 /* ugh... need to know if we're running with a pthread implementation
  * such as linuxthreads that treats individual threads as distinct
@@ -637,23 +642,43 @@ static apr_status_t collect_server_data(
     apr_size_t module_count,
     const char* config_file,
     const char* process_name,
+    const char* server_hostname,
     int operating_status)
 {
     apr_size_t index;
     module* modp;
     const char* version = ap_get_server_version();
-    
+    const char* server_root = ap_server_root;
+
     /* Add the name of the configuration file */
     add_data_string(string_table,
                string_table_len,
                config_file,
                server_data != NULL ? &server_data->configFileOffset : NULL);
 
+    /* Add the process name*/
+    add_data_string(string_table,
+               string_table_len,
+               process_name,
+               server_data != NULL ? &server_data->processNameOffset : NULL);
+
+    /* Add the server root directory */
+    add_data_string(string_table,
+               string_table_len,
+               server_root,
+               server_data != NULL ? &server_data->serverRootOffset : NULL);
+
     /* Add the Apache server version */
     add_data_string(string_table,
                     string_table_len,
                     version,
                     server_data != NULL ? &server_data->serverVersionOffset : NULL);
+
+    /* Add the host computer's ID */
+    add_data_string(string_table,
+                    string_table_len,
+                    server_hostname,
+                    server_data != NULL ? &server_data->serverIDOffset : NULL);
 
     if (server_data != NULL)
     {
@@ -912,7 +937,8 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     config_sslCertFile* cert_file_info; /* Ptr. to information about a certificate file */
     size_t stable_length;               /* Enough space for two null bytes as terminator */
     char* text;
-    char* process_name;
+    const char* process_name;
+    const char* server_hostname = NULL;
     server_rec* srec;
     module *modp;
 
@@ -928,11 +954,19 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     vhost_count = 2;
     for (srec = head; srec != NULL; srec = srec->next)
     {
+        if (!srec->is_virtual)
+        {
+            server_hostname = srec->server_hostname;
+        }
         text = apr_psprintf(ptemp, "cimprov: Server Vhost Name=%s, port=%d, is_virtual=%d",
                                    srec->server_hostname ? srec->server_hostname : "NULL",
                                    srec->port, srec->is_virtual);
         display_error(cfg, text, 0, 0);
         vhost_count++;
+    }
+    if (server_hostname == NULL)
+    {
+        server_hostname = "_Unknown";
     }
 
     /* Walk the list of certificate files to determine the count */
@@ -966,15 +1000,17 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     {
         char *tok_last;
         char *processName = apr_pstrdup(ptemp, ap_conftree->filename);
-        char *token = apr_strtok(processName, "/", &tok_last);
+        char *token = apr_strtok(processName, "/", &tok_last);  /* get the first path element */
 
         process_name = "";
         if (token != NULL)
         {
-            /* Skip /usr/local for install by source compiles */
+            token = apr_strtok(NULL, "/", &tok_last);   /* get the second path element */
+
+            /* Skip /usr/local for install by source compiles and use "httpd" for the process name */
             if (0 == apr_strnatcasecmp(token, "local"))
             {
-                token = apr_strtok(NULL, "/", &tok_last);
+                token = "httpd";
             }
             if (0 == apr_strnatcasecmp(token, "apache2") || 0 == apr_strnatcasecmp(token, "httpd"))
             {
@@ -982,10 +1018,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
             }
         }
     }
-
-    /*
-     * Compute the size of the string table
-     */
 
     stable_length = 1;                  /* reserve space for a single empty string at the beginning of the string table */
 
@@ -996,6 +1028,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                  module_count,
                                  ap_conftree->filename,
                                  process_name,
+                                 server_hostname,
                                  2);
     if (status != APR_SUCCESS)
     {
@@ -1081,6 +1114,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                  module_count,
                                  ap_conftree->filename,
                                  process_name,
+                                 server_hostname,
                                  2);
     if (status != APR_SUCCESS)
     {

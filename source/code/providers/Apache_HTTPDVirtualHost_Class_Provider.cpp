@@ -14,6 +14,7 @@
 // Virtual host memory mapped file definitions
 #include "apachebinding.h"
 #include "cimconstants.h"
+#include "utils.h"
 
 // Convert a string encoded in this project's base-64 encoding into a 16-bit integer
 static apr_uint16_t decode64(const char* str)
@@ -31,8 +32,17 @@ static void EnumerateOneInstance(Context& context,
 {
     Apache_HTTPDVirtualHost_Class inst;
     mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
+    const char* apacheServerVersion = GetApacheComponentVersion(g_apache.GetServerVersion(), "Apache");
 
-    // Insert the key into the instance
+    // Insert the key properties into the instance
+    inst.Name_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+    inst.Version_value(apacheServerVersion);
+    inst.SoftwareElementID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+    inst.TargetOperatingSystem_value(CIM_TARGET_OPERATING_SYSTEM);
+    inst.SoftwareElementState_value(CIM_SOFTWARE_ELEMENT_STATE_RUNNING);
+
+    // Insert the instance ID into the instance
+
     inst.InstanceID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
 
     if (! keysOnly)
@@ -63,7 +73,6 @@ static void EnumerateOneInstance(Context& context,
         // Insert the values into the instance
 
         inst.ServerName_value(g_apache.GetDataString(vhosts[item].hostNameOffset));
-        inst.Version_value(g_apache.GetServerVersion());
         inst.SoftwareElementState_value(CIM_SOFTWARE_ELEMENT_STATE_RUNNING);
         inst.SoftwareElementID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
         inst.TargetOperatingSystem_value(CIM_TARGET_OPERATING_SYSTEM);

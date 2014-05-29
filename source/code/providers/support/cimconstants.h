@@ -12,7 +12,11 @@
 /*----------------------------------------------------------------------------*/
 
 #ifndef CIMCONSTANTS_H
-#define COMCONSTANTS_H
+#define CIMCONSTANTS_H
+
+// Value of the vendor ID for Apache
+
+#define APACHE_VENDOR_ID "Apache Software Foundation"
 
 // Values for software element state
 
