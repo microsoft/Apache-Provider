@@ -219,16 +219,6 @@
           IgnoreStandardErrorWarningFormat='true'
           />
   </Target>
-
-  <Target Name="CoreTest">
-    <Message Text="CoreTest: Building and Running Tests on $(UnixBuildServer)"/>
-    <Message Text="CoreTest: Core Compile on $(UnixBuildServer)" />
-    <Message Text="CoreTest: UnixWorkSpaceName: $(UnixWorkSpaceName)" />
-    <Message Text="CoreTest: ConfigToBuild: $(ConfigToBuild) " />
-    <Exec WorkingDirectory='$(WorkspaceFolder)\bootstrap'
-          Command='$(PowerShellExecutable) -ExecutionPolicy RemoteSigned .\RunRemoteBashScript.ps1 $(UnixBuildServer) $(UnixWorkSpaceName)/Apache/bootstrap/RunUnitTest.bsh $(UnixWorkSpaceName)/Apache $(MakeTargetToBuild) $(ConfigToBuild)'
-          IgnoreExitCode='true' />
-  </Target>
   
   <Target Name="BeforeDropBuild">
 
