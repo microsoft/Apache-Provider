@@ -36,12 +36,12 @@ class ApacheBinding
 {
 public:
     ApacheBinding()
-        : m_fStatusOutput(true),
-          m_apr_pool(NULL), m_mmap_region(NULL),
-          m_server_data(NULL), m_vhost_data(NULL),
-          m_certificate_data(NULL), m_string_data(NULL),
-          m_mutexMapRW(NULL), m_loadCount(0)
-        {};
+    : m_fNoMemoryMap(false), m_fStatusOutput(true),
+      m_apr_pool(NULL), m_mmap_region(NULL),
+      m_server_data(NULL), m_vhost_data(NULL),
+      m_certificate_data(NULL), m_string_data(NULL),
+      m_mutexMapRW(NULL), m_loadCount(0)
+    {};
     ~ApacheBinding() {};
 
     apr_status_t OMI_Error(int err) { return APR_OS_START_USERERR + err; }
@@ -69,17 +69,35 @@ public:
     apr_size_t GetCertificateCount() { return m_certificate_data->count; }
     mmap_certificate_elements *GetCertificateElements() { return m_certificate_data->certificates; }
 
-    apr_status_t LockMutex() { return apr_global_mutex_lock(m_mutexMapRW); }
-    apr_status_t UnlockMutex() { return apr_global_mutex_unlock(m_mutexMapRW); }
+    apr_status_t LockMutex() { return m_fNoMemoryMap ? APR_SUCCESS : apr_global_mutex_lock(m_mutexMapRW); }
+    apr_status_t UnlockMutex() { return m_fNoMemoryMap ? APR_SUCCESS : apr_global_mutex_unlock(m_mutexMapRW); }
 
     apr_pool_t *GetPool() { return m_apr_pool; }
 
-protected:
+    // Test functions only - never called during production code
+    void SetTestMode() { m_fNoMemoryMap = true; }
     void InhibitStatusOutput() { m_fStatusOutput = false; }
+    bool GetStatusOutputFlag() { return m_fStatusOutput; }
+    void SetMemoryMap(mmap_server_data *svr, mmap_string_table *str)
+    {
+        SetTestMode();
+        m_server_data = svr;
+        m_string_data = str;
+    }
+    void ResetMemoryMap()
+    {
+        m_server_data = NULL;
+        m_vhost_data = NULL;
+        m_certificate_data = NULL;
+        m_string_data = NULL;
+    }
+
+protected:
     apr_status_t Initialize();
 
 private:
     static bool sm_fAprInitialized;
+    bool m_fNoMemoryMap;
     bool m_fStatusOutput;
 
     apr_pool_t *m_apr_pool;

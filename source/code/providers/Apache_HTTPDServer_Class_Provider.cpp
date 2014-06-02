@@ -85,6 +85,13 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
         Apache_HTTPDServer_Class inst;
         const char* apacheServerVersion = GetApacheComponentVersion(g_apache.GetServerVersion(), "Apache");
 
+        inst.ProductIdentifyingNumber_value("1");   /* serial number */
+        inst.ProductName_value(g_apache.GetServerConfigFile());
+        inst.ProductVendor_value(APACHE_VENDOR_ID);
+        inst.ProductVersion_value(apacheServerVersion);
+        inst.SystemID_value(g_apache.GetServerID());
+        inst.CollectionID_value(g_apache.GetServerRoot());
+
         if (! keysOnly)
         {
             // Build the version string
@@ -113,12 +120,6 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
 
             // Insert the values into the instance
 
-            inst.ProductIdentifyingNumber_value("1");   /* serial number */
-            inst.ProductName_value(g_apache.GetServerConfigFile());
-            inst.ProductVendor_value(APACHE_VENDOR_ID);
-            inst.ProductVersion_value(apacheServerVersion);
-            inst.SystemID_value(g_apache.GetServerID());
-            inst.CollectionID_value(g_apache.GetServerRoot());
             inst.ModuleVersion_value(ss.str().c_str());
             inst.InstanceID_value(g_apache.GetServerConfigFile());
             inst.ConfigurationFile_value(g_apache.GetServerConfigFile());

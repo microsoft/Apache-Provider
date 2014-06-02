@@ -24,6 +24,7 @@ TEST_DIR := $(BASE_DIR)/test/code
 
 PROVIDER_DIR := $(SOURCE_DIR)/providers
 PROVIDER_TEST_DIR := $(TEST_DIR)/providers
+PROVIDER_TEST_SUPPORT_DIR := $(PROVIDER_TEST_DIR)/support
 PAL_TESTUTILS_DIR := $(SCXPAL_DIR)/test/code/testutils
 
 TARGET_DIR := $(BASE_DIR)/target/$(BUILD_CONFIGURATION)
@@ -61,16 +62,16 @@ OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
 MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
 PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support -I$(TARGET_DIR)
 
-PROVIDER_TEST_INCLUDE_FLAGS := -I$(OMI_ROOT) -I$(OMI_ROOT)/common $(PROVIDER_INCLUDE_FLAGS) -I$(SCXPAL_DIR)/source/code/include -I$(SCXPAL_DIR)/test/code/include -I$(PROVIDER_DIR) -I$(BASE_DIR)/test/ext/include -I$(BASE_DIR)/test/code/include
+PROVIDER_TEST_INCLUDE_FLAGS := -Wmissing-include-dirs -I$(SCXPAL_DIR)/source/code/include -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(SCXPAL_DIR)/test/ext/include -I$(OMI_ROOT)/output/include -I$(OMI_ROOT) -I$(OMI_ROOT)/common -I$(SCXPAL_DIR)/test/code/include $(PROVIDER_INCLUDE_FLAGS) -I$(PROVIDER_DIR) -I$(PROVIDER_TEST_SUPPORT_DIR)
 
 ifeq ($(ENABLE_DEBUG),1)
 PROV_DEBUG_FLAGS := -g
 endif
 
-COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security   -Wfloat-equal -Wcast-align -Wswitch-enum -Wundef -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
+COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security -Wcast-align -Wswitch-enum -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
 
 LINK_LIBRARIES := -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1
-PROVIDER_TEST_LINK_LIBRARIES := -lbase -L$(SCXPAL_TARGET_DIR) -lscxcore $(BASE_DIR)/test/ext/lib/linux/$(ARCH)/cppunit/libcppunit.a -lpthread -lrt
+PROVIDER_TEST_LINK_LIBRARIES := -lbase -L$(SCXPAL_TARGET_DIR) -lscxcore $(SCXPAL_DIR)/test/ext/lib/linux/$(ARCH)/cppunit/libcppunit.a -lpthread -lrt
 
 SHARED_FLAGS := -shared
 
@@ -312,19 +313,23 @@ $(PROVIDER_TEST_DIR)/providertestutils.cpp: $(PAL_TESTUTILS_DIR)/providertestuti
 	$(RM) $(PROVIDER_TEST_DIR)/providers/providertestutils.cpp
 	ln -s $(PAL_TESTUTILS_DIR)/providertestutils.cpp $(PROVIDER_TEST_DIR)/providertestutils.cpp
 
+STATIC_PROVIDER_UNITFILES_INCLUDE = \
+	$(PROVIDER_TEST_SUPPORT_DIR)/mmap_builder.h
+
 STATIC_PROVIDER_UNITFILES = \
 	$(PROVIDER_TEST_DIR)/server_test.cpp \
 	\
-	$(PROVIDER_TEST_DIR)/productdependencies.cpp \
 	$(PROVIDER_TEST_DIR)/providertestutils.cpp \
+	$(PROVIDER_TEST_SUPPORT_DIR)/mmap_builder.cpp \
+	$(PROVIDER_TEST_SUPPORT_DIR)/productdependencies.cpp \
 	$(PAL_TESTUTILS_DIR)/scxassert_cppunit.cpp \
 	$(PAL_TESTUTILS_DIR)/testrunner.cpp \
 	$(PAL_TESTUTILS_DIR)/testrunnerlogpolicy.cpp
 
-$(TARGET_DIR)/testrunner : $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
+$(TARGET_DIR)/testrunner : $(STATIC_PROVIDER_UNITFILES_INCLUDE) $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	@echo "========================= Performing Building provider tests"
 	$(MKPATH) $(TARGET_DIR)
-	g++ $(COMPILE_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_TEST_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES) $(PROVIDER_TEST_LINK_LIBRARIES)
+	g++ $(COMPILE_FLAGS) $(PROVIDER_TEST_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES) $(PROVIDER_TEST_LINK_LIBRARIES)
 
 testrun : test
 

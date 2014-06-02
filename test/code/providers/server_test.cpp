@@ -12,11 +12,13 @@
 
 #include <scxcorelib/scxcmn.h>
 #include <scxcorelib/scxexception.h>
+#include <scxcorelib/stringaid.h>
 #include <testutils/scxunit.h>
 #include <testutils/providertestutils.h>
 
 #include "Apache_HTTPDServer_Class_Provider.h"
 #include "apachebinding.h"
+#include "mmap_builder.h"
 
 /*
 using namespace SCXCore;
@@ -26,15 +28,20 @@ using namespace SCXSystemLib;
 
 class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, ApacheBinding
 {
-    CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test  );
-    CPPUNIT_TEST( callDumpStringForCoverage );
-/*
+    CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test );
+
+    // Tests for low-level test functions - this is as good a place as any
+    CPPUNIT_TEST( testApacheBindingNotStatic );
+    CPPUNIT_TEST( testInsertStringIntoTable );
+    CPPUNIT_TEST( testInsertModules );
+
+    // Now test the actual production code
     CPPUNIT_TEST( TestEnumerateInstancesKeysOnly );
+/*
     CPPUNIT_TEST( TestEnumerateInstances );
     CPPUNIT_TEST( TestVerifyKeyCompletePartial );
     CPPUNIT_TEST( TestGetInstance );
 
-    SCXUNIT_TEST_ATTRIBUTE(callDumpStringForCoverage, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestEnumerateInstancesKeysOnly, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestEnumerateInstances, SLOW);
     SCXUNIT_TEST_ATTRIBUTE(TestVerifyKeyCompletePartial, SLOW);
@@ -48,44 +55,129 @@ private:
 public:
     void setUp(void)
     {
-        InhibitStatusOutput();
-        Initialize();
+        g_apache.SetTestMode();
+        g_apache.InhibitStatusOutput();
 
-/*
         std::wstring errMsg;
         TestableContext context;
-        SetUpAgent<mi::SCX_MemoryStatisticalInformation_Class_Provider>(context, CALL_LOCATION(errMsg));
+        SetUpAgent<mi::Apache_HTTPDServer_Class_Provider>(context, CALL_LOCATION(errMsg));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, true, context.WasRefuseUnloadCalled() );
-        m_keyNames.push_back(L"Name");
-*/
+
+        m_keyNames.push_back(L"ProductIdentifyingNumber");
+        m_keyNames.push_back(L"ProductName");
+        m_keyNames.push_back(L"ProductVendor");
+        m_keyNames.push_back(L"ProductVersion");
+        m_keyNames.push_back(L"SystemID");
+        m_keyNames.push_back(L"CollectionID");
     }
 
     void tearDown(void)
     {
-/*
         std::wstring errMsg;
         TestableContext context;
-        TearDownAgent<mi::SCX_MemoryStatisticalInformation_Class_Provider>(context, CALL_LOCATION(errMsg));
+        TearDownAgent<mi::Apache_HTTPDServer_Class_Provider>(context, CALL_LOCATION(errMsg));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, false, context.WasRefuseUnloadCalled() );
-*/
+
+        g_apache.ResetMemoryMap();
     }
 
-    void callDumpStringForCoverage()
+    void testApacheBindingNotStatic()
     {
-//        CPPUNIT_ASSERT(g_MemoryProvider.DumpString().find(L"MemoryProvider") != std::wstring::npos);
+        // Our class is built with Apache Binding mixed in, but this isn't static version
+        // Verify that InhibitStatusOutput() was set on static object (but was not set in our copy)
+
+        CPPUNIT_ASSERT_EQUAL( true, GetStatusOutputFlag() );
+        CPPUNIT_ASSERT_EQUAL( false, g_apache.GetStatusOutputFlag() );
     }
 
-/*
+    void testInsertStringIntoTable()
+    {
+        TestStringTable t;
+        size_t oldSize, offset;
+
+        // Validate empty table is empty
+        oldSize = t.size();
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), oldSize);
+
+        // Insert one string, make sure all is good
+        offset = t.InsertString("0123456789ABCDEF");
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), offset);
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(18), t.size());
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("0123456789ABCDEF", t.GetString(offset)));
+
+        // Insert additional string, make sure new string is good
+        offset = t.InsertString("GHIJKL");
+        CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(25), t.size());
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("GHIJKL", t.GetString(offset)));
+
+        // And verify that original string is still good too
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("0123456789ABCDEF", t.GetString(1)));
+    }
+
+    void testInsertModules()
+    {
+        TestStringTable t;
+        TestServerData s(t);
+
+        // Insert some data just to populate string table
+        s.SetConfigFile("/etc/httpd/conf/httpd.conf");
+        s.SetProcessName("httpd");
+        s.SetServerVersion("Apache/1.2.3");
+
+        CPPUNIT_ASSERT_EQUAL(std::string("/etc/httpd/conf/httpd.conf"), s.GetConfigFile() );
+        CPPUNIT_ASSERT_EQUAL(std::string("httpd"), s.GetProcessName() );
+        CPPUNIT_ASSERT_EQUAL(std::string("Apache/1.2.3"), s.GetServerVersion() );
+
+        // Verify that no modules return ULONG_MAX
+        CPPUNIT_ASSERT_EQUAL(ULONG_MAX, s.GetModule(0));
+        CPPUNIT_ASSERT_EQUAL(ULONG_MAX, s.GetModule(1));
+
+        // Add a few modules to the server
+        s.AddModule("mod_cimprov.c");
+        s.AddModule("mod_ssl.c");
+        s.AddModule("mod_dnssd.c");
+        s.AddModule("mod_version.c");
+        s.AddModule("mod_cgi.c");
+
+        // Now make sure we can get 'em back
+        CPPUNIT_ASSERT_EQUAL(ULONG_MAX, s.GetModule(5));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_cgi.c", t.GetString(s.GetModule(4))));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_version.c", t.GetString(s.GetModule(3))));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_dnssd.c", t.GetString(s.GetModule(2))));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_ssl.c", t.GetString(s.GetModule(1))));
+        CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_cimprov.c", t.GetString(s.GetModule(0))));
+    }
+
     void TestEnumerateInstancesKeysOnly()
     {
+        TemporaryPool pool(g_apache.GetPool());
+
+        TestStringTable strTab;
+        TestServerData serverTab(strTab);
+        GenerateSampleServerData(serverTab);
+        GenerateMemoryMap(pool, serverTab, strTab);
+
         std::wstring errMsg;
         TestableContext context;
-        StandardTestEnumerateKeysOnly<mi::SCX_MemoryStatisticalInformation_Class_Provider>(
+        StandardTestEnumerateKeysOnly<mi::Apache_HTTPDServer_Class_Provider>(
             m_keyNames, context, CALL_LOCATION(errMsg));
         CPPUNIT_ASSERT_EQUAL(1u, context.Size());
-        CPPUNIT_ASSERT_EQUAL(L"Memory", context[0].GetKey(L"Name", CALL_LOCATION(errMsg)));
+
+        CPPUNIT_ASSERT_EQUAL(std::wstring(L"1"),
+                             context[0].GetKey(L"ProductIdentifyingNumber", CALL_LOCATION(errMsg)));
+        CPPUNIT_ASSERT_EQUAL(std::wstring(L"/etc/httpd/conf/httpd.conf-fake"),
+                             context[0].GetKey(L"ProductName", CALL_LOCATION(errMsg)));
+        CPPUNIT_ASSERT_EQUAL(std::wstring(L"Apache Software Foundation"),
+                             context[0].GetKey(L"ProductVendor", CALL_LOCATION(errMsg)));
+        CPPUNIT_ASSERT_EQUAL(std::wstring(L"1.2.3"),
+                             context[0].GetKey(L"ProductVersion", CALL_LOCATION(errMsg)));
+        CPPUNIT_ASSERT_EQUAL(std::wstring(L"jeffcof64-rhel6-01.fake.com"),
+                             context[0].GetKey(L"SystemID", CALL_LOCATION(errMsg)));
+        CPPUNIT_ASSERT_EQUAL(std::wstring(L"/etc/httpd-fake"),
+                             context[0].GetKey(L"CollectionID", CALL_LOCATION(errMsg)));
     }
 
+/*
     void TestEnumerateInstances()
     {
         std::wstring errMsg;

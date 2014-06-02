@@ -88,6 +88,16 @@ apr_status_t ApacheBinding::Load(const char *text)
         }
 
         /*
+         * Wicked ugly, but no easy way to avoid this ... test support code in production code, yuck!
+         * This is necessary because there's no dependency injection possible within OMI c++ methods
+         */
+
+        if ( m_fNoMemoryMap )
+        {
+            return APR_SUCCESS;
+        }
+
+        /*
          * Now we have the APR tool - slightly easier to deal with output using it
          */
 
@@ -133,7 +143,8 @@ apr_status_t ApacheBinding::Load(const char *text)
 
 int ApacheBinding::Unload(const char *text)
 {
-    if (0 == --m_loadCount)
+    /* Only deal with memory map if we're not in test mode */
+    if (0 == --m_loadCount && !m_fNoMemoryMap)
     {
         apr_status_t status;
 
@@ -168,7 +179,7 @@ int ApacheBinding::Unload(const char *text)
 
 const char* ApacheBinding::GetDataString(apr_size_t offset)
 {
-    if (offset == 0 || (apr_size_t)offset >= m_string_data->total_length)
+    if (offset == 0 || offset >= m_string_data->total_length)
     {
         return "";
     }
