@@ -18,15 +18,10 @@
 
 #include "Apache_HTTPDServer_Class_Provider.h"
 #include "apachebinding.h"
+#include "testableapache.h"
 #include "mmap_builder.h"
 
-/*
-using namespace SCXCore;
-using namespace SCXCoreLib;
-using namespace SCXSystemLib;
-*/
-
-class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, ApacheBinding
+class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, TestableApacheBinding
 {
     CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test );
 
@@ -55,8 +50,7 @@ private:
 public:
     void setUp(void)
     {
-        g_apache.SetTestMode();
-        g_apache.InhibitStatusOutput();
+        g_pApache = new TestableApacheBinding(new TestableApacheDependencies());
 
         std::wstring errMsg;
         TestableContext context;
@@ -78,16 +72,17 @@ public:
         TearDownAgent<mi::Apache_HTTPDServer_Class_Provider>(context, CALL_LOCATION(errMsg));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, false, context.WasRefuseUnloadCalled() );
 
-        g_apache.ResetMemoryMap();
+        delete g_pApache;
+        g_pApache = NULL;
     }
 
     void testApacheBindingNotStatic()
     {
         // Our class is built with Apache Binding mixed in, but this isn't static version
-        // Verify that InhibitStatusOutput() was set on static object (but was not set in our copy)
+        // Verify that dependencies object is different in g_pApache and our mix-in
 
-        CPPUNIT_ASSERT_EQUAL( true, GetStatusOutputFlag() );
-        CPPUNIT_ASSERT_EQUAL( false, g_apache.GetStatusOutputFlag() );
+        TestableApacheBinding* pApache = static_cast<TestableApacheBinding*>(g_pApache);
+        CPPUNIT_ASSERT( this->GetDependencies() != pApache->GetDependencies() );
     }
 
     void testInsertStringIntoTable()
@@ -150,7 +145,7 @@ public:
 
     void TestEnumerateInstancesKeysOnly()
     {
-        TemporaryPool pool(g_apache.GetPool());
+        TemporaryPool pool(g_pApache->GetPool());
 
         TestStringTable strTab;
         TestServerData serverTab(strTab);

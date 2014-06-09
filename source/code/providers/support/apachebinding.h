@@ -32,17 +32,46 @@
  *   ApacheBinding 
  *   Helper class to help with Apache module <-> Provider bindings
  */
+
+class ApacheDependencies
+{
+public:
+    ApacheDependencies() : m_mutexMapRW(NULL), m_mmap_region(NULL) {}
+    virtual ~ApacheDependencies();
+
+    virtual bool AllowStatusOutput() { return true; }
+
+    virtual apr_status_t LoadMemoryMap(apr_pool_t* pool,
+                                       mmap_server_data** svr,
+                                       mmap_vhost_data** vhost,
+                                       mmap_certificate_data** cert,
+                                       mmap_string_table** str);
+    virtual apr_status_t UnloadMemoryMap();
+
+    virtual apr_status_t InitializeMutex(apr_pool_t* pool);
+    virtual apr_status_t DestroyMutex();
+    virtual apr_status_t Lock() { return apr_global_mutex_lock(m_mutexMapRW); }
+    virtual apr_status_t Unlock() { return apr_global_mutex_unlock(m_mutexMapRW); }
+
+    virtual apr_status_t LaunchDataCollector() { return m_sampler.Launch(); }
+    virtual apr_status_t ShutdownDataCollector() { return m_sampler.WaitForCompletion(); }
+
+private:
+    apr_global_mutex_t *m_mutexMapRW;
+    apr_shm_t *m_mmap_region;
+
+    DataSampler m_sampler;
+};
+
 class ApacheBinding
 {
 public:
-    ApacheBinding()
-    : m_fNoMemoryMap(false), m_fStatusOutput(true),
-      m_apr_pool(NULL), m_mmap_region(NULL),
-      m_server_data(NULL), m_vhost_data(NULL),
+    explicit ApacheBinding(ApacheDependencies* deps = new ApacheDependencies())
+    : m_server_data(NULL), m_vhost_data(NULL),
       m_certificate_data(NULL), m_string_data(NULL),
-      m_mutexMapRW(NULL), m_loadCount(0)
-    {};
-    ~ApacheBinding() {};
+      m_pDeps(deps), m_apr_pool(NULL), m_loadCount(0)
+    {}
+    ~ApacheBinding() { delete m_pDeps; }
 
     apr_status_t OMI_Error(int err) { return APR_OS_START_USERERR + err; }
     void DisplayError(apr_status_t status, const char *text);
@@ -69,54 +98,32 @@ public:
     apr_size_t GetCertificateCount() { return m_certificate_data->count; }
     mmap_certificate_elements *GetCertificateElements() { return m_certificate_data->certificates; }
 
-    apr_status_t LockMutex() { return m_fNoMemoryMap ? APR_SUCCESS : apr_global_mutex_lock(m_mutexMapRW); }
-    apr_status_t UnlockMutex() { return m_fNoMemoryMap ? APR_SUCCESS : apr_global_mutex_unlock(m_mutexMapRW); }
+    apr_status_t LockMutex() { return m_pDeps->Lock(); }
+    apr_status_t UnlockMutex() { return m_pDeps->Unlock(); }
 
     apr_pool_t *GetPool() { return m_apr_pool; }
-
-    // Test functions only - never called during production code
-    void SetTestMode() { m_fNoMemoryMap = true; }
-    void InhibitStatusOutput() { m_fStatusOutput = false; }
-    bool GetStatusOutputFlag() { return m_fStatusOutput; }
-    void SetMemoryMap(mmap_server_data *svr, mmap_string_table *str)
-    {
-        SetTestMode();
-        m_server_data = svr;
-        m_string_data = str;
-    }
-    void ResetMemoryMap()
-    {
-        m_server_data = NULL;
-        m_vhost_data = NULL;
-        m_certificate_data = NULL;
-        m_string_data = NULL;
-    }
 
 protected:
     apr_status_t Initialize();
 
-private:
-    static bool sm_fAprInitialized;
-    bool m_fNoMemoryMap;
-    bool m_fStatusOutput;
-
-    apr_pool_t *m_apr_pool;
-    apr_shm_t *m_mmap_region;
     mmap_server_data *m_server_data;
     mmap_vhost_data *m_vhost_data;
     mmap_certificate_data *m_certificate_data;
     mmap_string_table *m_string_data;
 
-    apr_global_mutex_t *m_mutexMapRW;
+    ApacheDependencies* m_pDeps;
 
-    DataSampler m_sampler;
+private:
+    static bool sm_fAprInitialized;
+
+    apr_pool_t *m_apr_pool;
     int m_loadCount;
 
     friend class DataSampler;
 };
 
 // Only construct class once - no need to load shared memory multiple times
-extern ApacheBinding g_apache;
+extern ApacheBinding* g_pApache;
 
 
 //
@@ -138,16 +145,16 @@ extern ApacheBinding g_apache;
 
 #define CIM_PEX_END(module) \
     catch (std::exception &e) { \
-        TemporaryPool ptemp( g_apache.GetPool() ); \
+        TemporaryPool ptemp( g_pApache->GetPool() ); \
         char *etext = apr_psprintf(ptemp.Get(), "%s - Exception occurred! Exception %s", module, e.what()); \
-        g_apache.DisplayError( PEX_ERROR_CODE, etext ); \
+        g_pApache->DisplayError( PEX_ERROR_CODE, etext ); \
         context.Post(MI_RESULT_FAILED); \
     } \
     catch (...) \
     { \
-        TemporaryPool ptemp( g_apache.GetPool() ); \
+        TemporaryPool ptemp( g_pApache->GetPool() ); \
         char *etext = apr_psprintf(ptemp.Get(), "%s - Unknown exception occurred!", module); \
-        g_apache.DisplayError( PEX_ERROR_CODE, etext ); \
+        g_pApache->DisplayError( PEX_ERROR_CODE, etext ); \
         context.Post(MI_RESULT_FAILED); \
     }
 

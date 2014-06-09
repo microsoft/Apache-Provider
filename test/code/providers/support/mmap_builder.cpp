@@ -14,6 +14,7 @@
 
 #include "testutils/scxunit.h"
 #include "apachebinding.h"
+#include "testableapache.h"
 #include "mmap_builder.h"
 
 
@@ -172,5 +173,6 @@ void GenerateMemoryMap(TemporaryPool& p, TestServerData& svr, TestStringTable& s
     mmap_server_data* serverMap = svr.GenerateServerMap(pool);
     mmap_string_table* stringTab = str.GenerateStringTable(pool);
 
-    g_apache.SetMemoryMap(serverMap, stringTab);
+    TestableApacheBinding* pApache = static_cast<TestableApacheBinding*>(g_pApache);
+    pApache->SetMemoryMap(serverMap, stringTab);
 }

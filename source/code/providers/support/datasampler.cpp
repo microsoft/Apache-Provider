@@ -46,7 +46,7 @@ void* APR_THREAD_FUNC DataSampler::threadmain(apr_thread_t *tid, void *data)
 
 apr_status_t DataSampler::Launch()
 {
-    apr_pool_t *pool = g_apache.GetPool();
+    apr_pool_t *pool = g_pApache->GetPool();
     apr_threadattr_t *attr;
     apr_status_t status;
 
@@ -54,13 +54,13 @@ apr_status_t DataSampler::Launch()
 
     if ((NULL == m_mutex) && APR_SUCCESS != (status = apr_thread_mutex_create(&m_mutex, APR_THREAD_MUTEX_UNNESTED, pool)))
     {
-        g_apache.DisplayError(status, "DataSampler::Initialize failed to initialize mutex for condition");
+        g_pApache->DisplayError(status, "DataSampler::Initialize failed to initialize mutex for condition");
         return status;
     }
 
     if ((NULL == m_cond) && APR_SUCCESS != (status = apr_thread_cond_create(&m_cond, pool)))
     {
-        g_apache.DisplayError(status, "DataSampler::Initialize failed to create/initialize condition");
+        g_pApache->DisplayError(status, "DataSampler::Initialize failed to create/initialize condition");
         return status;
     }
 
@@ -74,7 +74,7 @@ apr_status_t DataSampler::Launch()
 
     if (APR_SUCCESS != (status = apr_thread_create(&m_tid, attr, DataSampler::threadmain, this, pool)))
     {
-        g_apache.DisplayError(status, "DataSampler::Launch failed to create sampler thread");
+        g_pApache->DisplayError(status, "DataSampler::Launch failed to create sampler thread");
         return status;
     }
 
@@ -100,7 +100,7 @@ apr_status_t DataSampler::WaitForCompletion()
 
         if (APR_SUCCESS != (status = apr_thread_cond_signal(m_cond)))
         {
-            g_apache.DisplayError(status, "DataSampler::WaitForCompletion failed to signal condition");
+            g_pApache->DisplayError(status, "DataSampler::WaitForCompletion failed to signal condition");
             Unlock();
             return status;
         }
@@ -115,7 +115,7 @@ apr_status_t DataSampler::WaitForCompletion()
         status = apr_thread_join(&tstatus, m_tid);
         if (APR_SUCCESS != status)
         {
-            g_apache.DisplayError(status, "DataSampler::WaitForCompletion failed waiting for worker thread");
+            g_pApache->DisplayError(status, "DataSampler::WaitForCompletion failed waiting for worker thread");
             return status;
         }
 
@@ -131,7 +131,7 @@ apr_status_t DataSampler::Lock()
 
     if (APR_SUCCESS != (status = apr_thread_mutex_lock(m_mutex)))
     {
-        g_apache.DisplayError(status, "DataSampler::Lock failed to lock condition mutex");
+        g_pApache->DisplayError(status, "DataSampler::Lock failed to lock condition mutex");
     }
 
     return status;
@@ -143,7 +143,7 @@ apr_status_t DataSampler::Unlock()
 
     if (APR_SUCCESS != (status = apr_thread_mutex_unlock(m_mutex)))
     {
-        g_apache.DisplayError(status, "DataSampler::Lock failed to unlock condition mutex");
+        g_pApache->DisplayError(status, "DataSampler::Lock failed to unlock condition mutex");
     }
 
     return status;
@@ -155,7 +155,7 @@ void DataSampler::ThreadMain()
     const apr_time_t sleepInterval = apr_time_from_sec(60);
     apr_time_t wakeupTime = apr_time_now() + sleepInterval;
 
-    g_apache.DisplayError(0, "DataSampler::ThreadMain is alive");
+    g_pApache->DisplayError(0, "DataSampler::ThreadMain is alive");
 
     /*
      * Main loop: Wait for condition (shutdown); if none, then wake up one/minute for calculations
@@ -163,7 +163,7 @@ void DataSampler::ThreadMain()
 
     if (APR_SUCCESS != (status = Lock()))
     {
-        g_apache.DisplayError(status, "DataSampler::ThreadMain is aborting due to failure of Lock() operation");
+        g_pApache->DisplayError(status, "DataSampler::ThreadMain is aborting due to failure of Lock() operation");
         return;
     }
 
@@ -180,7 +180,7 @@ void DataSampler::ThreadMain()
         if (currentTime <= wakeupTime)
         {
             apr_interval_time_t timeout = wakeupTime - currentTime;
-            g_apache.DisplayError(0, "DataSampler::ThreadMain Waiting for condition");
+            g_pApache->DisplayError(0, "DataSampler::ThreadMain Waiting for condition");
             status = apr_thread_cond_timedwait(m_cond, m_mutex, timeout);
         }
         else
@@ -197,7 +197,7 @@ void DataSampler::ThreadMain()
 
         if (APR_SUCCESS != status && APR_TIMEUP != status)
         {
-            g_apache.DisplayError(status, "DataSampler::Threadmain received unexpected error from apr_thread_cond_timedwait");
+            g_pApache->DisplayError(status, "DataSampler::Threadmain received unexpected error from apr_thread_cond_timedwait");
             break;
         }
 
@@ -211,7 +211,7 @@ void DataSampler::ThreadMain()
 
         if (APR_SUCCESS != (status = Unlock()))
         {
-            g_apache.DisplayError(status, "DataSampler::Threadmain unable to unlock mutex");
+            g_pApache->DisplayError(status, "DataSampler::Threadmain unable to unlock mutex");
             break;
         }
 
@@ -219,7 +219,7 @@ void DataSampler::ThreadMain()
 
         if (APR_SUCCESS != (status = Lock()))
         {
-            g_apache.DisplayError(status, "DataSampler::Threadmain unable to lock mutex");
+            g_pApache->DisplayError(status, "DataSampler::Threadmain unable to lock mutex");
             break;
         }
 
@@ -228,7 +228,7 @@ void DataSampler::ThreadMain()
         wakeupTime += sleepInterval;
     }
 
-    g_apache.DisplayError(0, "DataSampler::ThreadMain is shutting down");
+    g_pApache->DisplayError(0, "DataSampler::ThreadMain is shutting down");
     Unlock();
     return;
 }
@@ -277,19 +277,19 @@ static apr_uint32_t DeltaHelper(apr_uint64_t *myCurrentTotal, apr_uint32_t *myPr
 
 void DataSampler::PerformComputations()
 {
-    mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
+    mmap_vhost_elements *vhosts = g_pApache->GetVHostElements();
     apr_time_t currentTime = apr_time_now();
     apr_interval_time_t deltaTime = currentTime - m_timeLastUpdated;
 
     // Scheduling oddity - just update time and return
     if (apr_time_sec(deltaTime) < 1)
     {
-        g_apache.DisplayError(0, "DataSampler::PerformComputations skipping execution due to thread scheduling issue");
+        g_pApache->DisplayError(0, "DataSampler::PerformComputations skipping execution due to thread scheduling issue");
         m_timeLastUpdated = currentTime;
         return;
     }
 
-    g_apache.DisplayError(0, "DataSampler::PerformComputations executing");
+    g_pApache->DisplayError(0, "DataSampler::PerformComputations executing");
 
     // Compute the CPU time utilized and related bits of information (need mutex for this)
     // (If we fail for some reason, log but continue with other statistics)
@@ -297,9 +297,9 @@ void DataSampler::PerformComputations()
     do {
         apr_status_t status;
 
-        if (APR_SUCCESS != (status = g_apache.LockMutex()))
+        if (APR_SUCCESS != (status = g_pApache->LockMutex()))
         {
-            g_apache.DisplayError(status, "DataSampler::PerformComputations: skipping worker statistics due to mutex lock error");
+            g_pApache->DisplayError(status, "DataSampler::PerformComputations: skipping worker statistics due to mutex lock error");
             break;
         }
 
@@ -307,13 +307,13 @@ void DataSampler::PerformComputations()
         // since that's how providers will access them. It's better to not grab mutex in provider enumerations since
         // that can happen potentially more often, impacting overall Apache performanace.
 
-        apr_atomic_set32(&g_apache.m_server_data->idleWorkers, g_apache.m_server_data->idleApacheWorkers);
-        apr_atomic_set32(&g_apache.m_server_data->busyWorkers, g_apache.m_server_data->busyApacheWorkers);
-        clock_t cpuUtilization = g_apache.m_server_data->apacheCpuUtilization;
+        apr_atomic_set32(&g_pApache->m_server_data->idleWorkers, g_pApache->m_server_data->idleApacheWorkers);
+        apr_atomic_set32(&g_pApache->m_server_data->busyWorkers, g_pApache->m_server_data->busyApacheWorkers);
+        clock_t cpuUtilization = g_pApache->m_server_data->apacheCpuUtilization;
 
-        if (APR_SUCCESS != (status = g_apache.UnlockMutex()))
+        if (APR_SUCCESS != (status = g_pApache->UnlockMutex()))
         {
-            g_apache.DisplayError(status, "DataSampler::PerformComputations: mutex unlock error in worker statistics");
+            g_pApache->DisplayError(status, "DataSampler::PerformComputations: mutex unlock error in worker statistics");
         }
 
 //      Apache made the computation like this:
@@ -323,15 +323,15 @@ void DataSampler::PerformComputations()
 //      mod_cimprov.c stores (tu + ts + tcu + tcs) / tick in apacheCpuUtilization;
 
         // TODO: Not quite sure here - Kris will get back to me on how to compute this
-        apr_atomic_set32(&g_apache.m_server_data->percentCPU, 0);
+        apr_atomic_set32(&g_pApache->m_server_data->percentCPU, 0);
 
         // Save the current clock value as the prior value for the next time 'round
-        g_apache.m_server_data->cpuUtilizationPrior = cpuUtilization;
+        g_pApache->m_server_data->cpuUtilizationPrior = cpuUtilization;
     } while (false);
 
     // TODO: Lock the process mutex (thread mutex?  Don't think we need process mutex for virtual hosts)
 
-    for (apr_size_t i = 0; i < g_apache.GetVHostCount(); i++)
+    for (apr_size_t i = 0; i < g_pApache->GetVHostCount(); i++)
     {
         apr_uint32_t deltaRequests, deltaBytes, delta400, delta500;
 

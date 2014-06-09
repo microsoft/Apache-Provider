@@ -39,7 +39,12 @@ void Apache_HTTPDServer_Class_Provider::Load(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_apache.Load("Server"))
+        if (NULL == g_pApache)
+        {
+            g_pApache = new ApacheBinding();
+        }
+
+        if (APR_SUCCESS != g_pApache->Load("Server"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -49,7 +54,7 @@ void Apache_HTTPDServer_Class_Provider::Load(
         MI_Result r = context.RefuseUnload();
         if ( MI_RESULT_OK != r )
         {
-            g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDServer_Class_Provider refuses to not unload");
+            g_pApache->DisplayError(g_pApache->OMI_Error(r), "Apache_HTTPDServer_Class_Provider refuses to not unload");
         }
 
         context.Post(MI_RESULT_OK);
@@ -62,7 +67,7 @@ void Apache_HTTPDServer_Class_Provider::Unload(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_apache.Unload("VirtualHostStatistics"))
+        if (APR_SUCCESS != g_pApache->Unload("VirtualHostStatistics"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -83,14 +88,14 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
     CIM_PEX_BEGIN
     {
         Apache_HTTPDServer_Class inst;
-        const char* apacheServerVersion = GetApacheComponentVersion(g_apache.GetServerVersion(), "Apache");
+        const char* apacheServerVersion = GetApacheComponentVersion(g_pApache->GetServerVersion(), "Apache");
 
         inst.ProductIdentifyingNumber_value("1");   /* serial number */
-        inst.ProductName_value(g_apache.GetServerConfigFile());
+        inst.ProductName_value(g_pApache->GetServerConfigFile());
         inst.ProductVendor_value(APACHE_VENDOR_ID);
         inst.ProductVersion_value(apacheServerVersion);
-        inst.SystemID_value(g_apache.GetServerID());
-        inst.CollectionID_value(g_apache.GetServerRoot());
+        inst.SystemID_value(g_pApache->GetServerID());
+        inst.CollectionID_value(g_pApache->GetServerRoot());
 
         if (! keysOnly)
         {
@@ -121,18 +126,18 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
             // Insert the values into the instance
 
             inst.ModuleVersion_value(ss.str().c_str());
-            inst.InstanceID_value(g_apache.GetServerConfigFile());
-            inst.ConfigurationFile_value(g_apache.GetServerConfigFile());
-            inst.ProcessName_value(g_apache.GetServerProcessName());
+            inst.InstanceID_value(g_pApache->GetServerConfigFile());
+            inst.ConfigurationFile_value(g_pApache->GetServerConfigFile());
+            inst.ProcessName_value(g_pApache->GetServerProcessName());
             inst.ServiceName_value(serviceName);
-            inst.OperatingStatus_value(OperatingStatusValues[g_apache.GetOperatingStatus()]);
+            inst.OperatingStatus_value(OperatingStatusValues[g_pApache->GetOperatingStatus()]);
 
             std::vector<mi::String> strArrary;
-            for (apr_size_t moduleNum = 0; moduleNum < g_apache.GetModuleCount(); moduleNum++)
+            for (apr_size_t moduleNum = 0; moduleNum < g_pApache->GetModuleCount(); moduleNum++)
             {
-                strArrary.push_back(g_apache.GetDataString(g_apache.GetServerModules()[moduleNum].moduleNameOffset));
+                strArrary.push_back(g_pApache->GetDataString(g_pApache->GetServerModules()[moduleNum].moduleNameOffset));
             }
-            mi::StringA modules(&strArrary[0], g_apache.GetModuleCount());
+            mi::StringA modules(&strArrary[0], g_pApache->GetModuleCount());
             inst.InstalledModules_value(modules);
         }
 

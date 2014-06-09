@@ -31,19 +31,19 @@ static void EnumerateOneInstance(Context& context,
         apr_size_t item)
 {
     Apache_HTTPDVirtualHost_Class inst;
-    mmap_vhost_elements *vhosts = g_apache.GetVHostElements();
-    const char* apacheServerVersion = GetApacheComponentVersion(g_apache.GetServerVersion(), "Apache");
+    mmap_vhost_elements *vhosts = g_pApache->GetVHostElements();
+    const char* apacheServerVersion = GetApacheComponentVersion(g_pApache->GetServerVersion(), "Apache");
 
     // Insert the key properties into the instance
-    inst.Name_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+    inst.Name_value(g_pApache->GetDataString(vhosts[item].instanceIDOffset));
     inst.Version_value(apacheServerVersion);
-    inst.SoftwareElementID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+    inst.SoftwareElementID_value(g_pApache->GetDataString(vhosts[item].instanceIDOffset));
     inst.TargetOperatingSystem_value(CIM_TARGET_OPERATING_SYSTEM);
     inst.SoftwareElementState_value(CIM_SOFTWARE_ELEMENT_STATE_RUNNING);
 
     // Insert the instance ID into the instance
 
-    inst.InstanceID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+    inst.InstanceID_value(g_pApache->GetDataString(vhosts[item].instanceIDOffset));
 
     if (! keysOnly)
     {
@@ -54,7 +54,7 @@ static void EnumerateOneInstance(Context& context,
         std::vector<mi::Uint16> portsArray;
         std::vector<mi::String> aliasesArray;
 
-        const char* ptr = g_apache.GetDataString(vhosts[item].addressesAndPortsOffset);
+        const char* ptr = g_pApache->GetDataString(vhosts[item].addressesAndPortsOffset);
         while (*ptr != '\0')
         {
             ipAddressesArray.push_back(ptr);
@@ -63,7 +63,7 @@ static void EnumerateOneInstance(Context& context,
             ptr += strlen(ptr) + 1;
         }
 
-        ptr = g_apache.GetDataString(vhosts[item].serverAliasesOffset);
+        ptr = g_pApache->GetDataString(vhosts[item].serverAliasesOffset);
         while (*ptr != '\0')
         {
             aliasesArray.push_back(ptr);
@@ -72,16 +72,16 @@ static void EnumerateOneInstance(Context& context,
 
         // Insert the values into the instance
 
-        inst.ServerName_value(g_apache.GetDataString(vhosts[item].hostNameOffset));
+        inst.ServerName_value(g_pApache->GetDataString(vhosts[item].hostNameOffset));
         inst.SoftwareElementState_value(CIM_SOFTWARE_ELEMENT_STATE_RUNNING);
-        inst.SoftwareElementID_value(g_apache.GetDataString(vhosts[item].instanceIDOffset));
+        inst.SoftwareElementID_value(g_pApache->GetDataString(vhosts[item].instanceIDOffset));
         inst.TargetOperatingSystem_value(CIM_TARGET_OPERATING_SYSTEM);
 
-        inst.DocumentRoot_value(g_apache.GetDataString(vhosts[item].documentRootOffset));
-        inst.ServerAdmin_value(g_apache.GetDataString(vhosts[item].serverAdminOffset));
-        inst.ErrorLog_value(g_apache.GetDataString(vhosts[item].logErrorOffset));
-        inst.CustomLog_value(g_apache.GetDataString(vhosts[item].logCustomOffset));
-        inst.AccessLog_value(g_apache.GetDataString(vhosts[item].logAccessOffset));
+        inst.DocumentRoot_value(g_pApache->GetDataString(vhosts[item].documentRootOffset));
+        inst.ServerAdmin_value(g_pApache->GetDataString(vhosts[item].serverAdminOffset));
+        inst.ErrorLog_value(g_pApache->GetDataString(vhosts[item].logErrorOffset));
+        inst.CustomLog_value(g_pApache->GetDataString(vhosts[item].logCustomOffset));
+        inst.AccessLog_value(g_pApache->GetDataString(vhosts[item].logAccessOffset));
         mi::StringA ipAddressesA(&ipAddressesArray[0], (MI_Uint32)ipAddressesArray.size());
         inst.IPAddresses_value(ipAddressesA);
         mi::Uint16A portsA(&portsArray[0], (MI_Uint32)portsArray.size());
@@ -108,7 +108,12 @@ void Apache_HTTPDVirtualHost_Class_Provider::Load(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_apache.Load("VirtualHost"))
+        if (NULL == g_pApache)
+        {
+            g_pApache = new ApacheBinding();
+        }
+
+        if (APR_SUCCESS != g_pApache->Load("VirtualHost"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -118,7 +123,7 @@ void Apache_HTTPDVirtualHost_Class_Provider::Load(
         MI_Result r = context.RefuseUnload();
         if ( MI_RESULT_OK != r )
         {
-            g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDVirtualHost_Class_Provider refuses to not unload");
+            g_pApache->DisplayError(g_pApache->OMI_Error(r), "Apache_HTTPDVirtualHost_Class_Provider refuses to not unload");
         }
 
         context.Post(MI_RESULT_OK);
@@ -131,7 +136,7 @@ void Apache_HTTPDVirtualHost_Class_Provider::Unload(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_apache.Unload("VirtualHost"))
+        if (APR_SUCCESS != g_pApache->Unload("VirtualHost"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -154,20 +159,20 @@ void Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances(
     CIM_PEX_BEGIN
     {
         /* Lock the mutex to walk the list */
-        if (APR_SUCCESS != (status = g_apache.LockMutex()))
+        if (APR_SUCCESS != (status = g_pApache->LockMutex()))
         {
-            g_apache.DisplayError(status, "VirtualHost::EnumerateInstances: failed to lock mutex");
+            g_pApache->DisplayError(status, "VirtualHost::EnumerateInstances: failed to lock mutex");
             context.Post(MI_RESULT_FAILED);
             return;
         }
 
-        for (apr_size_t i = 2; i <= g_apache.GetVHostCount() - 1; i++)
+        for (apr_size_t i = 2; i <= g_pApache->GetVHostCount() - 1; i++)
         {
             EnumerateOneInstance(context, keysOnly, i);
         }
 
         // Only display _Unknown if data is saved to it
-        if (g_apache.GetVHostElements()[1].requestsTotal)
+        if (g_pApache->GetVHostElements()[1].requestsTotal)
         {
             EnumerateOneInstance(context, keysOnly, 1);
         }
@@ -177,7 +182,7 @@ void Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances(
     CIM_PEX_END( "Apache_HTTPDVirtualHost_Class_Provider::EnumerateInstances" );
 
     // Be sure mutex gets unlocked, regardless if an exception occurs
-    g_apache.UnlockMutex();
+    g_pApache->UnlockMutex();
 }
 
 void Apache_HTTPDVirtualHost_Class_Provider::GetInstance(

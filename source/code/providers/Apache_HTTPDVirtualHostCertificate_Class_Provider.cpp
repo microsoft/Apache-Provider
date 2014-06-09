@@ -67,7 +67,7 @@ static int GetCertificateExpirationDate(
     status = apr_procattr_create(&pattr, pool);
     if (status != APR_SUCCESS)
     {
-        g_apache.DisplayError(status, "error creating openssl child process attributes");
+        g_pApache->DisplayError(status, "error creating openssl child process attributes");
         return -1;
     }
 
@@ -75,7 +75,7 @@ static int GetCertificateExpirationDate(
     status = apr_procattr_io_set(pattr, APR_NO_PIPE, APR_FULL_BLOCK, APR_NO_PIPE);
     if (status != APR_SUCCESS)
     {
-        g_apache.DisplayError(status, "error setting openssl child process i/o attributes");
+        g_pApache->DisplayError(status, "error setting openssl child process i/o attributes");
         return -1;
     }
 
@@ -83,7 +83,7 @@ static int GetCertificateExpirationDate(
     status = apr_procattr_cmdtype_set(pattr, APR_PROGRAM_PATH);
     if (status != APR_SUCCESS)
     {
-        g_apache.DisplayError(status, "error setting openssl child process command type");
+        g_pApache->DisplayError(status, "error setting openssl child process command type");
         return -1;
     }
 
@@ -91,7 +91,7 @@ static int GetCertificateExpirationDate(
     status = apr_proc_create(&proc, "openssl", argptr, NULL, (apr_procattr_t*)pattr, pool);
     if (status != APR_SUCCESS)
     {
-        g_apache.DisplayError(status, "error creating openssl child process");
+        g_pApache->DisplayError(status, "error creating openssl child process");
         return -1;
     }
 
@@ -99,7 +99,7 @@ static int GetCertificateExpirationDate(
     status = apr_file_gets(dateString, 64, proc.out);
     if (status != APR_SUCCESS)
     {
-        g_apache.DisplayError(status, "error reading openssl process output");
+        g_pApache->DisplayError(status, "error reading openssl process output");
         return -1;
     }
 
@@ -113,7 +113,7 @@ static int GetCertificateExpirationDate(
     status = apr_proc_wait(&proc, &exitCode, &why, APR_WAIT);
     if (!APR_STATUS_IS_CHILD_DONE(status))
     {
-        g_apache.DisplayError(status, "openssl process did not finish successfully");
+        g_pApache->DisplayError(status, "openssl process did not finish successfully");
         return -1;
     }
 
@@ -121,12 +121,12 @@ static int GetCertificateExpirationDate(
     // being a three-letter Engish abbreviation for the month name
     if (strncmp(dateString, "notAfter=", 9) != 0)
     {
-        g_apache.DisplayError(apr_get_netos_error(), "Apache_HTTPDVirtualHostCertificate: could not read openssl notAfter date");
+        g_pApache->DisplayError(apr_get_netos_error(), "Apache_HTTPDVirtualHostCertificate: could not read openssl notAfter date");
         return -1;
     }
     if (sscanf(&dateString[9], "%3s%d%d:%d:%d %d", monName, &day, &hour, &min, &sec, &year) < 6)
     {
-        g_apache.DisplayError(apr_get_netos_error(), "Apache_HTTPDVirtualHostCertificate: could not read openssl notAfter date");
+        g_pApache->DisplayError(apr_get_netos_error(), "Apache_HTTPDVirtualHostCertificate: could not read openssl notAfter date");
         return -1;
     }
     for (month = 0; month < 12; month++)
@@ -136,7 +136,7 @@ static int GetCertificateExpirationDate(
     }
     if (month == 12)
     {
-        g_apache.DisplayError(apr_get_netos_error(), "Apache_HTTPDVirtualHostCertificate: could not read openssl notAfter month");
+        g_pApache->DisplayError(apr_get_netos_error(), "Apache_HTTPDVirtualHostCertificate: could not read openssl notAfter month");
         return -1;
     }
 
@@ -182,9 +182,9 @@ static void EnumerateOneInstance(
     TemporaryPool& pool)
 {
     Apache_HTTPDVirtualHostCertificate_Class inst;
-    mmap_certificate_elements* certs = g_apache.GetCertificateElements();
-    const char* certificateFileName = g_apache.GetDataString(certs[item].certificateFileNameOffset);
-    const char* openSslVersion = GetApacheComponentVersion(g_apache.GetServerVersion(), "OpenSSL");
+    mmap_certificate_elements* certs = g_pApache->GetCertificateElements();
+    const char* certificateFileName = g_pApache->GetDataString(certs[item].certificateFileNameOffset);
+    const char* openSslVersion = GetApacheComponentVersion(g_pApache->GetServerVersion(), "OpenSSL");
 
 #if defined(_WIN32)
     // Since Windows file names are case-insensitive, just use the certificate file name
@@ -225,7 +225,7 @@ static void EnumerateOneInstance(
         // Insert the host:port name for the first host that uses this certificate file
         const char* hostStr = apr_psprintf(pool.Get(),
                                            "%s:%d",
-                                           g_apache.GetDataString(certs[item].hostNameOffset),
+                                           g_pApache->GetDataString(certs[item].hostNameOffset),
                                            certs[item].port);
         inst.ServerName_value(hostStr);
         inst.FileName_value(certificateFileName);
@@ -278,7 +278,12 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::Load(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_apache.Load("VirtualHostCertificate"))
+        if (NULL == g_pApache)
+        {
+            g_pApache = new ApacheBinding();
+        }
+
+        if (APR_SUCCESS != g_pApache->Load("VirtualHostCertificate"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -288,7 +293,7 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::Load(
         MI_Result r = context.RefuseUnload();
         if (r != MI_RESULT_OK)
         {
-            g_apache.DisplayError(g_apache.OMI_Error(r), "Apache_HTTPDVirtualHostCertificate_Class_Provider refuses to not unload");
+            g_pApache->DisplayError(g_pApache->OMI_Error(r), "Apache_HTTPDVirtualHostCertificate_Class_Provider refuses to not unload");
         }
 
         context.Post(MI_RESULT_OK);
@@ -301,7 +306,7 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::Unload(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_apache.Unload("VirtualHostCertificate"))
+        if (APR_SUCCESS != g_pApache->Unload("VirtualHostCertificate"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -324,16 +329,16 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
         apr_status_t status;
 
         // Lock the mutex to walk the list
-        if (APR_SUCCESS != (status = g_apache.LockMutex()))
+        if (APR_SUCCESS != (status = g_pApache->LockMutex()))
         {
-            g_apache.DisplayError(status, "VirtualHostCertificate::EnumerateInstances: failed to lock mutex");
+            g_pApache->DisplayError(status, "VirtualHostCertificate::EnumerateInstances: failed to lock mutex");
             context.Post(MI_RESULT_FAILED);
             return;
         }
 
-        TemporaryPool pool(g_apache.GetPool());
+        TemporaryPool pool(g_pApache->GetPool());
         apr_size_t item;
-        for (item = 0; item < g_apache.GetCertificateCount(); item++)
+        for (item = 0; item < g_pApache->GetCertificateCount(); item++)
         {
             EnumerateOneInstance(context, keysOnly, item, pool);
         }
@@ -343,7 +348,7 @@ void Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances(
     CIM_PEX_END( "Apache_HTTPDVirtualHostCertificate_Class_Provider::EnumerateInstances" );
 
     // Be sure mutex gets unlocked, regardless if an exception occurs
-    g_apache.UnlockMutex();
+    g_pApache->UnlockMutex();
 }
 
 void Apache_HTTPDVirtualHostCertificate_Class_Provider::GetInstance(
