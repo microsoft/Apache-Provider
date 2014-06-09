@@ -12,6 +12,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <apr_strings.h>
 
@@ -86,6 +87,211 @@ apr_status_t ApacheDependencies::DestroyMutex()
     }
 
     return APR_SUCCESS;
+}
+
+/*--------------------------------------------------------------*/
+/**
+   Gets the server configuration file
+
+   \returns        Full path to server configuration file, or NULL
+
+   Apache doesn't dependably return the top level configuration file. Testing has
+   indicated that (at least on SLES 11) uid.conf can be returned rather than httpd.conf,
+   even though httpd.conf is the top level configuration file.
+
+   This class works with ApacheBinding::GetServerConfigFile. If we can find the real
+   configuration file via #define options (from httpd -V), then we use that. Otherwise,
+   we return NULL and let ApacheBinding::GetServerConfigFile report what Apache told us
+   (which could be wrong, but at least we tried to do better).
+
+   httpd -V returns something like:
+        Server version: Apache/2.2.15 (Unix)
+        Server built:   Apr  9 2011 08:58:28
+        Server's Module Magic Number: 20051115:24
+        Server loaded:  APR 1.3.9, APR-Util 1.3.9
+        Compiled using: APR 1.3.9, APR-Util 1.3.9
+        Architecture:   64-bit
+        Server MPM:     Prefork
+          threaded:     no
+            forked:     yes (variable process count)
+        Server compiled with....
+         -D APACHE_MPM_DIR="server/mpm/prefork"
+         -D APR_HAS_SENDFILE
+         -D APR_HAS_MMAP
+         -D APR_HAVE_IPV6 (IPv4-mapped addresses enabled)
+         -D APR_USE_SYSVSEM_SERIALIZE
+         -D APR_USE_PTHREAD_SERIALIZE
+         -D SINGLE_LISTEN_UNSERIALIZED_ACCEPT
+         -D APR_HAS_OTHER_CHILD
+         -D AP_HAVE_RELIABLE_PIPED_LOGS
+         -D DYNAMIC_MODULE_LIMIT=128
+         -D HTTPD_ROOT="/etc/httpd"
+         -D SUEXEC_BIN="/usr/sbin/suexec"
+         -D DEFAULT_PIDLOG="run/httpd.pid"
+         -D DEFAULT_SCOREBOARD="logs/apache_runtime_status"
+         -D DEFAULT_LOCKFILE="logs/accept.lock"
+         -D DEFAULT_ERRORLOG="logs/error_log"
+         -D AP_TYPES_CONFIG_FILE="conf/mime.types"
+         -D SERVER_CONFIG_FILE="conf/httpd.conf"
+   In particular, we care about SERVER_CONFIG_FILE and HTTPD_ROOT, if
+   SERVER_CONFIG_FILE isn't an absolute path.
+*/
+const char* ApacheDependencies::GetServerConfigFile(apr_pool_t* pool)
+{
+    if ( !m_configFileAttempted )
+    {
+        char buffer[128];
+        apr_status_t status;
+        apr_proc_t proc;
+        apr_procattr_t *pattr;
+        std::string rootDir, configFile;
+
+        m_configFileAttempted = true;
+
+        // Try to run twice (two possible binary names)
+        const int loopLimit = 1;
+        for (int i = 0; i <= loopLimit; i++)
+        {
+            // Initialize the process attribute
+            status = apr_procattr_create(&pattr, pool);
+            if (status != APR_SUCCESS)
+            {
+                g_pApache->DisplayError(status, "GetServerConfigFile: error creating child process attributes");
+                return NULL;
+            }
+
+            // Set up the pipe of stdout from the child to this process' proc.out
+            status = apr_procattr_io_set(pattr, APR_NO_PIPE, APR_FULL_BLOCK, APR_NO_PIPE);
+            if (status != APR_SUCCESS)
+            {
+                g_pApache->DisplayError(status, "GetServerConfigFile: error setting child process i/o attributes");
+                return NULL;
+            }
+
+            // Make the httpd/apache2ctl program be run using the PATH variable
+            status = apr_procattr_cmdtype_set(pattr, APR_PROGRAM_PATH);
+            if (status != APR_SUCCESS)
+            {
+                g_pApache->DisplayError(status, "GetServerConfigFile: error setting child process command type");
+                return NULL;
+            }
+
+            // Run the binary
+            const char *progname;
+            if (0 == i)
+            {
+                progname = "apache2ctl";
+                const char* prog_args[] =
+                {
+                    "apache2ctl",
+                    "-V",
+                    NULL
+                };
+                char* const* argptr = const_cast<char* const*>(prog_args);
+                status = apr_proc_create(&proc, progname, argptr, NULL, (apr_procattr_t*)pattr, pool);
+            }
+            else if (1 == i)
+            {
+                progname = "httpd";
+                const char* prog_args[] =
+                {
+                    "httpd",
+                    "-V",
+                    NULL
+                };
+                char* const* argptr = const_cast<char* const*>(prog_args);
+                status = apr_proc_create(&proc, progname, argptr, NULL, (apr_procattr_t*)pattr, pool);
+            }
+            else
+            {
+                g_pApache->DisplayError(status, "GetServerConfigFile: unknown program to run");
+                return NULL;
+            }
+
+            if (status != APR_SUCCESS)
+            {
+                char *text = apr_psprintf(pool, "GetServerConfigFile: error creating child process for %s", progname);
+                g_pApache->DisplayError(status, text);
+                return NULL;
+            }
+
+            // Drain the output from the child process, grabbing what we need
+            while (APR_SUCCESS == (status = apr_file_gets(buffer, sizeof(buffer), proc.out)))
+            {
+                char* substrRoot = strstr(buffer, "-D HTTPD_ROOT=\"");
+                char* substrConfig = strstr(buffer, "-D SERVER_CONFIG_FILE=\"");
+
+                if (substrRoot != NULL || substrConfig != NULL)
+                {
+                    // We found something - figure out the value between the quotes
+                    // (i.e.  HTTPD_ROOT="/etc/httpd")
+
+                    char *valStart = strstr(buffer, "\"") + 1;
+                    char *valEnd = strstr(valStart, "\"");
+
+                    // Null-terminate the value (write null over ending quote)
+                    if (valEnd != NULL)
+                    {
+                        *valEnd = '\0';
+                    }
+
+                    // Save the value that we found
+                    if (substrRoot)
+                    {
+                        rootDir = valStart;
+                    }
+                    else if (substrConfig)
+                    {
+                        configFile = valStart;
+                    }
+                }
+            }
+
+            if (status != APR_SUCCESS && status != APR_EOF)
+            {
+                char *text = apr_psprintf(pool, "GetServerConfigFile: error reading process output for %s", progname);
+                g_pApache->DisplayError(status, text);
+                return NULL;
+            }
+
+            // Wait for the child process to finish
+            apr_exit_why_e why;
+            int exitCode;
+            status = apr_proc_wait(&proc, &exitCode, &why, APR_WAIT);
+            if (!APR_STATUS_IS_CHILD_DONE(status))
+            {
+                char *text = apr_psprintf(pool, "GetServerConfigFile: process did not finish successfully for %s", progname);
+                g_pApache->DisplayError(status, text);
+                return NULL;
+            }
+
+            if (exitCode != 0)
+            {
+                if (i < loopLimit)
+                {
+                    continue;
+                }
+
+                char *text = apr_psprintf(pool, "GetServerConfigFile: process %s failed with status %d", progname, exitCode);
+                g_pApache->DisplayError(status, text);
+                return NULL;
+            }
+
+            // If not absolute path, prepend root directory to configuration file
+            if (configFile[0] != '/' && rootDir.length())
+            {
+                m_configFile = std::string(rootDir) + std::string("/") + configFile;
+            }
+            else
+            {
+                m_configFile = configFile;
+            }
+
+            break;
+        }
+    }
+
+    return (m_configFile.length() ? m_configFile.c_str() : NULL);
 }
 
 
@@ -235,6 +441,13 @@ const char* ApacheBinding::GetDataString(apr_size_t offset)
         return "";
     }
     return m_string_data->data + offset;
+}
+
+const char* ApacheBinding::GetServerConfigFile()
+{
+    const char* configFile = m_pDeps->GetServerConfigFile(m_apr_pool);
+
+    return (configFile ? configFile : GetDataString(m_server_data->configFileOffset));
 }
 
 apr_status_t ApacheBinding::Initialize()

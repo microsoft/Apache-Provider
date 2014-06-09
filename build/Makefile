@@ -62,7 +62,7 @@ OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
 MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
 PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support -I$(TARGET_DIR)
 
-PROVIDER_TEST_INCLUDE_FLAGS := -Wmissing-include-dirs -I$(SCXPAL_DIR)/source/code/include -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(SCXPAL_DIR)/test/ext/include -I$(OMI_ROOT)/output/include -I$(OMI_ROOT) -I$(OMI_ROOT)/common -I$(SCXPAL_DIR)/test/code/include $(PROVIDER_INCLUDE_FLAGS) -I$(PROVIDER_DIR) -I$(PROVIDER_TEST_SUPPORT_DIR)
+PROVIDER_TEST_INCLUDE_FLAGS := -Wmissing-include-dirs -Wno-non-virtual-dtor -I$(SCXPAL_DIR)/source/code/include -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(SCXPAL_DIR)/test/ext/include -I$(OMI_ROOT)/output/include -I$(OMI_ROOT) -I$(OMI_ROOT)/common -I$(SCXPAL_DIR)/test/code/include $(PROVIDER_INCLUDE_FLAGS) -I$(PROVIDER_DIR) -I$(PROVIDER_TEST_SUPPORT_DIR)
 
 ifeq ($(ENABLE_DEBUG),1)
 PROV_DEBUG_FLAGS := -g
@@ -314,7 +314,8 @@ $(PROVIDER_TEST_DIR)/providertestutils.cpp: $(PAL_TESTUTILS_DIR)/providertestuti
 	ln -s $(PAL_TESTUTILS_DIR)/providertestutils.cpp $(PROVIDER_TEST_DIR)/providertestutils.cpp
 
 STATIC_PROVIDER_UNITFILES_INCLUDE = \
-	$(PROVIDER_TEST_SUPPORT_DIR)/mmap_builder.h
+	$(PROVIDER_TEST_SUPPORT_DIR)/mmap_builder.h \
+	$(PROVIDER_TEST_SUPPORT_DIR)/testableapache.h
 
 STATIC_PROVIDER_UNITFILES = \
 	$(PROVIDER_TEST_DIR)/server_test.cpp \

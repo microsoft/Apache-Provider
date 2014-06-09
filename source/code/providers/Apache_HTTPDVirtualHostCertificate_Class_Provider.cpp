@@ -96,7 +96,7 @@ static int GetCertificateExpirationDate(
     }
 
     // Read the first line from the child process stdout
-    status = apr_file_gets(dateString, 64, proc.out);
+    status = apr_file_gets(dateString, sizeof(dateString), proc.out);
     if (status != APR_SUCCESS)
     {
         g_pApache->DisplayError(status, "error reading openssl process output");

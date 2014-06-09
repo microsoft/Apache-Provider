@@ -26,6 +26,8 @@
 #include "datasampler.h"
 #include "temppool.h"
 
+#include <string>
+
 
 /*------------------------------------------------------------------------------*/
 /**
@@ -36,7 +38,7 @@
 class ApacheDependencies
 {
 public:
-    ApacheDependencies() : m_mutexMapRW(NULL), m_mmap_region(NULL) {}
+    ApacheDependencies() : m_mutexMapRW(NULL), m_mmap_region(NULL), m_configFileAttempted(false) {}
     virtual ~ApacheDependencies();
 
     virtual bool AllowStatusOutput() { return true; }
@@ -56,11 +58,15 @@ public:
     virtual apr_status_t LaunchDataCollector() { return m_sampler.Launch(); }
     virtual apr_status_t ShutdownDataCollector() { return m_sampler.WaitForCompletion(); }
 
+    virtual const char* GetServerConfigFile(apr_pool_t* pool);
+
 private:
     apr_global_mutex_t *m_mutexMapRW;
     apr_shm_t *m_mmap_region;
 
     DataSampler m_sampler;
+    bool m_configFileAttempted;
+    std::string m_configFile;
 };
 
 class ApacheBinding
@@ -80,7 +86,7 @@ public:
 
     const char* GetDataString(apr_size_t offset);
 
-    const char *GetServerConfigFile() { return GetDataString(m_server_data->configFileOffset); }
+    const char *GetServerConfigFile();
     const char *GetServerProcessName() { return GetDataString(m_server_data->processNameOffset); }
     const char *GetServerVersion() { return GetDataString(m_server_data->serverVersionOffset); }
     const char *GetServerRoot() { return GetDataString(m_server_data->serverRootOffset); }

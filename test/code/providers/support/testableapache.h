@@ -18,6 +18,8 @@
 
 class TestableApacheDependencies : public ApacheDependencies
 {
+    virtual ~TestableApacheDependencies() {}
+
     virtual bool AllowStatusOutput() { return false; }
     virtual apr_status_t LoadMemoryMap(apr_pool_t* pool,
                                        mmap_server_data** svr,
@@ -33,6 +35,8 @@ class TestableApacheDependencies : public ApacheDependencies
 
     virtual apr_status_t LaunchDataCollector() { return APR_SUCCESS; }
     virtual apr_status_t ShutdownDataCollector() { return APR_SUCCESS; }
+
+    virtual const char* GetServerConfigFile(apr_pool_t* pool) { return NULL; }
 };
 
 class TestableApacheBinding : public ApacheBinding

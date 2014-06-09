@@ -21,6 +21,8 @@
 #include "testableapache.h"
 #include "mmap_builder.h"
 
+#include <iostream> // for cout
+
 class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, TestableApacheBinding
 {
     CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test );
@@ -29,6 +31,7 @@ class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, TestableApacheBi
     CPPUNIT_TEST( testApacheBindingNotStatic );
     CPPUNIT_TEST( testInsertStringIntoTable );
     CPPUNIT_TEST( testInsertModules );
+    CPPUNIT_TEST( testGetConfigFile );
 
     // Now test the actual production code
     CPPUNIT_TEST( TestEnumerateInstancesKeysOnly );
@@ -141,6 +144,18 @@ public:
         CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_dnssd.c", t.GetString(s.GetModule(2))));
         CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_ssl.c", t.GetString(s.GetModule(1))));
         CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_cimprov.c", t.GetString(s.GetModule(0))));
+    }
+
+    void testGetConfigFile()
+    {
+        // Test production code version of GetServerConfigFile (verify NULL not returned)
+        TemporaryPool pool(g_pApache->GetPool());
+        ApacheDependencies deps;
+
+        const char* configFile = deps.GetServerConfigFile(pool.Get());
+        std::cout << ": " << ( configFile ? configFile : "NULL" );
+
+        CPPUNIT_ASSERT(configFile != NULL);
     }
 
     void TestEnumerateInstancesKeysOnly()
