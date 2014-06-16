@@ -173,6 +173,6 @@ void GenerateMemoryMap(TemporaryPool& p, TestServerData& svr, TestStringTable& s
     mmap_server_data* serverMap = svr.GenerateServerMap(pool);
     mmap_string_table* stringTab = str.GenerateStringTable(pool);
 
-    TestableApacheBinding* pApache = static_cast<TestableApacheBinding*>(g_pApache);
-    pApache->SetMemoryMap(serverMap, stringTab);
+    TestableApacheFactory* pFactory = static_cast<TestableApacheFactory*>(g_pFactory);
+    pFactory->SetMemoryMap(serverMap, stringTab);
 }

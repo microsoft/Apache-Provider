@@ -25,12 +25,12 @@ void Apache_HTTPDServerStatistics_Class_Provider::Load(
 {
     CIM_PEX_BEGIN
     {
-        if (NULL == g_pApache)
+        if (NULL == g_pFactory)
         {
-            g_pApache = new ApacheBinding();
+            g_pFactory = new ApacheFactory();
         }
 
-        if (APR_SUCCESS != g_pApache->Load("ServerStatistics"))
+        if (APR_SUCCESS != g_pFactory->GetInit()->Load("ServerStatistics"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -40,7 +40,7 @@ void Apache_HTTPDServerStatistics_Class_Provider::Load(
         MI_Result r = context.RefuseUnload();
         if ( MI_RESULT_OK != r )
         {
-            g_pApache->DisplayError(g_pApache->OMI_Error(r), "Apache_HTTPDServerStatistics_Class_Provider refuses to not unload");
+            DisplayError(OMI_Error(r), "Apache_HTTPDServerStatistics_Class_Provider refuses to not unload");
         }
 
         context.Post(MI_RESULT_OK);
@@ -53,7 +53,7 @@ void Apache_HTTPDServerStatistics_Class_Provider::Unload(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_pApache->Unload("VirtualHostStatistics"))
+        if (APR_SUCCESS != g_pFactory->GetInit()->Unload("ServerStatistics"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -73,24 +73,31 @@ void Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances(
 {
     CIM_PEX_BEGIN
     {
+        ApacheDataCollector data = g_pFactory->DataCollectorFactory();
         Apache_HTTPDServerStatistics_Class inst;
+
+        if (APR_SUCCESS != data.Attach("Apache_HTTPDServerStatistics_Class_Provider::EnumerateInstances"))
+        {
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
 
         // Insert the key into the instance
 
-        inst.InstanceID_value(g_pApache->GetServerConfigFile());
+        inst.InstanceID_value(data.GetServerConfigFile());
 
         if (! keysOnly)
         {
             // Insert the values into the instance
 
-            inst.ConfigurationFile_value(g_pApache->GetServerConfigFile());
+            inst.ConfigurationFile_value(data.GetServerConfigFile());
 
             // Insert time-based values into the instance
 
-            inst.TotalPctCPU_value(g_pApache->GetCPUUtilization());
+            inst.TotalPctCPU_value(data.GetCPUUtilization());
 
-            apr_uint32_t idleWorkers = g_pApache->GetWorkerCountIdle();
-            apr_uint32_t busyWorkers = g_pApache->GetWorkerCountBusy();
+            apr_uint32_t idleWorkers = data.GetWorkerCountIdle();
+            apr_uint32_t busyWorkers = data.GetWorkerCountBusy();
             apr_uint32_t totalWorkers = idleWorkers + busyWorkers;
 
             inst.IdleWorkers_value(idleWorkers);

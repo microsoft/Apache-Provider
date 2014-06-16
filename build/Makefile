@@ -290,10 +290,10 @@ STATIC_PROVIDERLIB_SRCFILES += \
 
 PROVIDER_HEADERS = \
 	$(PROVIDER_DIR)/support/apachebinding.h \
+	$(PROVIDER_DIR)/support/cimconstants.h \
 	$(PROVIDER_DIR)/support/datasampler.h \
 	$(PROVIDER_DIR)/support/utils.h \
-	$(PROVIDER_DIR)/support/temppool.h \
-	$(PROVIDER_DIR)/support/cimconstants.h
+	$(PROVIDER_DIR)/support/temppool.h
 
 $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"

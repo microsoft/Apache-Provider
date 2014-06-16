@@ -23,17 +23,36 @@
 
 #include <iostream> // for cout
 
-class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture, TestableApacheBinding
+class TestableDataCollectorDepsFailsLoadMemoryMap : public TestableApacheDataCollectorDependencies
+{
+    virtual apr_status_t LoadMemoryMap(mmap_server_data** svr,
+                                       mmap_vhost_data** vhost,
+                                       mmap_certificate_data** cert,
+                                       mmap_string_table** str)
+    { return APR_ENOENT; }
+};
+
+class TestableFactoryWithLoadMemoryMapFailure : public TestableApacheFactory
+{
+public:
+    virtual ApacheDataCollector DataCollectorFactory()
+    {
+        TestableDataCollectorDepsFailsLoadMemoryMap* pDeps = new TestableDataCollectorDepsFailsLoadMemoryMap();
+        return ApacheDataCollector( pDeps );
+    }
+};
+
+class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test );
 
     // Tests for low-level test functions - this is as good a place as any
-    CPPUNIT_TEST( testApacheBindingNotStatic );
     CPPUNIT_TEST( testInsertStringIntoTable );
     CPPUNIT_TEST( testInsertModules );
-    CPPUNIT_TEST( testGetConfigFile );
 
     // Now test the actual production code
+    CPPUNIT_TEST( TestGetConfigFile );
+    CPPUNIT_TEST( TestAttachFailsIfLoadMemoryMapFails );
     CPPUNIT_TEST( TestEnumerateInstancesKeysOnly );
 /*
     CPPUNIT_TEST( TestEnumerateInstances );
@@ -53,7 +72,7 @@ private:
 public:
     void setUp(void)
     {
-        g_pApache = new TestableApacheBinding(new TestableApacheDependencies());
+        g_pFactory = new TestableApacheFactory();
 
         std::wstring errMsg;
         TestableContext context;
@@ -75,17 +94,8 @@ public:
         TearDownAgent<mi::Apache_HTTPDServer_Class_Provider>(context, CALL_LOCATION(errMsg));
         CPPUNIT_ASSERT_EQUAL_MESSAGE(ERROR_MESSAGE, false, context.WasRefuseUnloadCalled() );
 
-        delete g_pApache;
-        g_pApache = NULL;
-    }
-
-    void testApacheBindingNotStatic()
-    {
-        // Our class is built with Apache Binding mixed in, but this isn't static version
-        // Verify that dependencies object is different in g_pApache and our mix-in
-
-        TestableApacheBinding* pApache = static_cast<TestableApacheBinding*>(g_pApache);
-        CPPUNIT_ASSERT( this->GetDependencies() != pApache->GetDependencies() );
+        delete g_pFactory;
+        g_pFactory = NULL;
     }
 
     void testInsertStringIntoTable()
@@ -146,11 +156,11 @@ public:
         CPPUNIT_ASSERT_EQUAL(0, strcmp("mod_cimprov.c", t.GetString(s.GetModule(0))));
     }
 
-    void testGetConfigFile()
+    void TestGetConfigFile()
     {
         // Test production code version of GetServerConfigFile (verify NULL not returned)
-        TemporaryPool pool(g_pApache->GetPool());
-        ApacheDependencies deps;
+        TemporaryPool pool(g_pFactory->GetInit()->GetPool());
+        ApacheInitDependencies deps;
 
         const char* configFile = deps.GetServerConfigFile(pool.Get());
         std::cout << ": " << ( configFile ? configFile : "NULL" );
@@ -158,9 +168,23 @@ public:
         CPPUNIT_ASSERT(configFile != NULL);
     }
 
+    void TestAttachFailsIfLoadMemoryMapFails()
+    {
+        TestableFactoryWithLoadMemoryMapFailure* pFactory = new TestableFactoryWithLoadMemoryMapFailure();
+
+        // Watch scoping; ApacheDataCollector must destruct prior to deleting the factory
+        {
+            ApacheDataCollector data = pFactory->DataCollectorFactory();
+            apr_status_t status = data.Attach("TestAttachFailsIfLoadMemoryMapFails");
+            CPPUNIT_ASSERT_EQUAL(APR_ENOENT, status);
+        }
+
+        delete pFactory;
+    }
+
     void TestEnumerateInstancesKeysOnly()
     {
-        TemporaryPool pool(g_pApache->GetPool());
+        TemporaryPool pool(g_pFactory->GetInit()->GetPool());
 
         TestStringTable strTab;
         TestServerData serverTab(strTab);

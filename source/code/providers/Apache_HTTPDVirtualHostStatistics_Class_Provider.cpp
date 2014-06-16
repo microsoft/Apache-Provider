@@ -11,19 +11,20 @@ MI_BEGIN_NAMESPACE
 
 static void EnumerateOneInstance(Context& context,
         bool keysOnly,
-        apr_size_t item)
+        apr_size_t item,
+        ApacheDataCollector& data)
 {
     Apache_HTTPDVirtualHostStatistics_Class inst;
-    mmap_vhost_elements *vhosts = g_pApache->GetVHostElements();
+    mmap_vhost_elements *vhosts = data.GetVHostElements();
 
     // Insert the key into the instance
-    inst.InstanceID_value(g_pApache->GetDataString(vhosts[item].instanceIDOffset));
+    inst.InstanceID_value(data.GetDataString(vhosts[item].instanceIDOffset));
 
     if (! keysOnly)
     {
         // Insert the values into the instance
 
-        inst.ServerName_value(g_pApache->GetDataString(vhosts[item].hostNameOffset));
+        inst.ServerName_value(data.GetDataString(vhosts[item].hostNameOffset));
         inst.RequestsTotal_value(vhosts[item].requestsTotal);
         inst.RequestsTotalBytes_value(vhosts[item].requestsBytes);
         inst.ErrorCount400_value(vhosts[item].errorCount400);
@@ -56,22 +57,21 @@ void Apache_HTTPDVirtualHostStatistics_Class_Provider::Load(
 {
     CIM_PEX_BEGIN
     {
-        if (NULL == g_pApache)
+        if (NULL == g_pFactory)
         {
-            g_pApache = new ApacheBinding();
+            g_pFactory = new ApacheFactory();
         }
 
-        if (APR_SUCCESS != g_pApache->Load("VirtualHostStatistics"))
+        if (APR_SUCCESS != g_pFactory->GetInit()->Load("VirtualHostStatistics"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
         }
 
-        // Notify that we don't wish to unload
         MI_Result r = context.RefuseUnload();
         if ( MI_RESULT_OK != r )
         {
-            g_pApache->DisplayError(g_pApache->OMI_Error(r), "Apache_HTTPDVirtualHostStatistics_Class_Provider refuses to not unload");
+            DisplayError(OMI_Error(r), "Apache_HTTPDVirtualHostStatistics_Class_Provider refuses to not unload");
         }
 
         context.Post(MI_RESULT_OK);
@@ -84,7 +84,7 @@ void Apache_HTTPDVirtualHostStatistics_Class_Provider::Unload(
 {
     CIM_PEX_BEGIN
     {
-        if (APR_SUCCESS != g_pApache->Unload("VirtualHostStatistics"))
+        if (APR_SUCCESS != g_pFactory->GetInit()->Unload("VirtualHostStatistics"))
         {
             context.Post(MI_RESULT_FAILED);
             return;
@@ -102,39 +102,46 @@ void Apache_HTTPDVirtualHostStatistics_Class_Provider::EnumerateInstances(
     bool keysOnly,
     const MI_Filter* filter)
 {
+    ApacheDataCollector data = g_pFactory->DataCollectorFactory();
+
     CIM_PEX_BEGIN
     {
         apr_status_t status;
-        apr_size_t i;
 
-        /* Lock the mutex to walk the list */
-        if (APR_SUCCESS != (status = g_pApache->LockMutex()))
+        if (APR_SUCCESS != data.Attach("Apache_HTTPDServer_Class_Provider::EnumerateInstances"))
         {
-            g_pApache->DisplayError(status, "VirtualHostStatistics::EnumerateInstances: failed to lock mutex");
             context.Post(MI_RESULT_FAILED);
             return;
         }
 
-        for (i = 2; i <= g_pApache->GetVHostCount() - 1; i++)
+        /* Lock the mutex to walk the list */
+        if (APR_SUCCESS != (status = data.LockMutex()))
         {
-            EnumerateOneInstance(context, keysOnly, i);
+            DisplayError(status, "VirtualHostStatistics::EnumerateInstances: failed to lock mutex");
+            context.Post(MI_RESULT_FAILED);
+            return;
+        }
+
+        for (apr_size_t i = 2; i <= data.GetVHostCount() - 1; i++)
+        {
+            EnumerateOneInstance(context, keysOnly, i, data);
         }
 
         // Only display _Unknown if data is saved to it
-        if (g_pApache->GetVHostElements()[1].requestsTotal)
+        if (data.GetVHostElements()[1].requestsTotal)
         {
-            EnumerateOneInstance(context, keysOnly, 1);
+            EnumerateOneInstance(context, keysOnly, 1, data);
         }
 
         // Support _Total
-        EnumerateOneInstance(context, keysOnly, 0);
+        EnumerateOneInstance(context, keysOnly, 0, data);
 
         context.Post(MI_RESULT_OK);
     }
     CIM_PEX_END( "Apache_HTTPDVirtualHostStatistics_Class_Provider::EnumerateInstances" );
 
     // Be sure mutex gets unlocked, regardless if an exception occurs
-    g_pApache->UnlockMutex();
+    data.UnlockMutex();
 }
 
 void Apache_HTTPDVirtualHostStatistics_Class_Provider::GetInstance(
