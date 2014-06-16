@@ -87,8 +87,7 @@ typedef enum
 {
     DOCUMENT_ROOT,
     TRANSFER_LOG_FILE_NAME,
-    CUSTOM_LOG_FILE_NAME,
-    PATH_ALIAS
+    CUSTOM_LOG_FILE_NAME
 } host_info_type;
 
 /*
@@ -289,40 +288,6 @@ static const char *set_host_info(cmd_parms *cmd, void *dummy, host_info_type typ
     {
         apr_cpystrn(hostInfo->customLogFileName, value1, sizeof hostInfo->customLogFileName);
     }
-    else if (type == PATH_ALIAS)
-    {
-        string_array* aliasSrc;
-        string_array* aliasTarget;
-
-        /* Allocate the strings in temporary memory */
-        aliasSrc = (string_array*)apr_pcalloc(g_persistConfig->configPool, sizeof (string_array));
-        if (aliasSrc == NULL)
-        {
-            display_error(g_persistConfig, "cimprov: unable to allocate memory for path alias item", APR_ENOMEM, 1);
-            return "cimprov: unable to allocate memory for path alias item";
-        }
-
-        aliasTarget = (string_array*)apr_pcalloc(g_persistConfig->configPool, sizeof (string_array));
-        if (aliasTarget == NULL)
-        {
-            display_error(g_persistConfig, "cimprov: unable to allocate memory for path alias item", APR_ENOMEM, 1);
-            return "cimprov: unable to allocate memory for path alias item";
-        }
-
-        aliasSrc->next = aliasTarget;   /* put the new strings into the array */
-        if (hostInfo->aliases == NULL)
-        {
-            hostInfo->aliases = aliasSrc;
-        }
-        else
-        {
-            hostInfo->lastAlias->next = aliasSrc;
-        }        
-        hostInfo->lastAlias = aliasTarget;
-
-        apr_cpystrn(aliasSrc->string, value1, PATH_MAX);    /* populate the strings */
-        apr_cpystrn(aliasTarget->string, value2, PATH_MAX);
-    }
     else
     {
         display_error(g_persistConfig, "cimprov: request for unsupported host configuration option", APR_EINVAL, 1);
@@ -350,10 +315,58 @@ static const char *set_custom_log_file(cmd_parms *cmd, void *dummy, const char *
     return set_host_info(cmd, dummy, CUSTOM_LOG_FILE_NAME, arg1, NULL);
 }
 
-/* Add the name of a custom log file to the list of host information */
-static const char *set_path_alias(cmd_parms *cmd, void *dummy, const char *arg1, const char *arg2)
+/* Take a list of server alias names for the virtual host */
+static const char *set_server_alias(cmd_parms *cmd, void *dummy, const char *arg)
 {
-    return set_host_info(cmd, dummy, PATH_ALIAS, arg1, arg2);
+    config_hostInfo* hostInfo;
+    server_rec* s = cmd->server;
+
+    if (!cmd->server->names) {
+        return "ServerAlias only used in <VirtualHost>";
+    }
+
+    hostInfo = find_host_info(g_persistConfig, s);
+    if (hostInfo == NULL)
+    {
+        /* if this host has no entry, create one by creating a pool and an item in the pool */
+        hostInfo = (config_hostInfo*)apr_pcalloc(g_persistConfig->configPool, sizeof (config_hostInfo));
+        if (hostInfo == NULL)
+        {
+            display_error(g_persistConfig, "cimprov: unable to allocate memory for file name items", APR_ENOMEM, 1);
+            return "cimprov: unable to allocate memory for file name items";
+        }
+
+        hostInfo->next = g_persistConfig->configData->hostInfoList;
+        hostInfo->srec = s;
+        g_persistConfig->configData->hostInfoList = hostInfo;
+    }
+
+    while (*arg) {
+        string_array* alias;
+        char *name = ap_getword_conf(g_persistConfig->configPool, &arg);
+
+        /* Allocate the string in temporary memory */
+        alias = (string_array*) apr_pcalloc(g_persistConfig->configPool, sizeof (string_array));
+        if (alias == NULL)
+        {
+            display_error(g_persistConfig, "cimprov: unable to allocate memory for server alias item", APR_ENOMEM, 1);
+            return "cimprov: unable to allocate memory for server alias item";
+        }
+
+        if (hostInfo->aliases == NULL)
+        {
+            hostInfo->aliases = alias;
+        }
+        else
+        {
+            hostInfo->lastAlias->next = alias;
+        }        
+        hostInfo->lastAlias = alias;
+
+        apr_cpystrn(alias->string, name, PATH_MAX);    /* populate the strings */
+    }
+
+    return NULL;
 }
 
 /* Add the name of a server certificate file for a given host and port to the certificate file names list */
@@ -416,8 +429,8 @@ static const command_rec cimprov_module_cmds[] =
       "Set the name of the transfer log file for the host."),
     AP_INIT_TAKE2("CustomLog", set_custom_log_file, NULL, RSRC_CONF,
       "Set the name of the custom log file for the host host."),
-    AP_INIT_TAKE2("Alias", set_path_alias, NULL, RSRC_CONF,
-      "Set the mapping for a server alias for the host."),
+    AP_INIT_RAW_ARGS("ServerAlias", set_server_alias, NULL, RSRC_CONF,
+      "A name or names alternately used to access the server"),
     AP_INIT_TAKE1("SSLCertificateFile", set_server_certificate_file, NULL, RSRC_CONF,
       "Set the name of the SSL certificate file for the host."),
     {NULL}
