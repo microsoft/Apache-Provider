@@ -108,7 +108,7 @@ public:
     apr_status_t Load(const char *text);
     apr_status_t Unload(const char *text);
 
-    virtual const char* GetServerConfigFile(apr_pool_t* pool)
+    const char* GetServerConfigFile(apr_pool_t* pool)
         { return m_pDeps->GetServerConfigFile(pool); }
 
     apr_pool_t *GetPool() { return m_apr_pool; }
@@ -200,7 +200,7 @@ class ApacheFactory
 {
 public:
     ApacheFactory() : m_pInit(NULL) {}
-    ~ApacheFactory() { delete m_pInit; }
+    virtual ~ApacheFactory() { delete m_pInit; }
     virtual ApacheInitialization* GetInit()
     {
         if (NULL == m_pInit)
