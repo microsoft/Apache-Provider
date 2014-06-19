@@ -14,6 +14,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <string>
+
 const char* GetApacheComponentVersion(const char* versionString, const char* component);
+std::string StrToLower(const std::string& str);
 
 #endif /* UTILS_H */

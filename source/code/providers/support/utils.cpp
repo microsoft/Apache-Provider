@@ -11,8 +11,8 @@
 */
 /*----------------------------------------------------------------------------*/
 
+#include "utils.h"
 #include <string.h>
-
 #include <apr_strings.h>
 
 static char s_buf[32];
@@ -48,4 +48,25 @@ const char* GetApacheComponentVersion(
     strncpy(s_buf, ptr, n);
     s_buf[n]= '\0';
     return s_buf;
+}
+
+
+/*----------------------------------------------------------------------------*/
+/**
+   Convert string to all lowercase
+
+   \param       str  String to convert
+
+   \returns          Converted string
+*/
+std::string StrToLower(const std::string& str)
+{
+    std::string tmp_str(str);
+
+    for (std::string::size_type i = 0; i < tmp_str.size(); i++)
+    {
+        tmp_str[i] = tolower( (int) (unsigned char) tmp_str[i] );
+    }
+
+    return tmp_str;
 }

@@ -99,7 +99,6 @@ void GenerateSampleServerData(TestServerData& s)
 {
     // Set some server information
     s.SetConfigFile("/etc/httpd/conf/httpd.conf-fake");
-    s.SetProcessName("httpd-fake");
     s.SetServerVersion("Apache/1.2.3");
     s.SetServerRoot("/etc/httpd-fake");
     s.SetServerID("jeffcof64-rhel6-01.fake.com");

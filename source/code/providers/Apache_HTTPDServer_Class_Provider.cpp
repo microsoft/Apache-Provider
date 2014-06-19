@@ -90,63 +90,92 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
         ApacheDataCollector data = g_pFactory->DataCollectorFactory();
         Apache_HTTPDServer_Class inst;
 
-        if (APR_SUCCESS != data.Attach("Apache_HTTPDServer_Class_Provider::EnumerateInstances"))
-        {
-            context.Post(MI_RESULT_FAILED);
-            return;
-        }
+        std::stringstream ss;
+        const char* serviceName = "_Unknown";
 
-        const char* apacheServerVersion = GetApacheComponentVersion(data.GetServerVersion(), "Apache");
-
-        inst.ProductIdentifyingNumber_value("1");   /* serial number */
-        inst.ProductName_value(data.GetServerConfigFile());
-        inst.ProductVendor_value(APACHE_VENDOR_ID);
-        inst.ProductVersion_value(apacheServerVersion);
-        inst.SystemID_value(data.GetServerID());
-        inst.CollectionID_value(data.GetServerRoot());
+        // Common code (regardless of if we attach to shared memory segment or not)
 
         if (! keysOnly)
         {
             // Build the version string
-            std::stringstream ss;
             ss << CIMPROV_BUILDVERSION_MAJOR
                << "." << CIMPROV_BUILDVERSION_MINOR
                << "." << CIMPROV_BUILDVERSION_PATCH
                << "-" << CIMPROV_BUILDVERSION_BUILDNR
                << " (" << CIMPROV_BUILDVERSION_DATE << ")";
-            const char* serviceName = "_Unknown";
+
 #if defined(linux)
-            int status = system("service httpd status");
+            int status = system("service httpd status > /dev/null 2>&1");
+            status = WEXITSTATUS( status );
             if (status == 0 || status == 3)
             {
                 serviceName = "httpd";
             }
             else
             {
-                status = system("service apache2 status");
+                status = system("service apache2 status > /dev/null 2>&1");
+                status = WEXITSTATUS( status );
                 if (status == 0 || status == 3)
                 {
                     serviceName = "apache2";
                 }
             }
 #endif
+        }
 
-            // Insert the values into the instance
+        if (APR_SUCCESS == data.Attach("Apache_HTTPDServer_Class_Provider::EnumerateInstances"))
+        {
+            // Successfully attached to memory segment; provide normal results
 
-            inst.ModuleVersion_value(ss.str().c_str());
-            inst.InstanceID_value(data.GetServerConfigFile());
-            inst.ConfigurationFile_value(data.GetServerConfigFile());
-            inst.ProcessName_value(data.GetServerProcessName());
-            inst.ServiceName_value(serviceName);
-            inst.OperatingStatus_value(OperatingStatusValues[data.GetOperatingStatus()]);
+            const char* apacheServerVersion = GetApacheComponentVersion(data.GetServerVersion(), "Apache");
 
-            std::vector<mi::String> strArrary;
-            for (apr_size_t moduleNum = 0; moduleNum < data.GetModuleCount(); moduleNum++)
+            inst.ProductIdentifyingNumber_value("1");   /* serial number */
+            inst.ProductName_value(data.GetServerConfigFile());
+            inst.ProductVendor_value(APACHE_VENDOR_ID);
+            inst.ProductVersion_value(apacheServerVersion);
+            inst.SystemID_value(data.GetServerID());
+            inst.CollectionID_value(data.GetServerRoot());
+
+            if (! keysOnly)
             {
-                strArrary.push_back(data.GetDataString(data.GetServerModules()[moduleNum].moduleNameOffset));
+                std::string processName;
+                g_pFactory->GetInit()->GetApacheProcessName(processName);
+
+                // Insert the values into the instance
+
+                inst.ModuleVersion_value(ss.str().c_str());
+                inst.InstanceID_value(data.GetServerConfigFile());
+                inst.ConfigurationFile_value(data.GetServerConfigFile());
+                inst.ProcessName_value(processName.c_str());
+                inst.ServiceName_value(serviceName);
+                inst.OperatingStatus_value(OperatingStatusValues[2]); // Server us up
+
+                std::vector<mi::String> strArrary;
+                for (apr_size_t moduleNum = 0; moduleNum < data.GetModuleCount(); moduleNum++)
+                {
+                    strArrary.push_back(data.GetDataString(data.GetServerModules()[moduleNum].moduleNameOffset));
+                }
+                mi::StringA modules(&strArrary[0], data.GetModuleCount());
+                inst.InstalledModules_value(modules);
             }
-            mi::StringA modules(&strArrary[0], data.GetModuleCount());
-            inst.InstalledModules_value(modules);
+        }
+        else
+        {
+            // We can't attach, so provide a minimal response indicating the server is down
+
+            inst.ProductIdentifyingNumber_value("1");   /* serial number */
+            inst.ProductName_value("Unknown");
+            inst.ProductVendor_value(APACHE_VENDOR_ID);
+            inst.ProductVersion_value("Unknown");
+            inst.SystemID_value("Unknown");
+            inst.CollectionID_value("Unknown");
+
+            if (! keysOnly)
+            {
+                inst.ModuleVersion_value(ss.str().c_str());
+                inst.ServiceName_value(serviceName);
+                inst.OperatingStatus_value(OperatingStatusValues[6]); // Server state: Error
+            }
         }
 
         context.Post(inst);

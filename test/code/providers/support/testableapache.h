@@ -18,6 +18,7 @@
 
 class TestableApacheInitDependencies : public ApacheInitDependencies
 {
+public:
     virtual ~TestableApacheInitDependencies() {}
 
     virtual bool AllowStatusOutput() { return false; }
@@ -26,6 +27,9 @@ class TestableApacheInitDependencies : public ApacheInitDependencies
     virtual apr_status_t ShutdownDataCollector() { return APR_SUCCESS; }
 
     virtual const char* GetServerConfigFile(apr_pool_t* pool) { return NULL; }
+    virtual apr_status_t ValidateSharedMemory(ApacheDataCollector& data) { return APR_SUCCESS; }
+    virtual bool IsSharedMemoryValid() { return true; }
+    virtual void GetApacheProcessName(std::string& processName) { processName = "httpd-fake"; }
 };
 
 class TestableApacheDataCollectorDependencies : public ApacheDataCollectorDependencies

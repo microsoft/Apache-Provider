@@ -654,9 +654,7 @@ static apr_status_t collect_server_data(
     module* top_module,
     apr_size_t module_count,
     const char* config_file,
-    const char* process_name,
-    const char* server_hostname,
-    int operating_status)
+    const char* server_hostname)
 {
     apr_size_t index;
     module* modp;
@@ -668,12 +666,6 @@ static apr_status_t collect_server_data(
                string_table_len,
                config_file,
                server_data != NULL ? &server_data->configFileOffset : NULL);
-
-    /* Add the process name*/
-    add_data_string(string_table,
-               string_table_len,
-               process_name,
-               server_data != NULL ? &server_data->processNameOffset : NULL);
 
     /* Add the server root directory */
     add_data_string(string_table,
@@ -696,7 +688,7 @@ static apr_status_t collect_server_data(
     if (server_data != NULL)
     {
         server_data->moduleCount = module_count;
-        server_data->operatingStatus = operating_status;
+        server_data->serverPid = getpid();
     }
 
     /* Add each of the loaded modules */
@@ -950,7 +942,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     config_sslCertFile* cert_file_info; /* Ptr. to information about a certificate file */
     size_t stable_length;               /* Enough space for two null bytes as terminator */
     char* text;
-    const char* process_name;
     const char* server_hostname = NULL;
     server_rec* srec;
     module *modp;
@@ -996,42 +987,6 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     text = apr_psprintf(ptemp, "cimprov: Count of certificates: %pS", &certificate_count);
     display_error(cfg, text, 0, 0);
 
-    /* Find the process name
-     *
-     * Process name is the second part of configuration filename:
-     *   If configuration file is: /etc/httpd/conf/httpd.conf, we pick: httpd
-     *   If configuration file is: /etc/apache2/apache2.conf, we pick: apache2
-     *   If configuration file is: /etc/apache2/httpd.conf, we pick: apache2
-     * So just pick the second directory in the configuration filename.
-     *
-     *   If the configuration file begins with "/usr/local", treat the "/usr/local"
-     *   just like the "/etc", above.
-     *
-     * Note: If config filename isn't one of those, keep blank (unknown installation)
-     */
-
-    {
-        char *tok_last;
-        char *processName = apr_pstrdup(ptemp, ap_conftree->filename);
-        char *token = apr_strtok(processName, "/", &tok_last);  /* get the first path element */
-
-        process_name = "";
-        if (token != NULL)
-        {
-            token = apr_strtok(NULL, "/", &tok_last);   /* get the second path element */
-
-            /* Skip /usr/local for install by source compiles and use "httpd" for the process name */
-            if (0 == apr_strnatcasecmp(token, "local"))
-            {
-                token = "httpd";
-            }
-            if (0 == apr_strnatcasecmp(token, "apache2") || 0 == apr_strnatcasecmp(token, "httpd"))
-            {
-                process_name = token;
-            }
-        }
-    }
-
     stable_length = 1;                  /* reserve space for a single empty string at the beginning of the string table */
 
     status = collect_server_data(NULL,
@@ -1040,9 +995,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                  ap_top_module,
                                  module_count,
                                  ap_conftree->filename,
-                                 process_name,
-                                 server_hostname,
-                                 2);
+                                 server_hostname);
     if (status != APR_SUCCESS)
     {
         display_error(cfg, "cimprov: collection of server data failed", status, 0);
@@ -1126,9 +1079,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
                                  ap_top_module,
                                  module_count,
                                  ap_conftree->filename,
-                                 process_name,
-                                 server_hostname,
-                                 2);
+                                 server_hostname);
     if (status != APR_SUCCESS)
     {
         display_error(cfg, "cimprov: collection of server data failed", status, 0);

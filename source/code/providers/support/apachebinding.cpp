@@ -18,6 +18,7 @@
 
 #include "apachebinding.h"
 #include "datasampler.h"
+#include "utils.h"
 
 // Define single global copy (intended as a singleton class)
 ApacheFactory* g_pFactory = NULL;
@@ -233,6 +234,149 @@ const char* ApacheInitDependencies::GetServerConfigFile(apr_pool_t* pool)
     }
 
     return (m_configFile.length() ? m_configFile.c_str() : NULL);
+}
+
+/*--------------------------------------------------------------*/
+/**
+   Checks and validates if the shared memory region is valid or not
+
+   \returns     APR_SUCCESS if no errors occured, error code otherwise
+
+   Note that error is logged normally prior to return from this function,
+   so error code is for informaitonal purposes only.
+
+   This method should NOT be used to check if shared memory segment is valid;
+   this method will actually perform (costly) checks to find out.
+
+
+   Note: It is assumed that ApacheDataCollector is already attached to the
+   shared memory segment. If this is not the case, we are likely to segfault
+   since ApacheDataCollector is defined to segfault if used when Attach()
+   fails.
+*/
+apr_status_t ApacheInitDependencies::ValidateSharedMemory(ApacheDataCollector& data)
+{
+    /*
+      Our algorithm is as follows:
+
+      Get the server PID (for Apache), and read Linux process stat file to get
+      the process name.
+
+      If the process name doesn't contain "http" or "apache", then assume that
+      the process is re-used for something else.
+
+      If process name contains "http" or "apache", we're good!
+     */
+
+    class DisplayInvalid
+    {
+    public:
+        DisplayInvalid() : m_isValid(false)
+            { DisplayError(0, "ValidateSharedMemory: Checking region ..."); }
+        ~DisplayInvalid()
+            { if (!m_isValid) DisplayError(0, "ValidateSharedMemory: Apache server appears dead!"); }
+        void MarkValid() { m_isValid = true; }
+
+    private:
+        bool m_isValid;
+    } invalidDisplay;
+
+    apr_status_t status;
+    apr_pool_t* pool = data.GetPool();
+    pid_t serverPID = data.GetServerPID();
+    char *text;
+
+    const char *fname = apr_psprintf(pool, "/proc/%d/stat", serverPID);
+    apr_file_t *fHandle;
+    if (APR_SUCCESS != (status = apr_file_open(&fHandle, fname, APR_FOPEN_READ, APR_FPROT_UREAD, pool)))
+    {
+        // APR_ENOENT is expected if the process no longer exists
+        if (APR_ENOENT != status)
+        {
+            text = apr_psprintf(pool, "ValidateSharedMemory: Error opening Apache process stat file: %s", fname);
+            DisplayError(status, text);
+        }
+
+        m_bIsRegionValid = false;
+        return status;
+    }
+
+    // The process is still alive; validate the process name to make sure it's still Apache!
+
+    char statBuffer[256];
+    apr_size_t bytes = sizeof(statBuffer) - 1;
+    if (APR_SUCCESS != (status = apr_file_read(fHandle, statBuffer, &bytes)))
+    {
+        text = apr_psprintf(pool, "ValidateSharedMemory: Error reading Apache process stat file: %s", fname);
+        DisplayError(status, text);
+
+        m_bIsRegionValid = false;
+        return status;
+    }
+    statBuffer[bytes] = '\0';
+
+    // The stat file is something like:
+    //
+    // 22646 (httpd) S 1 22646 22646 0 -1 4202560 1166 ...
+    //
+    // We only care about the second field (process name)
+
+    char *last;
+    apr_strtok(statBuffer, " ", &last);
+    char *processName = apr_strtok(NULL, " ", &last);
+    if ('(' == processName[0])
+    {
+        // Get rid of trailing ")" byte
+        processName[strlen(processName)-1] = '\0';
+        m_processName = &processName[1];
+    }
+    else
+    {
+        m_processName = processName;
+    }
+
+    if (APR_SUCCESS != (status = apr_file_close(fHandle)))
+    {
+        DisplayError(status, "ValidateSharedMemory: Error closing Apache process stat file");
+        // Fall through - don't abort for this, just report the error
+    }
+
+    // Validate if the process name is what we expect
+    // If not, we don't log an error here; but we do report failure
+
+    std::string procNameLower = StrToLower(m_processName);
+    if (procNameLower.find("apache") == std::string::npos
+        && procNameLower.find("http") == std::string::npos)
+    {
+        status = APR_EINVAL;
+        text = apr_psprintf(pool, "ValidateSharedMemory: Process stat file %s does not appear to belong to Apache", fname);
+        DisplayError(status, text);
+
+        m_bIsRegionValid = false;
+        return status;
+    }
+
+    invalidDisplay.MarkValid();
+    m_bIsRegionValid = true;
+    return APR_SUCCESS;
+}
+
+/*--------------------------------------------------------------*/
+/**
+   Returns process name of the Apache process
+
+   \param       processName     Name of the Apache process (for reporting)
+*/
+void ApacheInitDependencies::GetApacheProcessName(std::string& processName)
+{
+    if ( IsSharedMemoryValid() )
+    {
+        processName = m_processName;
+    }
+    else
+    {
+        processName.erase();
+    }
 }
 
 
@@ -493,7 +637,32 @@ ApacheDataCollector::~ApacheDataCollector()
 
 apr_status_t ApacheDataCollector::Attach(const char *text)
 {
-    return m_pDeps->Attach(text, m_apr_pool, &m_server_data, &m_vhost_data, &m_certificate_data, &m_string_data);
+    apr_status_t status;
+
+    // Map to the shared memory region
+    if (APR_SUCCESS != (status = m_pDeps->Attach(text, m_apr_pool, &m_server_data, &m_vhost_data, &m_certificate_data, &m_string_data)))
+    {
+        return status;
+    }
+
+    // We are mapped to a region; verify if it's actually valid
+    //
+    // Note: If it's not valid, then immediately validate again (since we are loaded)
+    // In this way, if it wasn't valid, but is now, we don't give false negatives.
+    // Depend on data collector thread to insure actual problems are caught in a
+    // timely manner.
+
+    if (g_pFactory->GetInit()->IsSharedMemoryValid())
+    {
+        return APR_SUCCESS;
+    }
+
+    if (APR_SUCCESS != (status = g_pFactory->GetInit()->ValidateSharedMemory(*this)))
+    {
+        return status;
+    }
+
+    return APR_SUCCESS;
 }
 
 apr_status_t ApacheDataCollector::Detach(const char *text)

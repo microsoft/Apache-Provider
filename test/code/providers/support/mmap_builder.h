@@ -47,14 +47,11 @@ public:
     ~TestServerData() {}
 
     void SetConfigFile(const char *configFile) { SetStringHelper(configFile, m_server.configFileOffset); }
-    void SetProcessName(const char *processName) { SetStringHelper(processName, m_server.processNameOffset); }
     void SetServerVersion(const char *serverVersion) { SetStringHelper(serverVersion, m_server.serverVersionOffset); }
     void SetServerRoot(const char *root) { SetStringHelper(root, m_server.serverRootOffset); }
     void SetServerID(const char *id) { SetStringHelper(id, m_server.serverIDOffset); }
-    void SetOperatingStatus(int operatingStatus) { m_server.operatingStatus = operatingStatus; }
 
     const char* GetConfigFile() { return m_stringTable.GetString(m_server.configFileOffset); }
-    const char* GetProcessName() { return m_stringTable.GetString(m_server.processNameOffset); }
     const char* GetServerVersion() { return m_stringTable.GetString(m_server.serverVersionOffset); }
     const char* GetServerRoot() { return m_stringTable.GetString(m_server.serverRootOffset); }
     const char* GetServerID() { return m_stringTable.GetString(m_server.serverIDOffset); }

@@ -29,6 +29,9 @@
 #include <string>
 
 
+// Forward definitions
+class ApacheDataCollector;
+
 /*------------------------------------------------------------------------------*/
 /**
  *   ApacheBinding 
@@ -39,7 +42,7 @@ class ApacheInitDependencies
 {
 public:
     ApacheInitDependencies()
-    : m_configFileAttempted(false)
+    : m_configFileAttempted(false), m_bIsRegionValid(false)
     {}
     virtual ~ApacheInitDependencies();
 
@@ -49,11 +52,18 @@ public:
     virtual apr_status_t ShutdownDataCollector() { return m_sampler.WaitForCompletion(); }
 
     virtual const char* GetServerConfigFile(apr_pool_t* pool);
+    virtual apr_status_t ValidateSharedMemory(ApacheDataCollector& data);
+    virtual bool IsSharedMemoryValid() { return m_bIsRegionValid; }
+    virtual void GetApacheProcessName(std::string& processName);
 
 private:
     DataSampler m_sampler;
     bool m_configFileAttempted;
     std::string m_configFile;
+
+    // Support for validating shared memory segment
+    bool m_bIsRegionValid;
+    std::string m_processName;
 };
 
 class ApacheDataCollectorDependencies
@@ -108,8 +118,15 @@ public:
     apr_status_t Load(const char *text);
     apr_status_t Unload(const char *text);
 
+    // Inline helpers to call dependency methods
     const char* GetServerConfigFile(apr_pool_t* pool)
         { return m_pDeps->GetServerConfigFile(pool); }
+    apr_status_t ValidateSharedMemory(ApacheDataCollector& data)
+        { return m_pDeps->ValidateSharedMemory(data); }
+    bool IsSharedMemoryValid()
+        { return m_pDeps->IsSharedMemoryValid(); }
+    void GetApacheProcessName(std::string& processName)
+        { m_pDeps->GetApacheProcessName(processName); }
 
     apr_pool_t *GetPool() { return m_apr_pool; }
 
@@ -152,11 +169,10 @@ public:
     const char* GetDataString(apr_size_t offset);
 
     const char *GetServerConfigFile();
-    const char *GetServerProcessName() { return GetDataString(m_server_data->processNameOffset); }
     const char *GetServerVersion() { return GetDataString(m_server_data->serverVersionOffset); }
     const char *GetServerRoot() { return GetDataString(m_server_data->serverRootOffset); }
     const char *GetServerID() { return GetDataString(m_server_data->serverIDOffset); }
-    int GetOperatingStatus() { return m_server_data->operatingStatus; }
+    pid_t GetServerPID() { return m_server_data->serverPid; }
     apr_size_t GetModuleCount() { return m_server_data->moduleCount; }
     mmap_server_modules *GetServerModules() { return m_server_data->modules; }
     apr_uint32_t GetWorkerCountIdle() { return apr_atomic_read32(&m_server_data->idleWorkers); }

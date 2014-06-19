@@ -29,11 +29,10 @@ typedef struct
 typedef struct
 {
     apr_size_t configFileOffset;        // Apache configuration file name
-    apr_size_t processNameOffset;       // Process name
     apr_size_t serverVersionOffset;     // Version of Apache server
     apr_size_t serverRootOffset;        // Root directory of server install
     apr_size_t serverIDOffset;          // Name of computer running Apache server
-    int operatingStatus;                // Operating status
+    pid_t serverPid;                    // PID of the Apache Server
 
     apr_uint32_t idleApacheWorkers;     // Number of workers that are currently idle (from Apache)
     apr_uint32_t busyApacheWorkers;     // Number of workers that are currently busy (from Apache)

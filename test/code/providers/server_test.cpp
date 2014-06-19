@@ -42,6 +42,27 @@ public:
     }
 };
 
+
+class TestableInitDepsFailsCroakedApache : public TestableApacheInitDependencies
+{
+    virtual apr_status_t ValidateSharedMemory(ApacheDataCollector& data) { return APR_ENOENT; }
+    virtual bool IsSharedMemoryValid() { return false; }
+};
+
+class TestableFactoryWithCroakedApache : public TestableApacheFactory
+{
+public:
+    virtual ApacheDataCollector DataCollectorFactory()
+    {
+        TestableDataCollectorDepsFailsLoadMemoryMap* pDeps = new TestableDataCollectorDepsFailsLoadMemoryMap();
+        return ApacheDataCollector( pDeps );
+    }
+
+    virtual ApacheInitialization* InitializationFactory()
+    { return new ApacheInitialization( new TestableInitDepsFailsCroakedApache() ); }
+};
+
+
 class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture
 {
     CPPUNIT_TEST_SUITE( Apache_HTTPDServer_Test );
@@ -54,6 +75,7 @@ class Apache_HTTPDServer_Test : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( TestGetConfigFile );
     CPPUNIT_TEST( TestAttachFailsIfLoadMemoryMapFails );
     CPPUNIT_TEST( TestEnumerateInstancesKeysOnly );
+    CPPUNIT_TEST( TestEnumerateInstancesWithDeadApacheServer );
 /*
     CPPUNIT_TEST( TestEnumerateInstances );
     CPPUNIT_TEST( TestVerifyKeyCompletePartial );
@@ -129,11 +151,9 @@ public:
 
         // Insert some data just to populate string table
         s.SetConfigFile("/etc/httpd/conf/httpd.conf");
-        s.SetProcessName("httpd");
         s.SetServerVersion("Apache/1.2.3");
 
         CPPUNIT_ASSERT_EQUAL(std::string("/etc/httpd/conf/httpd.conf"), s.GetConfigFile() );
-        CPPUNIT_ASSERT_EQUAL(std::string("httpd"), s.GetProcessName() );
         CPPUNIT_ASSERT_EQUAL(std::string("Apache/1.2.3"), s.GetServerVersion() );
 
         // Verify that no modules return ULONG_MAX
@@ -209,6 +229,41 @@ public:
                              context[0].GetKey(L"SystemID", CALL_LOCATION(errMsg)));
         CPPUNIT_ASSERT_EQUAL(std::wstring(L"/etc/httpd-fake"),
                              context[0].GetKey(L"CollectionID", CALL_LOCATION(errMsg)));
+    }
+
+    void TestEnumerateInstancesWithDeadApacheServer()
+    {
+        // We have our own factory for this ...
+        // Squirrel away the existing global pointer, restore later
+        ApacheFactory* saved_g_pFactory = g_pFactory;
+        g_pFactory = new TestableFactoryWithCroakedApache();
+
+        // Watch scoping; ApacheDataCollector must destruct prior to deleting the factory
+        {
+            TemporaryPool pool(g_pFactory->GetInit()->GetPool());
+
+            std::wstring errMsg;
+            TestableContext context;
+            StandardTestEnumerateKeysOnly<mi::Apache_HTTPDServer_Class_Provider>(
+                m_keyNames, context, CALL_LOCATION(errMsg));
+            CPPUNIT_ASSERT_EQUAL(1u, context.Size());
+
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"1"),
+                                 context[0].GetKey(L"ProductIdentifyingNumber", CALL_LOCATION(errMsg)));
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
+                                 context[0].GetKey(L"ProductName", CALL_LOCATION(errMsg)));
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Apache Software Foundation"),
+                                 context[0].GetKey(L"ProductVendor", CALL_LOCATION(errMsg)));
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
+                                 context[0].GetKey(L"ProductVersion", CALL_LOCATION(errMsg)));
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
+                                 context[0].GetKey(L"SystemID", CALL_LOCATION(errMsg)));
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
+                                 context[0].GetKey(L"CollectionID", CALL_LOCATION(errMsg)));
+        }
+
+        delete g_pFactory;
+        g_pFactory = saved_g_pFactory;
     }
 
 /*

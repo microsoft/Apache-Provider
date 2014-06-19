@@ -20,7 +20,7 @@
 #include "datasampler.h"
 
 DataSampler::DataSampler()
-    : m_tid(NULL), m_mutex(NULL), m_cond(NULL), m_fShutdown(false)
+    : m_tid(NULL), m_skipValidationCount(0), m_mutex(NULL), m_cond(NULL), m_fShutdown(false)
 {
     m_timeLastUpdated = apr_time_now();
 }
@@ -277,15 +277,6 @@ static apr_uint32_t DeltaHelper(apr_uint64_t *myCurrentTotal, apr_uint32_t *myPr
 
 void DataSampler::PerformComputations()
 {
-    ApacheDataCollector data = g_pFactory->DataCollectorFactory();
-
-    if (APR_SUCCESS != data.Attach("DataSampler::PerformComputations"))
-    {
-        // Apache must not be running; pick it up next time 'round
-        return;
-    }
-
-    mmap_vhost_elements *vhosts = data.GetVHostElements();
     apr_time_t currentTime = apr_time_now();
     apr_interval_time_t deltaTime = currentTime - m_timeLastUpdated;
 
@@ -298,6 +289,15 @@ void DataSampler::PerformComputations()
     }
 
     DisplayError(0, "DataSampler::PerformComputations executing");
+
+    ApacheDataCollector data = g_pFactory->DataCollectorFactory();
+    if (APR_SUCCESS != data.Attach("DataSampler::PerformComputations"))
+    {
+        // Apache must not be running; pick it up next time 'round
+        return;
+    }
+
+    mmap_vhost_elements *vhosts = data.GetVHostElements();
 
     // Compute the CPU time utilized and related bits of information (need mutex for this)
     // (If we fail for some reason, log but continue with other statistics)
@@ -363,6 +363,22 @@ void DataSampler::PerformComputations()
     }
 
     // TODO: Unlock the process mutex
+
+    // Check if the shared memory region could possibly be "stale".
+    //
+    // This can occur if Apache croaks (without doing normal cleanup), thus
+    // leaving our shared memory segment around. To guard against this, we
+    // check if the region is valid from time to time and, if not, we mark
+    // it invalid. That keeps anyone from using it until Apache restarts.
+    //
+    // Note that the region is always checked if we failed to attach. This
+    // allows immediate recovery of our provider when Apache is restarted.
+
+    if ( ++m_skipValidationCount >= 5 )
+    {
+        g_pFactory->GetInit()->ValidateSharedMemory(data);
+        m_skipValidationCount = 0;
+    }
 
     m_timeLastUpdated = currentTime;
     return;

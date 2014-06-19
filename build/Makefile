@@ -106,11 +106,17 @@ distclean : clean
 #   1) Apache is already configured to load mod_cimprov.so with a line like:
 #          LoadModule cimprov_module /usr/lib64/httpd/modules/mod_cimprov.so
 #   2) OMI already has registration files for libApacheHttpdProvider.so
-install : $(PROVIDER_LIBRARY) $(APACHE_MODULE)
-	@echo "========================= Performing Installing module"
+
+install : /opt/microsoft/apache-cimprov/lib/$(APACHE_MODULE_BASENAME).so /opt/microsoft/omi/lib/libApacheHttpdProvider.so
+
+/opt/microsoft/apache-cimprov/lib/$(APACHE_MODULE_BASENAME).so : $(APACHE_MODULE)
+	@echo "========================= Performing Installing Apache module"
 	sudo cp -v $(APACHE_MODULE) /opt/microsoft/apache-cimprov/lib/
-	sudo cp -v $(PROVIDER_LIBRARY) /opt/microsoft/omi/lib/
 	sudo /etc/init.d/httpd restart
+
+/opt/microsoft/omi/lib/libApacheHttpdProvider.so : $(PROVIDER_LIBRARY)
+	@echo "========================= Performing Installing OMI provider"
+	sudo cp -v $(PROVIDER_LIBRARY) /opt/microsoft/omi/lib/
 	sudo /etc/init.d/omiserverd restart
 
 restart :

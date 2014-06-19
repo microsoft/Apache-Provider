@@ -46,8 +46,10 @@ private:
     apr_thread_t *m_tid;
     apr_time_t m_timeLastUpdated;
 
-    // Support for condition (to control thread shutdown)
+    // Support for shared memory validation
+    int m_skipValidationCount;
 
+    // Support for condition (to control thread shutdown)
     apr_thread_mutex_t *m_mutex;
     apr_thread_cond_t *m_cond;
     bool m_fShutdown;

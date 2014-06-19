@@ -20,6 +20,9 @@ class Apache_HTTPDServer : CIM_InstalledProduct {
     [ Description ( "List of currently installed modules for the server") ]
     string InstalledModules[];
 
+    [ Description ( "Comma-separated list of currently installed modules for the server") ]
+    string InstalledModulesFormatted;
+
     [ Description ( "Name of the process for the server") ]
     string ProcessName;
 
@@ -31,6 +34,9 @@ class Apache_HTTPDServer : CIM_InstalledProduct {
       Values { "Unknown", "Other", "OK", "Degraded", "Stressed", "Predictive Failure", "Error", "Non-Recoverable Error", "Starting", "Stopping", "Stopped", "In Service", "No Contact",  "Lost Communication", "Aborted", "Dormant", "Supporting Entity in Error", "Completed", "Power Mode" }
     ]
     string OperatingStatus;
+
+    [ Description ( "Detailed status description for the current OperatingStatus" ) ]
+    string OperatingStatusDetail;
 
 };
 
@@ -68,14 +74,23 @@ class Apache_HTTPDVirtualHost : CIM_SoftwareElement {
     [ Description ( "Listening IP Addresses for the virtual host") ]
     string IPAddresses[];
 
+    [ Description ( "Comma-separated list of listening IP Addresses for the virtual host") ]
+    string IPAddressesFormatted;
+
     [ Description ( "Listening HTTP Port for the virtual host") ]
     uint16 Ports[];
+
+    [ Description ( "Comma-separated list of listening HTTP Ports for the virtual host") ]
+    string PortsFormatted;
 
     [ Description ( "Hostname and port that identifies the virtual host") ]
     string ServerName;
 
     [ Description ( "Alternate host names for the virtual host") ]
     string ServerAlias[];
+
+    [ Description ( "Comma-separated list of alternate server names for the virtual host") ]
+    string ServerAliasFormatted;
 
     [ Description ( "Root document directory for the virtual host") ]
     string DocumentRoot;
@@ -101,8 +116,8 @@ class Apache_HTTPDVirtualHost : CIM_SoftwareElement {
 ]
 class Apache_HTTPDVirtualHostCertificate : CIM_SoftwareElement {
 
-    [ Description ( "Hostname and port that identifies the virtual host") ]
-    string ServerName;
+    [ Description ( "Virtual host instance that the certificate is assigned to") ]
+    string VirtualHost;
 
     [ Description ( "Expiration date of the certificate") ]
     datetime ExpirationDate;
