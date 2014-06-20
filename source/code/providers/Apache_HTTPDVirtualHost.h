@@ -61,9 +61,12 @@ typedef struct _Apache_HTTPDVirtualHost /* extends CIM_SoftwareElement */
     MI_ConstStringField LanguageEdition;
     /* Apache_HTTPDVirtualHost properties */
     MI_ConstStringAField IPAddresses;
+    MI_ConstStringField IPAddressesFormatted;
     MI_ConstUint16AField Ports;
+    MI_ConstStringField PortsFormatted;
     MI_ConstStringField ServerName;
     MI_ConstStringAField ServerAlias;
+    MI_ConstStringField ServerAliasFormatted;
     MI_ConstStringField DocumentRoot;
     MI_ConstStringField ServerAdmin;
     MI_ConstStringField ErrorLog;
@@ -888,6 +891,38 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_IPAddresses(
         25);
 }
 
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_IPAddressesFormatted(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        26,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_IPAddressesFormatted(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        26,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_IPAddressesFormatted(
+    Apache_HTTPDVirtualHost* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        26);
+}
+
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_Ports(
     Apache_HTTPDVirtualHost* self,
     const MI_Uint16* data,
@@ -898,7 +933,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_Ports(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        26,
+        27,
         (MI_Value*)&arr,
         MI_UINT16A,
         0);
@@ -914,7 +949,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_Ports(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        26,
+        27,
         (MI_Value*)&arr,
         MI_UINT16A,
         MI_FLAG_BORROW);
@@ -925,7 +960,39 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_Ports(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        26);
+        27);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_PortsFormatted(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        28,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_PortsFormatted(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        28,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_PortsFormatted(
+    Apache_HTTPDVirtualHost* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        28);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerName(
@@ -934,7 +1001,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        27,
+        29,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -946,7 +1013,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        27,
+        29,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -957,7 +1024,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerName(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        27);
+        29);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAlias(
@@ -970,7 +1037,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAlias(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        28,
+        30,
         (MI_Value*)&arr,
         MI_STRINGA,
         0);
@@ -986,7 +1053,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerAlias(
     arr.size = size;
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        28,
+        30,
         (MI_Value*)&arr,
         MI_STRINGA,
         MI_FLAG_BORROW);
@@ -997,7 +1064,39 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerAlias(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        28);
+        30);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAliasFormatted(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        31,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerAliasFormatted(
+    Apache_HTTPDVirtualHost* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        31,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerAliasFormatted(
+    Apache_HTTPDVirtualHost* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        31);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_DocumentRoot(
@@ -1006,7 +1105,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_DocumentRoot(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        29,
+        32,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1018,7 +1117,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_DocumentRoot(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        29,
+        32,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1029,7 +1128,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_DocumentRoot(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        29);
+        32);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAdmin(
@@ -1038,7 +1137,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ServerAdmin(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        30,
+        33,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1050,7 +1149,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ServerAdmin(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        30,
+        33,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1061,7 +1160,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ServerAdmin(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        30);
+        33);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ErrorLog(
@@ -1070,7 +1169,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_ErrorLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        31,
+        34,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1082,7 +1181,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_ErrorLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        31,
+        34,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1093,7 +1192,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_ErrorLog(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        31);
+        34);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_CustomLog(
@@ -1102,7 +1201,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_CustomLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        32,
+        35,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1114,7 +1213,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_CustomLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        32,
+        35,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1125,7 +1224,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_CustomLog(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        32);
+        35);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_AccessLog(
@@ -1134,7 +1233,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Set_AccessLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        33,
+        36,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -1146,7 +1245,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_SetPtr_AccessLog(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        33,
+        36,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -1157,7 +1256,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHost_Clear_AccessLog(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        33);
+        36);
 }
 
 /*
@@ -1327,6 +1426,46 @@ public:
     }
 
     //
+    // Apache_HTTPDVirtualHost_Class.IPAddressesFormatted
+    //
+    
+    const Field<String>& IPAddressesFormatted() const
+    {
+        const size_t n = offsetof(Self, IPAddressesFormatted);
+        return GetField<String>(n);
+    }
+    
+    void IPAddressesFormatted(const Field<String>& x)
+    {
+        const size_t n = offsetof(Self, IPAddressesFormatted);
+        GetField<String>(n) = x;
+    }
+    
+    const String& IPAddressesFormatted_value() const
+    {
+        const size_t n = offsetof(Self, IPAddressesFormatted);
+        return GetField<String>(n).value;
+    }
+    
+    void IPAddressesFormatted_value(const String& x)
+    {
+        const size_t n = offsetof(Self, IPAddressesFormatted);
+        GetField<String>(n).Set(x);
+    }
+    
+    bool IPAddressesFormatted_exists() const
+    {
+        const size_t n = offsetof(Self, IPAddressesFormatted);
+        return GetField<String>(n).exists ? true : false;
+    }
+    
+    void IPAddressesFormatted_clear()
+    {
+        const size_t n = offsetof(Self, IPAddressesFormatted);
+        GetField<String>(n).Clear();
+    }
+
+    //
     // Apache_HTTPDVirtualHost_Class.Ports
     //
     
@@ -1364,6 +1503,46 @@ public:
     {
         const size_t n = offsetof(Self, Ports);
         GetField<Uint16A>(n).Clear();
+    }
+
+    //
+    // Apache_HTTPDVirtualHost_Class.PortsFormatted
+    //
+    
+    const Field<String>& PortsFormatted() const
+    {
+        const size_t n = offsetof(Self, PortsFormatted);
+        return GetField<String>(n);
+    }
+    
+    void PortsFormatted(const Field<String>& x)
+    {
+        const size_t n = offsetof(Self, PortsFormatted);
+        GetField<String>(n) = x;
+    }
+    
+    const String& PortsFormatted_value() const
+    {
+        const size_t n = offsetof(Self, PortsFormatted);
+        return GetField<String>(n).value;
+    }
+    
+    void PortsFormatted_value(const String& x)
+    {
+        const size_t n = offsetof(Self, PortsFormatted);
+        GetField<String>(n).Set(x);
+    }
+    
+    bool PortsFormatted_exists() const
+    {
+        const size_t n = offsetof(Self, PortsFormatted);
+        return GetField<String>(n).exists ? true : false;
+    }
+    
+    void PortsFormatted_clear()
+    {
+        const size_t n = offsetof(Self, PortsFormatted);
+        GetField<String>(n).Clear();
     }
 
     //
@@ -1444,6 +1623,46 @@ public:
     {
         const size_t n = offsetof(Self, ServerAlias);
         GetField<StringA>(n).Clear();
+    }
+
+    //
+    // Apache_HTTPDVirtualHost_Class.ServerAliasFormatted
+    //
+    
+    const Field<String>& ServerAliasFormatted() const
+    {
+        const size_t n = offsetof(Self, ServerAliasFormatted);
+        return GetField<String>(n);
+    }
+    
+    void ServerAliasFormatted(const Field<String>& x)
+    {
+        const size_t n = offsetof(Self, ServerAliasFormatted);
+        GetField<String>(n) = x;
+    }
+    
+    const String& ServerAliasFormatted_value() const
+    {
+        const size_t n = offsetof(Self, ServerAliasFormatted);
+        return GetField<String>(n).value;
+    }
+    
+    void ServerAliasFormatted_value(const String& x)
+    {
+        const size_t n = offsetof(Self, ServerAliasFormatted);
+        GetField<String>(n).Set(x);
+    }
+    
+    bool ServerAliasFormatted_exists() const
+    {
+        const size_t n = offsetof(Self, ServerAliasFormatted);
+        return GetField<String>(n).exists ? true : false;
+    }
+    
+    void ServerAliasFormatted_clear()
+    {
+        const size_t n = offsetof(Self, ServerAliasFormatted);
+        GetField<String>(n).Clear();
     }
 
     //

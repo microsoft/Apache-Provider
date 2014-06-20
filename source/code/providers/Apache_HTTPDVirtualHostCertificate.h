@@ -60,7 +60,7 @@ typedef struct _Apache_HTTPDVirtualHostCertificate /* extends CIM_SoftwareElemen
     MI_ConstStringField IdentificationCode;
     MI_ConstStringField LanguageEdition;
     /* Apache_HTTPDVirtualHostCertificate properties */
-    MI_ConstStringField ServerName;
+    MI_ConstStringField VirtualHost;
     MI_ConstDatetimeField ExpirationDate;
     MI_ConstUint16Field DaysUntilExpiration;
     MI_ConstStringField FileName;
@@ -843,7 +843,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_Clear_LanguageEdi
         24);
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_Set_ServerName(
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_Set_VirtualHost(
     Apache_HTTPDVirtualHostCertificate* self,
     const MI_Char* str)
 {
@@ -855,7 +855,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_Set_ServerName(
         0);
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_SetPtr_ServerName(
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_SetPtr_VirtualHost(
     Apache_HTTPDVirtualHostCertificate* self,
     const MI_Char* str)
 {
@@ -867,7 +867,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_SetPtr_ServerName
         MI_FLAG_BORROW);
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_Clear_ServerName(
+MI_INLINE MI_Result MI_CALL Apache_HTTPDVirtualHostCertificate_Clear_VirtualHost(
     Apache_HTTPDVirtualHostCertificate* self)
 {
     return self->__instance.ft->ClearElementAt(
@@ -1066,42 +1066,42 @@ public:
     }
 
     //
-    // Apache_HTTPDVirtualHostCertificate_Class.ServerName
+    // Apache_HTTPDVirtualHostCertificate_Class.VirtualHost
     //
     
-    const Field<String>& ServerName() const
+    const Field<String>& VirtualHost() const
     {
-        const size_t n = offsetof(Self, ServerName);
+        const size_t n = offsetof(Self, VirtualHost);
         return GetField<String>(n);
     }
     
-    void ServerName(const Field<String>& x)
+    void VirtualHost(const Field<String>& x)
     {
-        const size_t n = offsetof(Self, ServerName);
+        const size_t n = offsetof(Self, VirtualHost);
         GetField<String>(n) = x;
     }
     
-    const String& ServerName_value() const
+    const String& VirtualHost_value() const
     {
-        const size_t n = offsetof(Self, ServerName);
+        const size_t n = offsetof(Self, VirtualHost);
         return GetField<String>(n).value;
     }
     
-    void ServerName_value(const String& x)
+    void VirtualHost_value(const String& x)
     {
-        const size_t n = offsetof(Self, ServerName);
+        const size_t n = offsetof(Self, VirtualHost);
         GetField<String>(n).Set(x);
     }
     
-    bool ServerName_exists() const
+    bool VirtualHost_exists() const
     {
-        const size_t n = offsetof(Self, ServerName);
+        const size_t n = offsetof(Self, VirtualHost);
         return GetField<String>(n).exists ? true : false;
     }
     
-    void ServerName_clear()
+    void VirtualHost_clear()
     {
-        const size_t n = offsetof(Self, ServerName);
+        const size_t n = offsetof(Self, VirtualHost);
         GetField<String>(n).Clear();
     }
 

@@ -151,12 +151,20 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
                 inst.OperatingStatus_value(OperatingStatusValues[2]); // Server us up
 
                 std::vector<mi::String> strArrary;
+                std::string modulesFormatted;
                 for (apr_size_t moduleNum = 0; moduleNum < data.GetModuleCount(); moduleNum++)
                 {
-                    strArrary.push_back(data.GetDataString(data.GetServerModules()[moduleNum].moduleNameOffset));
+                    const char *moduleName = data.GetDataString(data.GetServerModules()[moduleNum].moduleNameOffset);
+                    strArrary.push_back(moduleName);
+                    if (modulesFormatted.size())
+                    {
+                        modulesFormatted += ", ";
+                    }
+                    modulesFormatted += moduleName;
                 }
                 mi::StringA modules(&strArrary[0], data.GetModuleCount());
                 inst.InstalledModules_value(modules);
+                inst.InstalledModulesFormatted_value(modulesFormatted.c_str());
             }
         }
         else

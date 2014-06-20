@@ -49,9 +49,11 @@ typedef struct _Apache_HTTPDServer /* extends CIM_InstalledProduct */
     MI_ConstStringField ModuleVersion;
     MI_ConstStringField ConfigurationFile;
     MI_ConstStringAField InstalledModules;
+    MI_ConstStringField InstalledModulesFormatted;
     MI_ConstStringField ProcessName;
     MI_ConstStringField ServiceName;
     MI_ConstStringField OperatingStatus;
+    MI_ConstStringField OperatingStatusDetail;
 }
 Apache_HTTPDServer;
 
@@ -599,13 +601,45 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Clear_InstalledModules(
         13);
 }
 
-MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_ProcessName(
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_InstalledModulesFormatted(
     Apache_HTTPDServer* self,
     const MI_Char* str)
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
         14,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_SetPtr_InstalledModulesFormatted(
+    Apache_HTTPDServer* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        14,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Clear_InstalledModulesFormatted(
+    Apache_HTTPDServer* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        14);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_ProcessName(
+    Apache_HTTPDServer* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        15,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -617,7 +651,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_SetPtr_ProcessName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        14,
+        15,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -628,7 +662,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Clear_ProcessName(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        14);
+        15);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_ServiceName(
@@ -637,7 +671,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_ServiceName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        15,
+        16,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -649,7 +683,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_SetPtr_ServiceName(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        15,
+        16,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -660,7 +694,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Clear_ServiceName(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        15);
+        16);
 }
 
 MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_OperatingStatus(
@@ -669,7 +703,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_OperatingStatus(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        16,
+        17,
         (MI_Value*)&str,
         MI_STRING,
         0);
@@ -681,7 +715,7 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_SetPtr_OperatingStatus(
 {
     return self->__instance.ft->SetElementAt(
         (MI_Instance*)&self->__instance,
-        16,
+        17,
         (MI_Value*)&str,
         MI_STRING,
         MI_FLAG_BORROW);
@@ -692,7 +726,39 @@ MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Clear_OperatingStatus(
 {
     return self->__instance.ft->ClearElementAt(
         (MI_Instance*)&self->__instance,
-        16);
+        17);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Set_OperatingStatusDetail(
+    Apache_HTTPDServer* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        18,
+        (MI_Value*)&str,
+        MI_STRING,
+        0);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_SetPtr_OperatingStatusDetail(
+    Apache_HTTPDServer* self,
+    const MI_Char* str)
+{
+    return self->__instance.ft->SetElementAt(
+        (MI_Instance*)&self->__instance,
+        18,
+        (MI_Value*)&str,
+        MI_STRING,
+        MI_FLAG_BORROW);
+}
+
+MI_INLINE MI_Result MI_CALL Apache_HTTPDServer_Clear_OperatingStatusDetail(
+    Apache_HTTPDServer* self)
+{
+    return self->__instance.ft->ClearElementAt(
+        (MI_Instance*)&self->__instance,
+        18);
 }
 
 /*
@@ -942,6 +1008,46 @@ public:
     }
 
     //
+    // Apache_HTTPDServer_Class.InstalledModulesFormatted
+    //
+    
+    const Field<String>& InstalledModulesFormatted() const
+    {
+        const size_t n = offsetof(Self, InstalledModulesFormatted);
+        return GetField<String>(n);
+    }
+    
+    void InstalledModulesFormatted(const Field<String>& x)
+    {
+        const size_t n = offsetof(Self, InstalledModulesFormatted);
+        GetField<String>(n) = x;
+    }
+    
+    const String& InstalledModulesFormatted_value() const
+    {
+        const size_t n = offsetof(Self, InstalledModulesFormatted);
+        return GetField<String>(n).value;
+    }
+    
+    void InstalledModulesFormatted_value(const String& x)
+    {
+        const size_t n = offsetof(Self, InstalledModulesFormatted);
+        GetField<String>(n).Set(x);
+    }
+    
+    bool InstalledModulesFormatted_exists() const
+    {
+        const size_t n = offsetof(Self, InstalledModulesFormatted);
+        return GetField<String>(n).exists ? true : false;
+    }
+    
+    void InstalledModulesFormatted_clear()
+    {
+        const size_t n = offsetof(Self, InstalledModulesFormatted);
+        GetField<String>(n).Clear();
+    }
+
+    //
     // Apache_HTTPDServer_Class.ProcessName
     //
     
@@ -1058,6 +1164,46 @@ public:
     void OperatingStatus_clear()
     {
         const size_t n = offsetof(Self, OperatingStatus);
+        GetField<String>(n).Clear();
+    }
+
+    //
+    // Apache_HTTPDServer_Class.OperatingStatusDetail
+    //
+    
+    const Field<String>& OperatingStatusDetail() const
+    {
+        const size_t n = offsetof(Self, OperatingStatusDetail);
+        return GetField<String>(n);
+    }
+    
+    void OperatingStatusDetail(const Field<String>& x)
+    {
+        const size_t n = offsetof(Self, OperatingStatusDetail);
+        GetField<String>(n) = x;
+    }
+    
+    const String& OperatingStatusDetail_value() const
+    {
+        const size_t n = offsetof(Self, OperatingStatusDetail);
+        return GetField<String>(n).value;
+    }
+    
+    void OperatingStatusDetail_value(const String& x)
+    {
+        const size_t n = offsetof(Self, OperatingStatusDetail);
+        GetField<String>(n).Set(x);
+    }
+    
+    bool OperatingStatusDetail_exists() const
+    {
+        const size_t n = offsetof(Self, OperatingStatusDetail);
+        return GetField<String>(n).exists ? true : false;
+    }
+    
+    void OperatingStatusDetail_clear()
+    {
+        const size_t n = offsetof(Self, OperatingStatusDetail);
         GetField<String>(n).Clear();
     }
 };

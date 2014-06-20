@@ -106,6 +106,7 @@ typedef struct
     apr_size_t certificateFileNameOffset;       /* name of file containing certificate */
     apr_size_t hostNameOffset;                  /* name of first host that uses this certificate */
     apr_uint16_t port;                          /* port of first host that uses this certificate */
+    apr_size_t virtualHostOffset;               /* name of the virtual host using this certificate */
     char certificateExpirationCimTime[32];      /* expiration time in CIM format; filled in by provider */
     apr_time_t certificateExpirationAprTime;    /* expiration time in APR format; filled in by provider */
     apr_time_t certificateFileMtime;            /* last time file was modified; filled in by provider */

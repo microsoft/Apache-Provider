@@ -97,7 +97,7 @@ typedef enum
 typedef struct config_sslCertFile config_sslCertFile;
 struct config_sslCertFile {
     config_sslCertFile* next;           /* Pointer to next certificate structure */
-    apr_pool_t* pool;                   /* The temporary pool that contains this item (and nothing else) */
+    server_rec* srec;                   /* The record of the host to which this applies */
     char certificateFileName[PATH_MAX]; /* Name of the the certificate file */
     char hostName[MAX_HOST_NAME_LEN];   /* Name of host for this certficate (or _Default) */
     apr_uint16_t port;                  /* Port of host that uses this certificate */
@@ -399,6 +399,7 @@ static const char *set_server_certificate_file(cmd_parms *cmd, void *dummy, cons
         }
 
         /* populate the item */
+        certFileInfo->srec = s;
         certFileInfo->next = g_persistConfig->configData->certificateFileList;
         apr_cpystrn(certFileInfo->certificateFileName, arg, sizeof certFileInfo->certificateFileName);
 
@@ -899,6 +900,7 @@ static apr_status_t collect_certificate_data(
     mmap_certificate_data* certificate_data,
     char* const string_table,
     apr_size_t* string_table_len,
+    apr_pool_t* ptemp,
     config_sslCertFile* head,
     apr_size_t certificate_count)
 {
@@ -913,6 +915,10 @@ static apr_status_t collect_certificate_data(
     certificate_element = certificate_count - 1;
     for (cert_file_info = head; cert_file_info != NULL; cert_file_info = cert_file_info->next)
     {
+        char* instanceHost;
+        server_rec* s;
+        server_addr_rec* addrs;
+
         /* save first host and port that use this certificate file */
         add_data_string(string_table,
                    string_table_len,
@@ -922,6 +928,23 @@ static apr_status_t collect_certificate_data(
                    string_table_len,
                    cert_file_info->hostName,
                    certificate_data != NULL ? &certificate_data->certificates[certificate_element].hostNameOffset : NULL);
+        /* populate the virtual host identifier for this certificate as well */
+        /* Note: This can't be done when reading configuration - server_hostname isn't initialized yet */
+        s = cert_file_info->srec;
+        instanceHost = apr_pstrdup(ptemp, s->server_hostname != NULL ? s->server_hostname : "_default_");
+        for (addrs = s->addrs; addrs != NULL; addrs = addrs->next)
+        {
+            char *nextEntry = apr_psprintf(ptemp,
+                                           ",%s:%d",
+                                           addrs->host_addr->hostname != NULL ? addrs->host_addr->hostname : "_default_",
+                                           (unsigned int)addrs->host_addr->port);
+            instanceHost = apr_pstrcat(ptemp, instanceHost, nextEntry, NULL);
+        }
+
+        add_data_string(string_table,
+                   string_table_len,
+                   instanceHost,
+                   certificate_data != NULL ? &certificate_data->certificates[certificate_element].virtualHostOffset : NULL);
         if (certificate_data != NULL)
         {
             certificate_data->certificates[certificate_element].port = cert_file_info->port;
@@ -1019,6 +1042,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     status = collect_certificate_data(NULL,
                                       NULL,
                                       &stable_length,
+                                      ptemp,
                                       cfg->configData->certificateFileList,
                                       certificate_count);
     if (status != APR_SUCCESS)
@@ -1107,6 +1131,7 @@ static apr_status_t mmap_region_create(persist_cfg *cfg, apr_pool_t *pool, apr_p
     status = collect_certificate_data(cfg->certificate_data,
                                       cfg->stable,
                                       &stable_length,
+                                      ptemp,
                                       cfg->configData->certificateFileList,
                                       certificate_count);
     if (status != APR_SUCCESS)

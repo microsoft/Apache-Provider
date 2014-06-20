@@ -55,12 +55,27 @@ static void EnumerateOneInstance(Context& context,
         std::vector<mi::Uint16> portsArray;
         std::vector<mi::String> aliasesArray;
 
+        std::string ipAddressesFormatted;
+        std::string portsFormatted;
+        std::string aliasesFormatted;
+
         const char* ptr = data.GetDataString(vhosts[item].addressesAndPortsOffset);
         while (*ptr != '\0')
         {
             ipAddressesArray.push_back(ptr);
+            if (ipAddressesFormatted.size())
+            {
+                ipAddressesFormatted += ", ";
+            }
+            ipAddressesFormatted += ptr;
             ptr += strlen(ptr) + 1;
+
             portsArray.push_back(decode64(ptr));
+            if (portsFormatted.size())
+            {
+                portsFormatted += ", ";
+            }
+            portsFormatted += ptr;
             ptr += strlen(ptr) + 1;
         }
 
@@ -68,6 +83,11 @@ static void EnumerateOneInstance(Context& context,
         while (*ptr != '\0')
         {
             aliasesArray.push_back(ptr);
+            if (aliasesFormatted.size())
+            {
+                aliasesFormatted += ", ";
+            }
+            aliasesFormatted += ptr;
             ptr += strlen(ptr) + 1;
         }
 
@@ -83,12 +103,18 @@ static void EnumerateOneInstance(Context& context,
         inst.ErrorLog_value(data.GetDataString(vhosts[item].logErrorOffset));
         inst.CustomLog_value(data.GetDataString(vhosts[item].logCustomOffset));
         inst.AccessLog_value(data.GetDataString(vhosts[item].logAccessOffset));
+
         mi::StringA ipAddressesA(&ipAddressesArray[0], (MI_Uint32)ipAddressesArray.size());
         inst.IPAddresses_value(ipAddressesA);
+        inst.IPAddressesFormatted_value(ipAddressesFormatted.c_str());
+
         mi::Uint16A portsA(&portsArray[0], (MI_Uint32)portsArray.size());
         inst.Ports_value(portsA);
+        inst.PortsFormatted_value(portsFormatted.c_str());
+
         mi::StringA aliasesA(&aliasesArray[0], (MI_Uint32)aliasesArray.size());
         inst.ServerAlias_value(aliasesA);
+        inst.ServerAliasFormatted_value(aliasesFormatted.c_str());
     }
 
     context.Post(inst);

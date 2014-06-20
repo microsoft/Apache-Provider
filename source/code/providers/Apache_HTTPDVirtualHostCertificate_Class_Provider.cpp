@@ -221,12 +221,8 @@ static void EnumerateOneInstance(
         apr_time_t timeNow;
         apr_status_t status;
 
-        // Insert the host:port name for the first host that uses this certificate file
-        const char* hostStr = apr_psprintf(data.GetPool(),
-                                           "%s:%d",
-                                           data.GetDataString(certs[item].hostNameOffset),
-                                           certs[item].port);
-        inst.ServerName_value(hostStr);
+        // Insert the appropriate value to map the certficate to the virtual host
+        inst.VirtualHost_value(data.GetDataString(certs[item].virtualHostOffset));
         inst.FileName_value(certificateFileName);
 
         // Insert the certificate file dates
