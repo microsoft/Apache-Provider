@@ -75,7 +75,7 @@ static void EnumerateOneInstance(Context& context,
             {
                 portsFormatted += ", ";
             }
-            portsFormatted += ptr;
+            portsFormatted += apr_itoa(data.GetPool(), decode64(ptr));
             ptr += strlen(ptr) + 1;
         }
 
