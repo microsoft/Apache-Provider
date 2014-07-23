@@ -6,7 +6,7 @@
 #--------------------------------------------------------------------------------
 
 BASE_DIR := $(subst /build,,$(PWD))
-OMI_ROOT := $(shell cd ../../omi/distro; pwd -P)
+OMI_ROOT := $(shell cd ../../omi/Unix; pwd -P)
 SCXPAL_DIR := $(shell cd ../../pal; pwd -P)
 
 PF_POSIX := 1

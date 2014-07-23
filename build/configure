@@ -1,6 +1,6 @@
 #!/bin/bash
 
-scxomi_dir=`(cd ../../omi/distro; pwd -P)`
+scxomi_dir=`(cd ../../omi/Unix; pwd -P)`
 scxpal_dir=`(cd ../../pal; pwd -P)`
 
 enable_debug=""
