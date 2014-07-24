@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Apache</RootNamespace>
+    <AssemblyName>Apache</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Interop.sshcomLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=56dc22b28e9eff5e, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>..\..\Dependency\SshcomLib\Interop.sshcomLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.WSManAutomation">
+      <HintPath>..\..\Dependency\bin\WsManInteropdll\winrm2.0\Interop.WSManAutomation.dll</HintPath>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="MCF.Infra.FrmwrkEE">
+      <HintPath>..\..\Dependency\MCF\MCF3.3-CLR4\MCF.Infra.FrmwrkEE.dll</HintPath>
+    </Reference>
+    <Reference Include="MCF.Infra.Logger">
+      <HintPath>..\..\Dependency\MCF\MCF3.3-CLR4\MCF.Infra.Logger.dll</HintPath>
+    </Reference>
+    <Reference Include="MCF.Infra.Types">
+      <HintPath>..\..\Dependency\MCF\MCF3.3-CLR4\MCF.Infra.Types.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Windows\assembly\GAC_MSIL\System.Management.Automation\1.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="scxhelper\AgentHelper.cs" />
+    <Compile Include="scxhelper\ApacheHelper.cs" />
+    <Compile Include="scxhelper\ClientInfo.cs" />
+    <Compile Include="scxhelper\CommonHelper.cs" />
+    <Compile Include="scxhelper\ConsoleLogger.cs" />
+    <Compile Include="scxhelper\EventLogHelper.cs" />
+    <Compile Include="GroupHelper.cs" />
+    <Compile Include="scxhelper\IFileCopyHelper.cs" />
+    <Compile Include="scxhelper\IRunHelper.cs" />
+    <Compile Include="scxhelper\Logging.cs" />
+    <Compile Include="scxhelper\PosixCopy.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="scxhelper\PsHelper.cs" />
+    <Compile Include="scxhelper\RunPosixCmd.cs" />
+    <Compile Include="scxhelper\ScxMethods.cs" />
+    <Compile Include="scxhelper\ScxStatistics.cs" />
+    <Compile Include="scxhelper\ScxTypes.cs" />
+    <Compile Include="scxhelper\SshHelper.cs" />
+    <Compile Include="VerifyEnumerate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Fakes Include="Fakes\Interop.sshcomLib.fakes" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WSManCommon\WSManCommon.csproj">
+      <Project>{eb1d1123-7e8a-4634-8e57-c06131b791c8}</Project>
+      <Name>WSManCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(SolutionDir)..\
+xcopy /E /Y /I ".\Dependency\MCF\*" "$(TargetDir)MCF"
+xcopy /E /Y /I ".\Dependency\SshcomLib\x64\*" "$(TargetDir)x64"
+xcopy /E /Y /I ".\Dependency\SshcomLib\Interop.sshcomLib.dll" "$(TargetDir)"
+xcopy /E /Y /I ".\Apache\TestFiles\*" "$(TargetDir)TestFiles"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>cd $(SolutionDir)..\
+regsvr32 /s .\Dependency\SshcomLib\x64\sshcom.dll</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

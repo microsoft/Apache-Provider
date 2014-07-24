@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<varmap xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap"
+        assembly="..\Apache.dll"
+        dsc="Apache Automation Test"
+        owner="v-jeyin" contact="v-jeyin">
+  
+  <var set="1" lvl="0" vid="1" cid="Apache_HTTPDServer" cls="Apache.VerifyEnumerate" dsc="" act="true">
+    <!--snipref id="UniqueOSInfo" /-->
+    <rec key="p:InstanceID">^$</rec>
+    <rec key="p:Caption">^$</rec>
+    <rec key="p:Description">^$</rec>
+    <rec key="p:ElementName">^$</rec>
+    <rec key="p:ProductIdentifyingNumber">1</rec>
+    <rec key="p:ProductName">Unknown</rec>
+    <rec key="p:ProductVendor">Apache Software Foundation</rec>
+    <rec key="p:ProductVersion">Unknown</rec>
+    <rec key="p:SystemID">Unknown</rec>  
+    <rec key="p:CollectionID">Unknown</rec>
+    <rec key="p:Name">^$</rec>
+    <rec key="p:ModuleVersion">1\.0\.0-85 \(20140711\)</rec>
+    <rec key="p:ConfigurationFile">^$</rec>
+    <rec key="p:InstalledModules">^$</rec>
+    <rec key="p:InstalledModulesFormatted">^$</rec>
+    <rec key="p:ProcessName">^$</rec>
+    <rec key="p:ServiceName">apache2</rec>
+    <rec key="p:OperatingStatus">Error</rec>
+    <rec key="p:OperatingStatusDetail">^$</rec>
+  </var>
+  <!-- Test group information -->
+  <grp cls="Apache.GroupHelper">
+    <!--<rec key="hostname">scxomt64-deb6-03.scx.com</rec>-->
+    <rec key="hostname">osst-ub12-01</rec>
+    <rec key="omserver"></rec>
+    <rec key="username">root</rec>
+    <rec key="password">OpsMgr2007R2</rec>
+    <rec key="nonsuperuser">scxuser</rec>
+    <rec key="nonsuperuserpwd">scxuser</rec>
+    <rec key="PlatformTag">universald.1.x64</rec>
+    <rec key="InstallCmd">sh /tmp/{0} --install</rec>
+    <rec key="UninstallCmd">/opt/microsoft/scx/bin/uninstall</rec>
+    <rec key="CleanupCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.*;rm -rf /var/opt/microsoft]]></rec>
+    <rec key="AgentPkgExt">deb</rec>
+    <rec key="DirectoryTag">Debian5.0_x64</rec>
+    <rec key="installonly">false</rec>
+    <rec key="knownIssueFormat">Known Issue: WI {0}: '{1}'</rec>
+    <rec key="localagents"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents]]></rec>
+    <!--cimprov-->
+    <rec key="localapaches"><![CDATA[C:\Apache\cimprov]]></rec>
+    <rec key="installApacheCmd">dpkg -i /tmp/{0}</rec>
+    <rec key="UninstallApacheCmd">echo test</rec>
+    <rec key="CleanupApacheCmd">rm -rf /opt/microsoft/*</rec>
+    <!--check apache status-->
+    <rec key="installApachePkg">apt-get install apache2</rec>
+    <rec key="startApacheCmd">/etc/init.d/apache2 start</rec>
+    <rec key="checkServiceCmd">/etc/init.d/apache2 status</rec>
+    <rec key="checkApacheInstalled">dpkg -l |grep apache2</rec>
+    
+    <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'localagents' -->
+    <rec key="uselocalagents">true</rec>
+    <rec key="useLocalapaches">true</rec>
+    <!-- Use only the latest agent: if an agent is not available in the latest build folder, exit with an error -->
+    <rec key="latestonly">true</rec>
+    <!-- Skip agent deployment: run WSMAN tests without attempting to install a new agent on the client machine, and don't uninstall the agent when testing is done-->
+    <rec key="skipagentdeploy">false</rec>
+    <varref />
+  </grp>
+</varmap>
