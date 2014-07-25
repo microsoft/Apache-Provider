@@ -14,6 +14,7 @@ DESCRIPTION:             'Provides CIM management interface for Apache HTTP Serv
 MAINTAINER:              'Microsoft Corporation'
 
 INCLUDE_DIRECTIVE:       'include /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
+INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 
 %Defines
 
@@ -84,6 +85,10 @@ FindApacheConfigFile()
         APACHE_CONF=/etc/apache2/default-server.conf
         [ -e "${APACHE_CONF}" ] && return
 
+	# Ubuntu-type installation
+        APACHE_CONF=/etc/apache2/apache2.conf
+        [ -e "${APACHE_CONF}" ] && return
+
 	# Source code installation w/default directories
         APACHE_CONF=/usr/local/apache2/conf/httpd.conf
         [ -e "${APACHE_CONF}" ] && return
@@ -98,6 +103,22 @@ FindApacheConfigFile
 #include FindApacheConfigurationFile
 UnconfigureApacheConf_File()
 {
+    #
+    # Prefer to use /etc/httpd/conf.d or /etc/apache2/conf.d, if these exist
+    #
+    if [ -L /etc/httpd/conf.d/mod_cimprov.conf ]; then
+        rm /etc/httpd/conf.d/mod_cimprov.conf
+        return 0
+    fi
+    if [ -L /etc/apache2/conf.d/mod_cimprov.conf ]; then
+        rm /etc/apache2/conf.d/mod_cimprov.conf
+        return 0
+    fi
+
+    #
+    # Fall back to using Apache configuration file
+    #
+
     if [ ! -e "${APACHE_CONF}" ]; then
 	echo "Failure unconfiguring Apache: Apache configuration file was not found" 1>&2
 	return 1;
@@ -133,6 +154,22 @@ UnconfigureApacheConf_File()
 #include FindApacheConfigurationFile
 ConfigureApacheConf_File()
 {
+    #
+    # Prefer to use /etc/httpd/conf.d or /etc/apache2/conf.d, if these exist
+    #
+    if [ -d /etc/httpd/conf.d ]; then
+        ln -s ${{INCLUDE_FILE}} /etc/httpd/conf.d/mod_cimprov.conf
+        return 0
+    fi
+    if [ -d /etc/apache2/conf.d ]; then
+        ln -s ${{INCLUDE_FILE}} /etc/apache2/conf.d/mod_cimprov.conf
+        return 0
+    fi
+
+    #
+    # Fall back to using Apache configuration file
+    #
+
     if [ ! -e "${APACHE_CONF}" ]; then
 	echo "Failure configuring Apache: Apache configuration file was not found" 1>&2
 	return 1;
