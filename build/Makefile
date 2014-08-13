@@ -89,7 +89,7 @@ all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 endif
 
 clean :
-	$(RMDIR) $(BASE_DIR)/target $(PROVIDER_TEST_DIR)/providertestutils.cpp
+	$(RMDIR) $(BASE_DIR)/build/cppunit_result.* $(BASE_DIR)/build/scxtestrunner.log $(BASE_DIR)/installer/intermediate $(BASE_DIR)/target $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 
 distclean : clean
@@ -387,6 +387,12 @@ kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 		base_apache.data linux.data linux_rpm.data
 
 ifeq ($(ULINUX),1)
+
+	# The kit has a name including .universalr., and the 'r' is only desired for OM
+	sed -e 's/\.universalr\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
 	sudo $(RMDIR) $(STAGING_DIR)
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
@@ -404,7 +410,44 @@ ifeq ($(ULINUX),1)
 		--DPKG_LOCATION=$(SCXPAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH) \
 		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
 		base_apache.data linux.data linux_dpkg.data
+
+	# The kit has a name including .universald., and the 'd' is only desired for OM
+	sed -e 's/\.universald\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# Strip the package extension from the package filename
+	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# The MP needs architecture of i686 (for x86) and x86_64 (for x64).
+	sed -e 's/\.x86$$/\.i686/' $(TARGET_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`.rpm
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename`.deb $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`.deb
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# Build the tar file containing both .rpm and .deb packages
+	cd $(TARGET_DIR); tar cvf `cat $(TARGET_DIR)/package_filename`.tar `cat $(TARGET_DIR)/package_filename`.rpm `cat $(TARGET_DIR)/package_filename`.deb
+
+else
+
+	# Strip the package extension from the package filename
+	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# The MP needs architecture of i686 (for x86) and x86_64 (for x64).
+	sed -e 's/\.x86$$/\.i686/' $(TARGET_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`.rpm
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# Build the tar file containing the .rpm package
+	cd $(TARGET_DIR); tar cvf `cat $(TARGET_DIR)/package_filename`.tar `cat $(TARGET_DIR)/package_filename`.rpm
+
 endif
+
+	../installer/bundle/create_bundle.sh $(PF)_$(PF_DISTRO) \
+                                             $(TARGET_DIR) \
+                                             `cat $(TARGET_DIR)/package_filename`
 
 #
 # The following is all for OMI "bootstrap" stuff (allowing omigen and omireg to run)
