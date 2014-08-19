@@ -85,6 +85,9 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
     bool keysOnly,
     const MI_Filter* filter)
 {
+    static char s_ServerConfigFile[PATH_MAX];
+    static char s_ServerVersion[96];
+
     CIM_PEX_BEGIN
     {
         ApacheDataCollector data = g_pFactory->DataCollectorFactory();
@@ -125,9 +128,15 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
 
         if (APR_SUCCESS == data.Attach("Apache_HTTPDServer_Class_Provider::EnumerateInstances"))
         {
-            // Successfully attached to memory segment; provide normal results
-
             const char* apacheServerVersion = GetApacheComponentVersion(data.GetServerVersion(), "Apache");
+
+            // Save values for reporting if unable to attach next time 'round
+            // (WI 693191: Make Apache_HTTPDSeerver properties sticky)
+
+            strncpy(s_ServerConfigFile, data.GetServerConfigFile(), sizeof(s_ServerConfigFile));
+            strncpy(s_ServerVersion, apacheServerVersion, sizeof(s_ServerVersion));
+
+            // Successfully attached to memory segment; provide normal results
 
             inst.ProductIdentifyingNumber_value("1");   /* serial number */
             inst.ProductName_value(data.GetServerConfigFile());
@@ -172,9 +181,9 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
             // We can't attach, so provide a minimal response indicating the server is down
 
             inst.ProductIdentifyingNumber_value("1");   /* serial number */
-            inst.ProductName_value("Unknown");
+            inst.ProductName_value(s_ServerConfigFile[0] ? s_ServerConfigFile : "Unknown");
             inst.ProductVendor_value(APACHE_VENDOR_ID);
-            inst.ProductVersion_value("Unknown");
+            inst.ProductVersion_value(s_ServerVersion[0] ? s_ServerVersion : "Unknown");
             inst.SystemID_value("Unknown");
             inst.CollectionID_value("Unknown");
 
@@ -183,6 +192,8 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
                 inst.ModuleVersion_value(ss.str().c_str());
                 inst.ServiceName_value(serviceName);
                 inst.OperatingStatus_value(OperatingStatusValues[6]); // Server state: Error
+
+                inst.InstanceID_value(s_ServerConfigFile[0] ? s_ServerConfigFile : "Unknown");
             }
         }
 
