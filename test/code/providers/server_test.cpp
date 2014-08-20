@@ -250,11 +250,11 @@ public:
 
             CPPUNIT_ASSERT_EQUAL(std::wstring(L"1"),
                                  context[0].GetKey(L"ProductIdentifyingNumber", CALL_LOCATION(errMsg)));
-            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"/etc/httpd/conf/httpd.conf-fake"),
                                  context[0].GetKey(L"ProductName", CALL_LOCATION(errMsg)));
             CPPUNIT_ASSERT_EQUAL(std::wstring(L"Apache Software Foundation"),
                                  context[0].GetKey(L"ProductVendor", CALL_LOCATION(errMsg)));
-            CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
+            CPPUNIT_ASSERT_EQUAL(std::wstring(L"1.2.3"),
                                  context[0].GetKey(L"ProductVersion", CALL_LOCATION(errMsg)));
             CPPUNIT_ASSERT_EQUAL(std::wstring(L"Unknown"),
                                  context[0].GetKey(L"SystemID", CALL_LOCATION(errMsg)));
