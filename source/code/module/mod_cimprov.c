@@ -659,7 +659,14 @@ static apr_status_t collect_server_data(
 {
     apr_size_t index;
     module* modp;
+
+    // Pull the server version formatted like: Apache/2.0.41
+#if AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER == 2
     const char* version = ap_get_server_version();
+#elif AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER >= 4
+    const char* version = ap_get_server_banner();
+#endif
+
     const char* server_root = ap_server_root;
 
     /* Add the name of the configuration file */
@@ -1214,7 +1221,11 @@ static apr_status_t post_config_handler(apr_pool_t *pconf, apr_pool_t *plog, apr
     }
 
 #ifdef AP_NEED_SET_MUTEX_PERMS
+#if AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER == 2
     if (APR_SUCCESS != (status = unixd_set_global_mutex_perms(cfg->mutexMapRW)))
+#elif AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER >= 4
+    if (APR_SUCCESS != (status = ap_unixd_set_global_mutex_perms(cfg->mutexMapRW)))
+#endif
     {
         return display_error(cfg, "cimprov: post_config_handler could not set permissions on global mutex", status, 1);
     }
@@ -1364,6 +1375,9 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
         }
     }
 
+#if AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER >= 4
+    ap_generation_t mpm_generation;
+#endif
     apr_uint32_t ready = 0, busy = 0;
     clock_t tu, ts, tcu, tcs;
     int i, j;
@@ -1388,6 +1402,10 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
     display_error(cfg, "cimprov: Computing Apache idle/busy thread/process counts", 0, 0);
 #endif // defined(linux)
 
+#if AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER >= 4
+    ap_mpm_query(AP_MPMQ_GENERATION, &mpm_generation);
+#endif
+
     for (i = 0; i < cfg->process_limit; ++i) {
         process_score *score_process;
         worker_score *score_worker;
@@ -1399,11 +1417,21 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
 
         score_process = ap_get_scoreboard_process(i);
         for (j = 0; j < cfg->thread_limit; ++j) {
+#if AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER == 2
             score_worker = ap_get_scoreboard_worker(i, j);
+#elif AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER == 4
+            score_worker = ap_get_scoreboard_worker_from_indexes(i, j);
+#else
+#error HTTPD Major/Minor Version not recognized
+#endif
             state = score_worker->status;
 
             if (!score_process->quiescing && score_process->pid) {
+#if AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER == 2
                 if (state == SERVER_READY && score_process->generation == ap_my_generation)
+#elif AP_SERVER_MAJORVERSION_NUMBER == 2 && AP_SERVER_MINORVERSION_NUMBER >= 4
+                if (state == SERVER_READY && score_process->generation == mpm_generation)
+#endif
                 {
                     ready++;
                 }

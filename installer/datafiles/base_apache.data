@@ -2,6 +2,7 @@
 SHELL_HEADER:            '#!/bin/sh'
 APACHEHOME:              '/opt/microsoft/apache-cimprov'
 SHLIB_EXT:               'so'
+HTTP_VERSION:            '0'
 
 SHORT_NAME:              'apache-cimprov'
 SHORT_NAME_PREFIX:       'MSFT'
@@ -19,8 +20,16 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 %Defines
 
 %Files
+#if HTTP_VERSION == 22
+/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v22;   755; root; root
+/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v22; 755; root; root
+#elseif HTTP_VERSION == 24
+/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v24;   755; root; root
+/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v24; 755; root; root
+#else
 /opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}};       755; root; root
 /opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}; 755; root; root
+#endif
 
 /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf;                installer/conf/mod_cimprov.conf;                                  644; root; root; conffile
 /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt;                 installer/conf/installinfo.txt;                                   644; root; root; conffile
@@ -77,6 +86,10 @@ fi
 FindApacheConfigFile()
 {
     if [ -z "${APACHE_CONF}" ]; then
+	# Source code installation w/default directories
+        APACHE_CONF=/usr/local/apache2/conf/httpd.conf
+        [ -e "${APACHE_CONF}" ] && return
+
         # Redhat-type installation
         APACHE_CONF=/etc/httpd/conf/httpd.conf
         [ -e "${APACHE_CONF}" ] && return
@@ -87,10 +100,6 @@ FindApacheConfigFile()
 
 	# Ubuntu-type installation
         APACHE_CONF=/etc/apache2/apache2.conf
-        [ -e "${APACHE_CONF}" ] && return
-
-	# Source code installation w/default directories
-        APACHE_CONF=/usr/local/apache2/conf/httpd.conf
         [ -e "${APACHE_CONF}" ] && return
 
         # Unable to find it, so indicate so

@@ -71,54 +71,108 @@ usage()
 cleanup_and_exit()
 {
     if [ -n "$1" ]; then
-	exit $1
+        exit $1
     else
-	exit 0
+        exit 0
     fi
 }
 
 verifyNoInstallationOption()
 {
     if [ -n "${installMode}" ]; then
-	echo "$0: Conflicting qualifiers, exiting" >&2
-	cleanup_and_exit 1
+        echo "$0: Conflicting qualifiers, exiting" >&2
+        cleanup_and_exit 1
     fi
 
     return;
 }
 
-ulinux_detect_installer() {
+ulinux_detect_installer()
+{
     INSTALLER=
 
     # If DPKG lives here, assume we use that. Otherwise we use RPM.
     type dpkg > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-	INSTALLER=DPKG
+        INSTALLER=DPKG
     else
-	INSTALLER=RPM
+        INSTALLER=RPM
     fi
+}
+
+ulinux_detect_apache_version()
+{
+    APACHE_PREFIX=
+
+    # Try for local installation in /usr/local/apahe2
+    APACHE_CTL="/usr/local/apache2/bin/apachectl"
+
+    if [ ! -e  $APACHE_CTL ]; then
+        # Try for Redhat-type installation
+        APACHE_CTL="/usr/sbin/httpd"
+
+        if [ ! -e $APACHE_CTL ]; then
+            # Try for SuSE-type installation (also covers Ubuntu)
+            APACHE_CTL="/usr/sbin/apache2ctl"
+
+            if [ ! -e $APACHE_CTL ]; then
+                # Can't figure out what Apache version we have!
+                echo "$0: Can't determine location of Apache installation" >&2
+                cleanup_and_exit 1
+            fi
+        fi
+    fi
+
+    # Get the version line (something like: "Server version: Apache/2.2,15 (Unix)"
+    APACHE_VERSION=`${APACHE_CTL} -v | head -1`
+    if [ $? -ne 0 ]; then
+        echo "$0: Unable to run Apache to determine version" >&2
+        cleanup_and_exit 1
+    fi
+
+    # Massage it to get the actual version
+    APACHE_VERSION=`echo $APACHE_VERSION | grep -oP "/2\.[24]\."`
+    
+    case "$APACHE_VERSION" in
+        /2.2.)
+            echo "Detected Apache v2.2 ..."
+            APACHE_PREFIX="apache_22/"
+            ;;
+
+        /2.4.)
+            echo "Detected Apache v2.4 ..."
+            APACHE_PREFIX="apache_24/"
+            ;;
+
+        *)
+            echo "$0: We only support Apache v2.2 or Apache v2.4" >&2
+            cleanup_and_exit 1
+            ;;
+    esac
 }
 
 # $1 - The filename of the package to be installed
 pkg_add() {
     pkg_filename=$1
     case "$PLATFORM" in
-	Linux_ULINUX)
-	    ulinux_detect_installer
-	    if [ "$INSTALLER" = "DPKG" ]; then
-		dpkg --install --refuse-downgrade ${pkg_filename}.deb
-	    else
-		rpm --install ${pkg_filename}.rpm
-	    fi
-	    ;;
+        Linux_ULINUX)
+            ulinux_detect_installer
+            ulinux_detect_apache_version
 
-	Linux_REDHAT|Linux_SUSE)
-	    rpm --install ${pkg_filename}.rpm
-	    ;;
-	
-	*)
-	    echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
-	    cleanup_and_exit 2
+            if [ "$INSTALLER" = "DPKG" ]; then
+                dpkg --install --refuse-downgrade ${APACHE_PREFIX}${pkg_filename}.deb
+            else
+                rpm --install ${APACHE_PREFIX}${pkg_filename}.rpm
+            fi
+            ;;
+
+        Linux_REDHAT|Linux_SUSE)
+            rpm --install ${pkg_filename}.rpm
+            ;;
+
+        *)
+            echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
+            cleanup_and_exit 2
     esac
 }
 
@@ -126,26 +180,26 @@ pkg_add() {
 # $2 - Optional parameter. Only used when forcibly removing omi on SunOS
 pkg_rm() {
     case "$PLATFORM" in
-	Linux_ULINUX)
-	    ulinux_detect_installer
-	    if [ "$INSTALLER" = "DPKG" ]; then
-		if [ "$installMode" = "P" ]; then
-		    dpkg --purge $1 1> /dev/null 2> /dev/null
-		else
-		    dpkg --remove $1 1> /dev/null 2> /dev/null
-		fi
-	    else
-		rpm --erase $1 1> /dev/null 2> /dev/null
-	    fi
-	    ;;
+        Linux_ULINUX)
+            ulinux_detect_installer
+            if [ "$INSTALLER" = "DPKG" ]; then
+                if [ "$installMode" = "P" ]; then
+                    dpkg --purge $1 1> /dev/null 2> /dev/null
+                else
+                    dpkg --remove $1 1> /dev/null 2> /dev/null
+                fi
+            else
+                rpm --erase $1 1> /dev/null 2> /dev/null
+            fi
+            ;;
 
-	Linux_REDHAT|Linux_SUSE)
-	    rpm --erase $1 1> /dev/null 2> /dev/null
-	    ;;
-	
-	*)
-	    echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
-	    cleanup_and_exit 2
+        Linux_REDHAT|Linux_SUSE)
+            rpm --erase $1 1> /dev/null 2> /dev/null
+            ;;
+
+        *)
+            echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
+            cleanup_and_exit 2
     esac
 }
 
@@ -155,27 +209,28 @@ pkg_upd() {
     pkg_filename=$1
 
     case "$PLATFORM" in
-	Linux_ULINUX)
-	    ulinux_detect_installer
-	    if [ "$INSTALLER" = "DPKG" ]; then
-		[ -z "${forceFlag}" ] && FORCE="--refuse-downgrade"
-		dpkg --install $FORCE ${pkg_filename}.deb
+        Linux_ULINUX)
+            ulinux_detect_installer
+            ulinux_detect_apache_version
+            if [ "$INSTALLER" = "DPKG" ]; then
+                [ -z "${forceFlag}" ] && FORCE="--refuse-downgrade"
+                dpkg --install $FORCE ${APACHE_PREFIX}${pkg_filename}.deb
 
-		export PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH
-	    else
-		[ -n "${forceFlag}" ] && FORCE="--force"
-		rpm --upgrade $FORCE ${pkg_filename}.rpm
-	    fi
-	    ;;
+                export PATH=/usr/local/sbin:/usr/sbin:/sbin:$PATH
+            else
+                [ -n "${forceFlag}" ] && FORCE="--force"
+                rpm --upgrade $FORCE ${APACHE_PREFIX}${pkg_filename}.rpm
+            fi
+            ;;
 
-	Linux_REDHAT|Linux_SUSE)
-	    [ -n "${forceFlag}" ] && FORCE="--force"
-	    rpm --upgrade $FORCE ${pkg_filename}.rpm
-	    ;;
+        Linux_REDHAT|Linux_SUSE)
+            [ -n "${forceFlag}" ] && FORCE="--force"
+            rpm --upgrade $FORCE ${pkg_filename}.rpm
+            ;;
 
-	*)
-	    echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
-	    cleanup_and_exit 2
+        *)
+            echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
+            cleanup_and_exit 2
     esac
 }
 
@@ -198,90 +253,90 @@ force_stop_omi_service() {
 
 while [ $# -ne 0 ]; do
     case "$1" in
-	--extract-script)
-	    # hidden option, not part of usage
-	    # echo "  --extract-script FILE  extract the script to FILE."
-	    head -${SCRIPT_LEN} "${SCRIPT}" > "$2"
-	    local shouldexit=true
-	    shift 2
-	    ;;
+        --extract-script)
+            # hidden option, not part of usage
+            # echo "  --extract-script FILE  extract the script to FILE."
+            head -${SCRIPT_LEN} "${SCRIPT}" > "$2"
+            local shouldexit=true
+            shift 2
+            ;;
 
-	--extract-binary)
-	    # hidden option, not part of usage
-	    # echo "  --extract-binary FILE  extract the binary to FILE."
-	    tail +${SCRIPT_LEN_PLUS_ONE} "${SCRIPT}" > "$2"
-	    local shouldexit=true
-	    shift 2
-	    ;;
+        --extract-binary)
+            # hidden option, not part of usage
+            # echo "  --extract-binary FILE  extract the binary to FILE."
+            tail +${SCRIPT_LEN_PLUS_ONE} "${SCRIPT}" > "$2"
+            local shouldexit=true
+            shift 2
+            ;;
 
-	--force)
-	    forceFlag=true
-	    shift 1
-	    ;;
+        --force)
+            forceFlag=true
+            shift 1
+            ;;
 
-	--install)
-	    verifyNoInstallationOption
-	    installMode=I
-	    shift 1
-	    ;;
+        --install)
+            verifyNoInstallationOption
+            installMode=I
+            shift 1
+            ;;
 
-	--purge)
-	    verifyNoInstallationOption
-	    installMode=P
-	    shouldexit=true
-	    shift 1
-	    ;;
+        --purge)
+            verifyNoInstallationOption
+            installMode=P
+            shouldexit=true
+            shift 1
+            ;;
 
-	--remove)
-	    verifyNoInstallationOption
-	    installMode=R
-	    shouldexit=true
-	    shift 1
-	    ;;
+        --remove)
+            verifyNoInstallationOption
+            installMode=R
+            shouldexit=true
+            shift 1
+            ;;
 
-	--upgrade)
-	    verifyNoInstallationOption
-	    installMode=U
-	    shift 1
-	    ;;
+        --upgrade)
+            verifyNoInstallationOption
+            installMode=U
+            shift 1
+            ;;
 
-	--debug)
-	    echo "Starting shell debug mode." >&2
-	    echo "" >&2
-	    echo "SCRIPT_INDIRECT: $SCRIPT_INDIRECT" >&2
-	    echo "SCRIPT_DIR:      $SCRIPT_DIR" >&2
-	    echo "SCRIPT:          $SCRIPT" >&2
-	    echo >&2
-	    set -x
-	    shift 1
-	    ;;
+        --debug)
+            echo "Starting shell debug mode." >&2
+            echo "" >&2
+            echo "SCRIPT_INDIRECT: $SCRIPT_INDIRECT" >&2
+            echo "SCRIPT_DIR:      $SCRIPT_DIR" >&2
+            echo "SCRIPT:          $SCRIPT" >&2
+            echo >&2
+            set -x
+            shift 1
+            ;;
 
-	-? | --help)
-	    usage `basename $0` >&2
-	    cleanup_and_exit 0
-	    ;;
+        -? | --help)
+            usage `basename $0` >&2
+            cleanup_and_exit 0
+            ;;
 
-	*)
-	    usage `basename $0` >&2
-	    cleanup_and_exit 1
-	    ;;
+        *)
+            usage `basename $0` >&2
+            cleanup_and_exit 1
+            ;;
     esac
 done
 
 if [ -n "${forceFlag}" ]; then
     if [ "$installMode" != "I" -a "$installMode" != "U" ]; then
-	echo "Option --force is only valid with --install or --upgrade" >&2
-	cleanup_and_exit 1
+        echo "Option --force is only valid with --install or --upgrade" >&2
+        cleanup_and_exit 1
     fi
 fi
 
 case "$PLATFORM" in
     Linux_REDHAT|Linux_SUSE|Linux_ULINUX)
-	;;
+        ;;
 
     *)
-	echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
-	cleanup_and_exit 2
+        echo "Invalid platform encoded in variable \$PACKAGE; aborting" >&2
+        cleanup_and_exit 2
 esac
 
 # Do we need to remove the package?
@@ -290,8 +345,8 @@ if [ "$installMode" = "R" -o "$installMode" = "P" ]; then
     pkg_rm apache-cimprov
 
     if [ "$installMode" = "P" ]; then
-	echo "Purging all files in Apache agent ..."
-	rm -rf /etc/opt/microsoft/apache-cimprov /opt/microsoft/apache-cimprov /var/opt/microsoft/apache-cimprov
+        echo "Purging all files in Apache agent ..."
+        rm -rf /etc/opt/microsoft/apache-cimprov /opt/microsoft/apache-cimprov /var/opt/microsoft/apache-cimprov
     fi
 fi
 
@@ -331,32 +386,44 @@ EXIT_STATUS=0
 
 case "$installMode" in
     I)
-	echo "Installing Apache agent ..."
+        echo "Installing Apache agent ..."
 
-	force_stop_omi_service
+        force_stop_omi_service
 
-	pkg_add $APACHE_PKG
-	EXIT_STATUS=$?
-	;;
+        pkg_add $APACHE_PKG
+        EXIT_STATUS=$?
+        ;;
 
     U)
-	echo "Updating Apache agent ..."
-	force_stop_omi_service
+        echo "Updating Apache agent ..."
+        force_stop_omi_service
 
-	pkg_upd $APACHE_PKG
-	EXIT_STATUS=$?
-	;;
+        pkg_upd $APACHE_PKG
+        EXIT_STATUS=$?
+        ;;
 
     *)
-	echo "$0: Invalid setting of variable \$installMode, exiting" >&2
-	cleanup_and_exit 2
+        echo "$0: Invalid setting of variable \$installMode, exiting" >&2
+        cleanup_and_exit 2
 esac
 
 # Remove the package that was extracted as part of the bundle
-# NOTE: Should we run in a temporary directory to not blow away any existing package in pwd?
 
-[ -f $APACHE_PKG.rpm ] && rm $APACHE_PKG.rpm
-[ -f $APACHE_PKG.deb ] && rm $APACHE_PKG.deb
+case "$PLATFORM" in
+    Linux_ULINUX)
+        [ -f apache_22/$APACHE_PKG.rpm ] && rm apache_22/$APACHE_PKG.rpm
+        [ -f apache_22/$APACHE_PKG.deb ] && rm apache_22/$APACHE_PKG.deb
+        [ -f apache_24/$APACHE_PKG.rpm ] && rm apache_24/$APACHE_PKG.rpm
+        [ -f apache_24/$APACHE_PKG.deb ] && rm apache_24/$APACHE_PKG.deb
+        rmdir apache_22 apache_24 > /dev/null 2>&1
+        ;;
+
+    Linux_REDHAT|Linux_SUSE)
+        [ -f $APACHE_PKG.rpm ] && rm $APACHE_PKG.rpm
+        [ -f $APACHE_PKG.deb ] && rm $APACHE_PKG.deb
+        ;;
+
+esac
 
 if [ $? -ne 0 -o "$EXIT_STATUS" -ne "0" ]; then
     cleanup_and_exit 1
