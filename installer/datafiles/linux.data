@@ -108,8 +108,11 @@ StartOmiServer
 
 %Postuninstall_1100
 #include ApacheService_funcs
-RestartApacheServer
-
 #include OmiService_funcs
 #include CheckIfOmiIsRunning
-RestartOmiServer
+
+# If we're called for upgrade, don't do anything
+if [ "$1" != "upgrade" ]; then 
+    RestartApacheServer
+    RestartOmiServer
+fi

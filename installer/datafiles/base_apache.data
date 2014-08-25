@@ -167,10 +167,12 @@ ConfigureApacheConf_File()
     # Prefer to use /etc/httpd/conf.d or /etc/apache2/conf.d, if these exist
     #
     if [ -d /etc/httpd/conf.d ]; then
+        [ -e /etc/httpd/conf.d/mod_cimprov.conf ] && rm /etc/httpd/conf.d/mod_cimprov.conf
         ln -s ${{INCLUDE_FILE}} /etc/httpd/conf.d/mod_cimprov.conf
         return 0
     fi
     if [ -d /etc/apache2/conf.d ]; then
+        [ -e /etc/apache2/conf.d/mod_cimprov.conf ] && rm /etc/apache2/conf.d/mod_cimprov.conf
         ln -s ${{INCLUDE_FILE}} /etc/apache2/conf.d/mod_cimprov.conf
         return 0
     fi
