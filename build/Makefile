@@ -19,6 +19,15 @@ ifndef ENABLE_DEBUG
 $(error "ENABLE_DEBUG is not set.  Please re-run configure")
 endif
 
+ifeq ($(ULINUX),1)
+HTTPD_BASE_V22 := /usr/local_httpd_2.2.0
+# Apache v2.2 uses installed version of APR (compatible with Apache v2.2 on SLES 10)
+
+HTTPD_BASE_V24 := /usr/local_httpd_2.4.1
+APR_BASE_V24 := /usr/local_apr_1.4.2
+APRUTIL_BASE_V24 := /usr/local_apr_util_1.3.0
+endif
+
 SOURCE_DIR := $(BASE_DIR)/source/code
 TEST_DIR := $(BASE_DIR)/test/code
 
@@ -34,12 +43,6 @@ APACHE_MODULE := $(TARGET_DIR)/$(APACHE_MODULE_BASENAME).so
 
 INSTALLER_TMPDIR := $(TARGET_DIR)/installer_tmp
 
-# Find the appropriate version of 'apxs' to build with
-APXS := apxs
-ifeq ($(shell (type apxs > /dev/null 2>&1 && echo 0) || echo 1),1)
-    APXS := apxs2
-endif
-
 # If building with Apache source code, handle appropriately
 APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
 ifeq ($(APACHE_SOURCE_DIR),)
@@ -48,6 +51,19 @@ APACHE_SOURCE_LIB_PATH_OPTION :=
 else
 APACHE_SOURCE_INCLUDE_PATH_OPTION := -I$(APACHE_SOURCE_DIR)/include
 APACHE_SOURCE_LIB_PATH_OPTION := -L$(APACHE_SOURCE_DIR)/lib
+endif
+
+# Find the appropriate version of 'apxs' to build with
+# (When built from source, apxs doesn't change it's name, ULINUX uses source build)
+APXS := apxs
+
+ifeq ($(ULINUX),1)
+    APACHE_SOURCE_INCLUDE_PATH_OPTION :=
+    APACHE_SOURCE_LIB_PATH_OPTION :=
+else
+    ifeq ($(shell (type apxs > /dev/null 2>&1 && echo 0) || echo 1),1)
+        APXS := apxs2
+    endif
 endif
 
 # Include files
@@ -59,8 +75,20 @@ INCLUDE_DEFINES := $(TARGET_DIR)/defines.h
 # Compiler flags
 
 OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
-MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
 PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support -I$(TARGET_DIR)
+
+# Note: MODULE_INCLUDE_FLAGS always included prior to PROVIDER_INCLUDE_FLAGS for provider and module; we depend on this
+ifeq ($(ULINUX),1)
+
+MODULE_INCLUDE_FLAGS_v22 := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(HTTPD_BASE_V22)/include -DHAVE_TIMES
+MODULE_INCLUDE_FLAGS_v24 := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(HTTPD_BASE_V24)/include -I$(APR_BASE_V24)/include/apr-1 -I$(APRUTIL_BASE_V24)/include/apr-1 -DHAVE_TIMES
+LINK_LIBRARIES_v24 := -L$(APR_BASE_V24)/lib -L$(APRUTIL_BASE_V24)/lib
+
+else
+
+MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
+
+endif
 
 PROVIDER_TEST_INCLUDE_FLAGS := -Wmissing-include-dirs -Wno-non-virtual-dtor -I$(SCXPAL_DIR)/source/code/include -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(SCXPAL_DIR)/test/ext/include -I$(OMI_ROOT)/output/include -I$(OMI_ROOT) -I$(OMI_ROOT)/common -I$(SCXPAL_DIR)/test/code/include $(PROVIDER_INCLUDE_FLAGS) -I$(PROVIDER_DIR) -I$(PROVIDER_TEST_SUPPORT_DIR)
 
@@ -83,7 +111,7 @@ STAGING_DIR := $(TARGET_DIR)/staging
 # Build targets
 
 ifeq ($(ULINUX),1)
-all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE) kit
+all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY)_v22 $(PROVIDER_LIBRARY)_v24 $(APACHE_MODULE)_v22 $(APACHE_MODULE)_v24 kit
 else
 all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 endif
@@ -155,9 +183,8 @@ endif
 #
 # Doing a 'make clean' in PAL directory will force us to rebuild.
 #
-# Note: Strictly speaking, PAL is only needed for the unit tests. However, due
-# to various makefile dependencies, we build it all the time (not as part of the
-# "test" rule).
+# Note: The PAL is only needed for the unit tests, and will only be built (if
+# needed) during the "make test" target.
 
 $(SCXPAL_INTERMEDIATE_DIR) :
 	@echo "========================= Performing Building PAL"
@@ -301,10 +328,26 @@ PROVIDER_HEADERS = \
 	$(PROVIDER_DIR)/support/utils.h \
 	$(PROVIDER_DIR)/support/temppool.h
 
+ifeq ($(ULINUX),1)
+
+$(PROVIDER_LIBRARY)_v22: $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
+	@echo "========================= Performing Building provider (w/HTTP v2.2)"
+	$(MKPATH) $(TARGET_DIR)
+	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS_v22) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
+
+$(PROVIDER_LIBRARY)_v24: $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
+	@echo "========================= Performing Building provider (w/HTTP v2.4)"
+	$(MKPATH) $(TARGET_DIR)
+	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS_v24) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES_v24) $(LINK_LIBRARIES)
+
+else
+
 $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"
 	$(MKPATH) $(TARGET_DIR)
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
+
+endif
 
 #--------------------------------------------------------------------------------
 # Apache Provider Unit Tests
@@ -354,9 +397,23 @@ $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
 	$(MKPATH) $(TARGET_DIR)/module
 	ln -s  $(APACHE_REAL_SOURCE) $(APACHE_TARGET_SOURCE)
 
+ifeq ($(ULINUX),1)
+
+$(APACHE_MODULE)_v22 : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
+	@echo "========================= Performing Building module (w/HTTP v2.2)"
+	cd $(TARGET_DIR)/module && $(HTTPD_BASE_V22)/bin/$(APXS) -c $(MODULE_INCLUDE_FLAGS_v22) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
+
+$(APACHE_MODULE)_v24 : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
+	@echo "========================= Performing Building module (w/HTTP v2.4)"
+	cd $(TARGET_DIR)/module && $(HTTPD_BASE_V24)/bin/$(APXS) -c $(MODULE_INCLUDE_FLAGS_v24) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
+
+else
+
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 	@echo "========================= Performing Building module"
-	cd $(TARGET_DIR)/module && $(APXS) -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $(APACHE_MODULE)
+	cd $(TARGET_DIR)/module && $(APXS) -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
+
+endif
 
 #--------------------------------------------------------------------------------
 # Build the distribution kit
@@ -366,7 +423,135 @@ $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 # While the "formal build" only builds ULINUX, we may build something else for DEV purposes.
 # Assume we ALWAYS build RPM, but only build DPKG if --enable-ulinux is speified in configure.
 
-kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
+ifeq ($(ULINUX),1)
+APACHE_MODULE_TARGETS := $(APACHE_MODULE)_v22 $(APACHE_MODULE)_v24
+PROVIDER_LIBRARY_TARGETS := $(PROVIDER_LIBRARY)_v22 $(PROVIDER_LIBRARY)_v24
+else
+APACHE_MODULE_TARGETS := $(APACHE_MODULE)
+PROVIDER_LIBRARY_TARGETS := $(PROVIDER_LIBRARY)
+endif
+
+kit : $(OMI_ROOT)/output $(PROVIDER_LIBRARY_TARGETS) $(APACHE_MODULE_TARGETS)
+ifeq ($(ULINUX),1)
+
+	@echo "========================= Performing Building RPM and DPKG packages"
+	$(MKPATH) $(INSTALLER_TMPDIR)
+	sudo $(RMDIR) $(STAGING_DIR)
+	$(MKPATH) $(TARGET_DIR)/apache_22
+	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
+		--BASE_DIR=$(BASE_DIR) \
+		--TARGET_DIR=$(TARGET_DIR) \
+		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
+		--STAGING_DIR=$(STAGING_DIR) \
+		--BUILD_TYPE=$(BUILD_TYPE) \
+		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
+		--PFARCH=$(PF_ARCH) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
+		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
+		--HTTP_VERSION=22 \
+		base_apache.data linux.data linux_rpm.data
+
+	# The kit has a name including .universalr., and the 'r' is only desired for OM
+	sed -e 's/\.universalr\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	sudo $(RMDIR) $(STAGING_DIR)
+	$(MKPATH) $(TARGET_DIR)/apache_22
+	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
+		--BASE_DIR=$(BASE_DIR) \
+		--TARGET_DIR=$(TARGET_DIR) \
+		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
+		--STAGING_DIR=$(STAGING_DIR) \
+		--BUILD_TYPE=$(BUILD_TYPE) \
+		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
+		--PFARCH=$(PF_ARCH) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
+		--DPKG_LOCATION=$(SCXPAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH) \
+		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
+		--HTTP_VERSION=22 \
+		base_apache.data linux.data linux_dpkg.data
+
+	# The kit has a name including .universald., and the 'd' is only desired for OM
+	sed -e 's/\.universald\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	$(MKPATH) $(INSTALLER_TMPDIR)
+	sudo $(RMDIR) $(STAGING_DIR)
+	$(MKPATH) $(TARGET_DIR)/apache_24
+	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
+		--BASE_DIR=$(BASE_DIR) \
+		--TARGET_DIR=$(TARGET_DIR) \
+		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
+		--STAGING_DIR=$(STAGING_DIR) \
+		--BUILD_TYPE=$(BUILD_TYPE) \
+		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
+		--PFARCH=$(PF_ARCH) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
+		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
+		--HTTP_VERSION=24 \
+		base_apache.data linux.data linux_rpm.data
+
+	# The kit has a name including .universalr., and the 'r' is only desired for OM
+	sed -e 's/\.universalr\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	sudo $(RMDIR) $(STAGING_DIR)
+	$(MKPATH) $(TARGET_DIR)/apache_24
+	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
+		--BASE_DIR=$(BASE_DIR) \
+		--TARGET_DIR=$(TARGET_DIR) \
+		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
+		--STAGING_DIR=$(STAGING_DIR) \
+		--BUILD_TYPE=$(BUILD_TYPE) \
+		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
+		--PFARCH=$(PF_ARCH) \
+		--PFDISTRO=$(PF_DISTRO) \
+		--PFMAJOR=$(PF_MAJOR) \
+		--PFMINOR=$(PF_MINOR) \
+		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
+		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
+		--DPKG_LOCATION=$(SCXPAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH) \
+		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
+		--HTTP_VERSION=24 \
+		base_apache.data linux.data linux_dpkg.data
+
+	# The kit has a name including .universald., and the 'd' is only desired for OM
+	sed -e 's/\.universald\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# Strip the package extension from the package filename
+	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# The MP needs architecture of i686 (for x86) and x86_64 (for x64).
+	sed -e 's/\.x86$$/\.i686/' $(TARGET_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(TARGET_DIR)/package_file.tmp
+	mv $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`.rpm
+	mv $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_filename`.deb $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`.deb
+	mv $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`.rpm
+	mv $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_filename`.deb $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`.deb
+	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+
+	# Build the tar file containing both .rpm and .deb packages
+	cd $(TARGET_DIR); tar cvf `cat $(TARGET_DIR)/package_filename`.tar apache_22/`cat $(TARGET_DIR)/package_filename`.rpm apache_22/`cat $(TARGET_DIR)/package_filename`.deb apache_24/`cat $(TARGET_DIR)/package_filename`.rpm apache_24/`cat $(TARGET_DIR)/package_filename`.deb
+
+else
+
 	@echo "========================= Performing Building RPM and DPKG packages"
 	$(MKPATH) $(INSTALLER_TMPDIR)
 	sudo $(RMDIR) $(STAGING_DIR)
@@ -385,51 +570,6 @@ kit: $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
 		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
 		base_apache.data linux.data linux_rpm.data
-
-ifeq ($(ULINUX),1)
-
-	# The kit has a name including .universalr., and the 'r' is only desired for OM
-	sed -e 's/\.universalr\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
-
-	sudo $(RMDIR) $(STAGING_DIR)
-	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
-		--BASE_DIR=$(BASE_DIR) \
-		--TARGET_DIR=$(TARGET_DIR) \
-		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
-		--STAGING_DIR=$(STAGING_DIR) \
-		--BUILD_TYPE=$(BUILD_TYPE) \
-		--BUILD_CONFIGURATION=$(BUILD_CONFIGURATION) \
-		--PFARCH=$(PF_ARCH) \
-		--PFDISTRO=$(PF_DISTRO) \
-		--PFMAJOR=$(PF_MAJOR) \
-		--PFMINOR=$(PF_MINOR) \
-		--VERSION=$(SCX_BUILDVERSION_MAJOR).$(SCX_BUILDVERSION_MINOR).$(SCX_BUILDVERSION_PATCH) \
-		--RELEASE=$(SCX_BUILDVERSION_BUILDNR) \
-		--DPKG_LOCATION=$(SCXPAL_DIR)/installer/InstallBuilder/tools/bin/dpkg-deb-$(PF_ARCH) \
-		--DATAFILE_PATH=$(BASE_DIR)/installer/datafiles \
-		base_apache.data linux.data linux_dpkg.data
-
-	# The kit has a name including .universald., and the 'd' is only desired for OM
-	sed -e 's/\.universald\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
-
-	# Strip the package extension from the package filename
-	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
-
-	# The MP needs architecture of i686 (for x86) and x86_64 (for x64).
-	sed -e 's/\.x86$$/\.i686/' $(TARGET_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`.rpm
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename`.deb $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`.deb
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
-
-	# Build the tar file containing both .rpm and .deb packages
-	cd $(TARGET_DIR); tar cvf `cat $(TARGET_DIR)/package_filename`.tar `cat $(TARGET_DIR)/package_filename`.rpm `cat $(TARGET_DIR)/package_filename`.deb
-
-else
 
 	# Strip the package extension from the package filename
 	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp

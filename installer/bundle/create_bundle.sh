@@ -21,11 +21,10 @@ set -x
 
 usage()
 {
-    echo "usage: $0 platform directory tar-file apache-package-name"
+    echo "usage: $0 platform directory apache-package-name"
     echo "  where"
-    echo "    platform is one of: linux, ulinux-r, ulinux-d, aix, hpux, sun"
+    echo "    platform is one of: Linux_REDHAT, Linux_SUSE, Linux_ULINUX"
     echo "    directory is directory path to package file"
-    echo "    tar-file is the name of the tar file that contains the following packages"
     echo "    apache-package-name is the name of the Apache installation package"
     exit 1
 }
