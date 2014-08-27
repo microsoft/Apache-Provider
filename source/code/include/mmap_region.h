@@ -36,15 +36,14 @@ typedef struct
 
     apr_uint32_t idleApacheWorkers;     // Number of workers that are currently idle (from Apache)
     apr_uint32_t busyApacheWorkers;     // Number of workers that are currently busy (from Apache)
-    clock_t apacheCpuUtilization;       // CPU utilization for the server (from Apache)
+    apr_uint32_t apacheCpuUtilization;  // CPU utilization (from Apache); total ticks consumed
     volatile time_t busyRefreshTime;    // Time of last update for idle/busy workers
 
-    clock_t cpuUtilizationPrior;        // Prior copy of apacheCpuUtilization for delta computations
-
     /* The following are from provider worker thread that are updated once/minute */
-    volatile apr_uint32_t idleWorkers;  // Number of workers that are currently idle
-    volatile apr_uint32_t busyWorkers;  // Number of workers that are currently busy
-    volatile apr_uint32_t percentCPU;   // Percentage of CPU utilization
+    apr_uint32_t idleWorkers;           // Number of workers that are currently idle
+    apr_uint32_t busyWorkers;           // Number of workers that are currently busy
+    apr_uint32_t priorCpuUtilization;   // Prior copy of apacheCpuUtilization for delta computations
+    apr_uint32_t percentCPU;            // Percentage of CPU utilization
 
     apr_size_t moduleCount;             // Number of elements of mmap_server_modules that follow
     mmap_server_modules modules[0];     // Array of Apache modules loaded into the configuraiton

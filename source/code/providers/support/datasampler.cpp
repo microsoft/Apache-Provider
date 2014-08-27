@@ -11,6 +11,7 @@
 */
 /*----------------------------------------------------------------------------*/
 
+#include <algorithm>
 #include <limits>
 
 #include <apr_atomic.h>
@@ -242,7 +243,7 @@ void DataSampler::ThreadMain()
     Apache server. This is necessary because the APR only allows for 32-bit
     atomic operations, allowing the possibility of numeric overflow.
 
-    \param      myCurrentTotal          Grant total (64-bit) for the counter
+    \param      myCurrentTotal          Grand total (64-bit) for the counter (or NULL)
     \param      myPriorTotal            Previous total (last time we ran),
                                         updated to latest total upon exit
     \param      myLatestTotal           Latest total from Apache module (atomic)
@@ -270,7 +271,10 @@ static apr_uint32_t DeltaHelper(apr_uint64_t *myCurrentTotal, apr_uint32_t *myPr
     // Now update values and return the delta
 
     *myPriorTotal = *myLatestTotal;
-    *myCurrentTotal += currentDelta;
+    if (myCurrentTotal != NULL)
+    {
+        *myCurrentTotal += currentDelta;
+    }
 
     return currentDelta;
 }
@@ -297,48 +301,39 @@ void DataSampler::PerformComputations()
         return;
     }
 
-    mmap_vhost_elements *vhosts = data.GetVHostElements();
+    // Compute the CPU time utilized for Apache server
+    //
+    // Apache made the computation like this:
+    //   ap_rprintf(r, "CPULoad: %g\n", (tu + ts + tcu + tcs) / tick / up_time * 100.);
+    //
+    // mod_cimprov.c stores (tu + ts + tcu + tcs) in apacheCpuUtilization.  We take that,
+    // massage it, and store the percentCPU in the memory map for provider to access.
 
-    // Compute the CPU time utilized and related bits of information (need mutex for this)
-    // (If we fail for some reason, log but continue with other statistics)
+    int ticks;
 
-    do {
-        apr_status_t status;
+#ifdef _SC_CLK_TCK
+    ticks = sysconf(_SC_CLK_TCK);
+#else
+    ticks = HZ;
+#endif
 
-        if (APR_SUCCESS != (status = data.LockMutex()))
-        {
-            DisplayError(status, "DataSampler::PerformComputations: skipping worker statistics due to mutex lock error");
-            break;
-        }
+    apr_uint32_t deltaTicks = DeltaHelper(NULL, &data.m_server_data->priorCpuUtilization, &data.m_server_data->apacheCpuUtilization);
+    int logicalProcs = sysconf(_SC_NPROCESSORS_ONLN);
+    int percentBusy = ((deltaTicks + (ticks/2)) * 100) / (logicalProcs * ticks * 60);
+    apr_atomic_set32(&data.m_server_data->percentCPU, std::min(percentBusy, 100));
 
-        // Grab what we need and then unlock the mutex; note that we need to copy to "provider" versions atomically
-        // since that's how providers will access them. It's better to not grab mutex in provider enumerations since
-        // that can happen potentially more often, impacting overall Apache performanace.
+    // Copy from "volatile" Apache idle/busy counters to values that are updated once/minute
 
-        apr_atomic_set32(&data.m_server_data->idleWorkers, data.m_server_data->idleApacheWorkers);
-        apr_atomic_set32(&data.m_server_data->busyWorkers, data.m_server_data->busyApacheWorkers);
-        clock_t cpuUtilization = data.m_server_data->apacheCpuUtilization;
+    apr_atomic_set32(&data.m_server_data->idleWorkers, apr_atomic_read32(&data.m_server_data->idleApacheWorkers));
+    apr_atomic_set32(&data.m_server_data->busyWorkers, apr_atomic_read32(&data.m_server_data->busyApacheWorkers));
 
-        if (APR_SUCCESS != (status = data.UnlockMutex()))
-        {
-            DisplayError(status, "DataSampler::PerformComputations: mutex unlock error in worker statistics");
-        }
-
-//      Apache made the computation like this:
-//      ap_rprintf(r, "CPULoad: %g\n",
-//                 (tu + ts + tcu + tcs) / tick / up_time * 100.);
-//
-//      mod_cimprov.c stores (tu + ts + tcu + tcs) / tick in apacheCpuUtilization;
-
-        // TODO: Not quite sure here - Kris will get back to me on how to compute this
-        apr_atomic_set32(&data.m_server_data->percentCPU, 0);
-
-        // Save the current clock value as the prior value for the next time 'round
-        data.m_server_data->cpuUtilizationPrior = cpuUtilization;
-    } while (false);
+    //
+    // Walk the virtual hosts and update the virtual host statistics
+    //
 
     // TODO: Lock the process mutex (thread mutex?  Don't think we need process mutex for virtual hosts)
 
+    mmap_vhost_elements *vhosts = data.GetVHostElements();
     for (apr_size_t i = 0; i < data.GetVHostCount(); i++)
     {
         apr_uint32_t deltaRequests, deltaBytes, delta400, delta500;

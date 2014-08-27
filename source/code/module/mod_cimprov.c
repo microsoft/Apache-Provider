@@ -1382,14 +1382,7 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
     clock_t tu, ts, tcu, tcs;
     int i, j;
 #ifdef HAVE_TIMES
-    float tick;
     int times_per_thread = getpid() != g_child_pid;
-
-#ifdef _SC_CLK_TCK
-    tick = sysconf(_SC_CLK_TCK);
-#else
-    tick = HZ;
-#endif
 #endif
 
     tu = ts = tcu = tcs = 0;
@@ -1476,29 +1469,16 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
 #endif
     }
 
-    // Because clock_t data structure can be 64-bit (on 64-bit platforms), and
-    // because the APR doesn't support 64-bit atomics, we use a mutex here ...
-
-    if (APR_SUCCESS != (status = mutex_lock(cfg, LOCKTYPE_RW)))
-    {
-        return display_error(cfg, "handle_WorkerStatistics: Error locking RW mutex", status, 1);
-    }
-
 #ifdef HAVE_TIMES
+    // ts: System time, tu: User time, tcs: System time of children, tcu: User time of children
     if (ts || tu || tcu || tcs)
     {
-        cfg->server_data->apacheCpuUtilization = (tu + ts + tcu + tcs) / tick;
+        apr_atomic_add32(&cfg->server_data->apacheCpuUtilization, tu + ts + tcu + tcs);
     }
 #endif
 
-    // These could be updated atomically, but since we needed the mutex anyway ...
-    cfg->server_data->idleApacheWorkers = ready;
-    cfg->server_data->busyApacheWorkers = busy;
-
-    if (APR_SUCCESS != (status = mutex_unlock(cfg, LOCKTYPE_RW)))
-    {
-        return display_error(cfg, "handle_WorkerStatistics: Error unlocking RW mutex", status, 1);
-    }
+    apr_atomic_set32(&cfg->server_data->idleApacheWorkers, ready);
+    apr_atomic_set32(&cfg->server_data->busyApacheWorkers, busy);
 
     return APR_SUCCESS;
 }
@@ -1512,7 +1492,6 @@ static int log_request_handler(request_rec *r)
     return DECLINED;
 }
 
-#ifdef HAVE_TIMES
 static void child_init_handler(apr_pool_t *pool, server_rec *server)
 {
     persist_cfg *cfg = ap_get_module_config(server->module_config, &cimprov_module);
@@ -1522,9 +1501,11 @@ static void child_init_handler(apr_pool_t *pool, server_rec *server)
     {
         display_error(cfg, "child_init_handler: failed to initialize child mutex", status, 1);
     }
+
+#ifdef HAVE_TIMES
     g_child_pid = getpid();
-}
 #endif
+}
 
 /*
 *    Define the hooks and the functions registered to those hooks
