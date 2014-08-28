@@ -11,14 +11,14 @@
 */
 /*----------------------------------------------------------------------------*/
 
-#include <algorithm>
-#include <limits>
-
 #include <apr_atomic.h>
 #include <apr_strings.h>
 
 #include "apachebinding.h"
 #include "datasampler.h"
+
+#include <algorithm>
+#include <limits>
 
 DataSampler::DataSampler()
     : m_tid(NULL), m_skipValidationCount(0), m_mutex(NULL), m_cond(NULL), m_fShutdown(false)
