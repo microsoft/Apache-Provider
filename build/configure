@@ -41,7 +41,23 @@ do
           echo "Cannot build for ULINUX on non-Linux platforms"
           exit 1
       fi
+      if [ "$NOULINUX" = "1" ]; then
+          echo "Conflicting qualifers: --enable-ulinux and --noenable-ulinux can't be specified together"
+          exit 1
+      fi
       ULINUX=1
+    ;;
+
+    --noenable-ulinux)
+      if [ `uname` != "Linux" ]; then
+          echo "Cannot build for ULINUX on non-Linux platforms"
+          exit 1
+      fi
+      if [ "$ULINUX" = "1" ]; then
+          echo "Conflicting qualifers: --enable-ulinux and --noenable-ulinux can't be specified together"
+          exit 1
+      fi
+      NOULINUX=1
     ;;
 
     --enable-purify-agent)
@@ -83,7 +99,8 @@ This script configures SCXOM for building. Type the following commands.
 OPTIONS:
     -h, --help                  Print this help message.
     --enable-debug              Perform a debug build.
-    --enable-ulinux             Specifies platform as ULINUX (Linux only).
+    --[no]enable-ulinux         Specifies platform as ULINUX (Linux only);
+                                ULINUX is assumed on universal build systems
     --enable-purify-agent       Allow agent to be run with purify (memory leak detection)
     --enable-purify-server      Allow server to be run with purify (memory leak detection)
     --enable-omi-tools          Build to allow use of OMI tools (omischema and omireg)
@@ -95,7 +112,16 @@ fi
 omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${enable_omi_tools} ${omi_configure_quals}"
 pal_configure_quals="${enable_debug}"
 
-
+# See if we're running on a SuSE 10 (universal) system; if so, assume ULINUX
+if [ "$NOULINUX" != "1" ]; then
+    if [ -e /etc/SuSE-release ]; then 
+        PF_MAJOR=`head -n 1 /etc/SuSE-release | sed 's/.* \([0-9][0-9]*\)[ \.].*/\1/'`
+        PF_MINOR=`(head -n 1 /etc/SuSE-release | sed 's/.* [0-9][0-9]*[\.]\([0-9][0-9]*\).*/\1/') | grep -v '[^0-9]' || echo '0'`
+        if [ "$PF_MAJOR" = "10" -a "$PF_MINOR" = "0" ]; then
+            ULINUX=1
+        fi
+    fi
+fi
 
 # Note: Most of this code came from the PAL configure file
 
@@ -208,3 +234,10 @@ chmod ug+x ${scxomi_dir}/configure ${scxomi_dir}/buildtool
 # Fix permissions in case they aren't executable - and then configure PAL
 chmod ug+x ${scxpal_dir}/build/configure
 (cd ${scxpal_dir}/build && ./configure ${pal_configure_quals})
+
+# Display some information for our own configuration
+if [ "$ULINUX" = "1" ]; then
+    echo "Configured Apache for ULINUX build"
+else
+    echo "Configured Apache for non-ULINUX build"
+fi
