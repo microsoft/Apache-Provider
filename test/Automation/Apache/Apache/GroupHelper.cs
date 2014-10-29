@@ -67,6 +67,7 @@ namespace Apache
         /// Required: string tag used in identifying the platform
         /// </summary>
         private string platformTag;
+        private string ApacheTag;
 
         /// <summary>
         /// Optional: allows configuring download of earlier agents in case of build failure
@@ -127,6 +128,7 @@ namespace Apache
                 this.agentPkgExt = ctx.Records.GetValue("AgentPkgExt");
                 this.directoryTag = ctx.Records.GetValue("DirectoryTag");
                 this.platformTag = ctx.Records.GetValue("PlatformTag");
+                this.ApacheTag = ctx.Records.GetValue("ApacheTag");
                 this.installApacheCmd = ctx.Records.GetValue("installApacheCmd");
                 this.uninstallApacheCmd = ctx.Records.GetValue("UninstallApacheCmd");
                 this.cleanupApacheCmd = ctx.Records.GetValue("CleanupApacheCmd");
@@ -345,16 +347,16 @@ namespace Apache
 
             ctx.Trc("Searching for apache in " + localapaches);
             DirectoryInfo di = new DirectoryInfo(localapaches);
-            FileInfo[] fi = di.GetFiles("*" + this.platformTag + "*");
+            FileInfo[] fi = di.GetFiles("*" + this.ApacheTag + "*");
 
             if (fi.Length == 0)
             {
-                throw new GroupAbort("Found no apache installer matching platformtag: " + this.platformTag);
+                throw new GroupAbort("Found no apache installer matching ApacheTag: " + this.ApacheTag);
             }
 
             if (fi.Length > 1)
             {
-                throw new GroupAbort("Found more than one apache installer matching platformtag: " + this.platformTag);
+                throw new GroupAbort("Found more than one apache installer matching ApacheTag: " + this.ApacheTag);
             }
 
             this.apacheHelper.FullApachePath = fi[0].FullName;
@@ -379,7 +381,35 @@ namespace Apache
 
         private void CleanupApache(IContext ctx)
         {
-            try
+            this.apacheHelper.AgentPkgExt = this.agentPkgExt;
+            this.apacheHelper.DirectoryTag = this.directoryTag;
+
+            if (ctx.Records.HasKey("apacheCachePath") == true)
+            {
+                this.apacheHelper.LocalCachePath = ctx.Records.GetValue("apacheCachePath");
+            }
+
+            string localapaches = ctx.Records.GetValue("localapaches");
+
+            ctx.Trc("Searching for apache in " + localapaches);
+            DirectoryInfo di = new DirectoryInfo(localapaches);
+            FileInfo[] fi = di.GetFiles("*" + this.ApacheTag + "*");
+
+            if (fi.Length == 0)
+            {
+                throw new GroupAbort("Found no apache installer matching ApacheTag: " + this.ApacheTag);
+            }
+
+            if (fi.Length > 1)
+            {
+                throw new GroupAbort("Found more than one apache installer matching ApacheTag: " + this.ApacheTag);
+            }
+
+            this.apacheHelper.FullApachePath = fi[0].FullName;
+
+            ctx.Trc("Uninstall apache");
+            this.apacheHelper.Uninstall();
+            /*try
             {
                 // Calling the AgentHelper Uninstall method with CleanupCMD
                 this.apacheHelper.Uninstall();
@@ -387,7 +417,7 @@ namespace Apache
             catch (Exception ex)
             {
                 ctx.Trc("Cleanup failed: " + ex.Message);
-            }
+            }*/
         }
 
 

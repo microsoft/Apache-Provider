@@ -423,45 +423,47 @@ namespace Scx.Test.Common
         /// </summary>
         public void Uninstall()
         {
-            Uninstall(this.hostName, this.uninstallApacheCmd, this.userName, this.password);
-        }
-
-        /// <summary>
-        /// Uninstall an agent from a Posix host.
-        /// This is a generic method which can be called from varmap, for example in multihost tests
-        /// </summary>
-        /// <param name="hostName">The hostNames you want to uninstall. Seperated by comma.</param>
-        /// <param name="uninstallCmd">Uninstall commands. Seperated by comma.</param>
-        /// <param name="userName">username to connect host.</param>
-        /// <param name="password">password for username.</param>
-        public void Uninstall(string hostName, string uninstallCmd, string userName, string password)
-        {
-            if (string.IsNullOrEmpty(hostName))
+            if (string.IsNullOrEmpty(this.fullApachePath) == true)
             {
-                throw new ArgumentNullException("hostName");
-            }
-            if (string.IsNullOrEmpty(uninstallCmd))
-            {
-                throw new ArgumentNullException("UninstallCmd");
+                throw new ArgumentNullException("FullApachePath not set");
             }
 
-            genericLogger.Write("Uninstalling agent: from {0}: {1} ", hostName, uninstallCmd);
-            RunPosixCmd execUninstall = new RunPosixCmd(hostName, userName, password)
+            if (string.IsNullOrEmpty(this.uninstallApacheCmd) == true)
             {
-                FileName = uninstallCmd,
-                Arguments = string.Empty
-            };
+                throw new ArgumentNullException("uninstallApacheCmd not set");
+            }
+
+            // User-specified Apache path takes precedent
+            string ApacheName;
+            ApacheName = this.ApacheFile == null ? Path.GetFileName(this.fullApachePath) : this.ApacheFile.Name;
 
             try
             {
-                execUninstall.RunCmd();
-                genericLogger.Write("Uninstall agent from '{0}' successfully.", hostName);
+                RunPosixCmd CheckApacheFile = new RunPosixCmd(this.hostName, this.userName, this.password);
+                CheckApacheFile.FileName = "/bin/ls /tmp/" + ApacheName;
+                CheckApacheFile.RunCmd();
             }
-            catch (Exception e)
+            catch (ApplicationException ae)
             {
-                this.logger(string.Format("Uninstall agent from '{0}' failed. Error message: '{1}'", hostName, e.ToString()));
+
+                PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
+                // Copy from server to Posix host
+                this.logger("Copying Apache from drop server to host"+ae.Message);
+                copyToHost.CopyTo(this.fullApachePath, "/tmp/" + ApacheName);
             }
+            
+            // Begin installation
+            RunPosixCmd execUninstall = new RunPosixCmd(this.hostName, this.userName, this.password);
+
+            // Execute installation command
+            execUninstall.FileName = string.Format(this.uninstallApacheCmd, ApacheName);
+            execUninstall.Arguments = string.Empty;
+            this.logger(string.Format("UnInstalling Apache to {0}: command: {1} ", this.hostName, execUninstall.FileName));
+            execUninstall.RunCmd();
+            this.logger("UnInstall() Uninstallation out: " + execUninstall.StdOut);
+
         }
+
 
         public void CheckApacheStatus(string hostName, string checkApacheInstalled, string checkServiceCmd, string startApacheCmd, string userName, string password)
         {
@@ -499,7 +501,19 @@ namespace Scx.Test.Common
                 }
 
                 execUninstall.FileName = checkServiceCmd;
-                execUninstall.RunCmd();
+
+                try
+                {
+                    execUninstall.RunCmd();
+                }
+                catch (ApplicationException e)
+                {
+                    string message = e.InnerException.ToString();
+                    if (!(message.Contains("httpd is stopped")))
+                    { 
+                        throw; 
+                    }                      
+                }
 
                 stdout = execUninstall.StdOut;
 
