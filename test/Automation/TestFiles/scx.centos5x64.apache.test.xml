@@ -6,19 +6,19 @@
 
   <!-- Test Variables Definition -->
   <grp cls="Apache.GroupHelper">
-    <rec key="hostname">cmt-cent5x86-02</rec>
+    <rec key="hostname"></rec>
     <rec key="omserver">osst-ws8r2-01</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
     <rec key="nonsuperuserpwd">scxuser</rec>
-    <rec key="PlatformTag">universalr.1.x86</rec>
-    <rec key="ApacheTag">universal.1.i686</rec>
+    <rec key="PlatformTag">universalr.1.x64</rec>
+    <rec key="ApacheTag">universal.1.x86_64</rec>
     <rec key="InstallCmd">sh /tmp/{0} --install</rec>
     <rec key="UninstallCmd">/opt/microsoft/scx/bin/uninstall</rec>
     <rec key="CleanupCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -rf /tmp/scx*;rm -rf /var/opt/microsoft]]></rec>
     <rec key="AgentPkgExt">deb</rec>
-    <rec key="DirectoryTag">CentOS5.0_x86</rec>
+    <rec key="DirectoryTag">CentOS5.0_x64</rec>
     <rec key="installonly">false</rec>
     <rec key="knownIssueFormat">Known Issue: WI {0}: '{1}'</rec>
     <rec key="localagents"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents\DownloadedKits]]></rec>

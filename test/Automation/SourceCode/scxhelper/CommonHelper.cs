@@ -1,4 +1,4 @@
-﻿namespace Apache
+﻿namespace Scx.Test.Apache.Provider
 {
     class CommonHelper
     {

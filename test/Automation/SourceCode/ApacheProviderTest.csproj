@@ -7,7 +7,7 @@
     <ProjectGuid>{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Apache</RootNamespace>
+    <RootNamespace>Scx.Test.Apache.Provider</RootNamespace>
     <AssemblyName>Apache</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -105,7 +105,7 @@
 xcopy /E /Y /I ".\Dependency\MCF\*" "$(TargetDir)MCF"
 xcopy /E /Y /I ".\Dependency\SshcomLib\x64\*" "$(TargetDir)x64"
 xcopy /E /Y /I ".\Dependency\SshcomLib\Interop.sshcomLib.dll" "$(TargetDir)"
-xcopy /E /Y /I ".\Apache\TestFiles\*" "$(TargetDir)TestFiles"</PostBuildEvent>
+xcopy /E /Y /I ".\ApacheProviderAutomation\TestFiles\*" "$(TargetDir)TestFiles"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>

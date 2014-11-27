@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\TFS\Apache\Automation\Apache\Apache\bin\Debug\MCF\MCF3.3-CLR4\MCF.exe</StartProgram>
-    <StartArguments>/m:scx.centos5x86.apache.test.xml /v:1 /logxml:c:/temp/test.xml /dbglvl:15 /dbgloc:63</StartArguments>
+    <StartArguments>/m:scx.centos6x64.apache.test.xml /v:1 /logxml:c:/temp/test.xml /dbglvl:15 /dbgloc:63</StartArguments>
     <StartWorkingDirectory>C:\TFS\Apache\Automation\Apache\Apache\bin\Debug\TestFiles\</StartWorkingDirectory>
   </PropertyGroup>
 </Project>

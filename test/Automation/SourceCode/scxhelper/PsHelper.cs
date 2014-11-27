@@ -6,7 +6,7 @@
 // <description>A helper class about PowerShell, to handle to initialize powershell runspace, execute powershell script, and check output and error/exception msg</description>
 //-----------------------------------------------------------------------
 
-namespace Apache
+namespace Scx.Test.Apache.Provider
 {
     using System;
     using System.Collections.Generic;

@@ -11,7 +11,7 @@ namespace Scx.Test.Common
 {
     using System;
     //using sshcomLib; // This is the Microsoft SSL library
-    using Apache;
+    using Scx.Test.Apache.Provider;
 
     /// <summary>
     /// Run a command on a Posix system via SSH connection

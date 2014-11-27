@@ -14,7 +14,7 @@ namespace Scx.Test.Common
     using System.Text;
     //using sshcomLib; // This is the Microsoft SSL library
     // using Tamir.SharpSsh;  This library is deprecated
-    using Apache;
+    using Scx.Test.Apache.Provider;
 
     /// <summary>
     /// Description for PosixCopy.

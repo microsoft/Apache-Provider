@@ -1,0 +1,59 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{B8CB00A2-23FB-4ACF-8752-BAAA55BF3162}"
+	ProjectSection(SolutionItems) = preProject
+		scx.centos5x64.apache.test.xml = scx.centos5x64.apache.test.xml
+		TestFiles\scx.centos5x86.apache.test.xml = TestFiles\scx.centos5x86.apache.test.xml
+		scx.centos6x64.apache.test.xml = scx.centos6x64.apache.test.xml
+		scx.centos6x86.apache.test.xml = scx.centos6x86.apache.test.xml
+		scx.centos7x64.apache.test.xml = scx.centos7x64.apache.test.xml
+		scx.centos7x86.apache.test.xml = scx.centos7x86.apache.test.xml
+		TestFiles\scx.ubuntu12.x64.apache.test.xml = TestFiles\scx.ubuntu12.x64.apache.test.xml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WSManCommon", "WSManCommon\WSManCommon.csproj", "{EB1D1123-7E8A-4634-8E57-C06131B791C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApacheProviderTest", "SourceCode\ApacheProviderTest.csproj", "{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://cdmvstf:8080/tfs/cdm
+		SccProjectUniqueName0 = WSManCommon\\WSManCommon.csproj
+		SccProjectName0 = WSManCommon
+		SccAuxPath0 = http://cdmvstf:8080/tfs/cdm
+		SccLocalPath0 = WSManCommon
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccProjectUniqueName1 = SourceCode\\ApacheProviderTest.csproj
+		SccProjectName1 = SourceCode
+		SccAuxPath1 = http://cdmvstf:8080/tfs/cdm
+		SccLocalPath1 = SourceCode
+		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		signed|Any CPU = signed|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB1D1123-7E8A-4634-8E57-C06131B791C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB1D1123-7E8A-4634-8E57-C06131B791C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB1D1123-7E8A-4634-8E57-C06131B791C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1D1123-7E8A-4634-8E57-C06131B791C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB1D1123-7E8A-4634-8E57-C06131B791C8}.signed|Any CPU.ActiveCfg = Release|Any CPU
+		{EB1D1123-7E8A-4634-8E57-C06131B791C8}.signed|Any CPU.Build.0 = Release|Any CPU
+		{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}.signed|Any CPU.ActiveCfg = Release|Any CPU
+		{F42FCC43-94B8-4EE4-87EC-11C785D8F3BE}.signed|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -6,7 +6,7 @@
 // <description>A helper class about Ssh, to handle SSH task. </description>
 //-----------------------------------------------------------------------
 
-namespace Apache
+namespace Scx.Test.Apache.Provider
 {
     using System;
     using System.Runtime.InteropServices;

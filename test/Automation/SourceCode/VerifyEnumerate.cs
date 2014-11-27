@@ -7,7 +7,7 @@
 // <history>3/25/2009 2:27:44 PM: Created</history>
 //-----------------------------------------------------------------------
 
-namespace Apache
+namespace Scx.Test.Apache.Provider
 {
     using System;
     using System.Collections;

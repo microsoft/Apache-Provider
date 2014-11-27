@@ -6,7 +6,7 @@
 // <description></description>
 //-----------------------------------------------------------------------
 
-namespace Apache
+namespace Scx.Test.Apache.Provider
 {
     using System;
     using System.IO;
