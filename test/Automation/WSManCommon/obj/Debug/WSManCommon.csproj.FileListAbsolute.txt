@@ -1,6 +1,0 @@
-C:\TFS\Target\Test\Debug\Scx.Test.WSMAN.Common.dll
-C:\TFS\Target\Test\Debug\Scx.Test.WSMAN.Common.pdb
-C:\TFS\Apache\Automation\Apache\WSManCommon\obj\Debug\Scx.Test.WSMAN.Common.dll
-C:\TFS\Apache\Automation\Apache\WSManCommon\obj\Debug\Scx.Test.WSMAN.Common.pdb
-C:\TFS\Apache\Automation\ApacheProviderAutomation\WSManCommon\obj\Debug\Scx.Test.WSMAN.Common.dll
-C:\TFS\Apache\Automation\ApacheProviderAutomation\WSManCommon\obj\Debug\Scx.Test.WSMAN.Common.pdb

@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\TFS\Apache\Automation\Apache\Apache\bin\Debug\MCF\MCF3.3-CLR4\MCF.exe</StartProgram>
-    <StartArguments>/m:scx.centos6x64.apache.test.xml /v:1 /logxml:c:/temp/test.xml /dbglvl:15 /dbgloc:63</StartArguments>
-    <StartWorkingDirectory>C:\TFS\Apache\Automation\Apache\Apache\bin\Debug\TestFiles\</StartWorkingDirectory>
-  </PropertyGroup>
-</Project>
