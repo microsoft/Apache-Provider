@@ -3,10 +3,44 @@
         assembly="..\Apache.dll"
         dsc="Apache Automation Test"
         owner="v-litin" contact="v-litin">
-
+  <snippet id="UniqueApacheServerInfo">
+    <rec key="ApacheServer.ConfFile">/etc/httpd/conf/httpd\.conf</rec>
+    <rec key="ApacheServer.Vendor">Apache Software Foundation</rec>
+    <rec key="ApacheServer.ProductVersion">2\.2\.3</rec>
+    <rec key="ApacheServer.ProcessName">httpd</rec>
+    <rec key="ApacheServer.Collection">/etc/httpd</rec>
+  </snippet>
+  <snippet id="LinuxInfo">
+    <rec key="Linux.Host">cmt-cent5x86-02.scx.com</rec>
+  </snippet>
+  <!-- Test Case information -->
+  <var set="1" lvl="0" vid="724411" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="Verify enumeration of Apache_HTTPDServer works for 1 Apache Server." act="true">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <rec key="p:InstanceID">%ApacheServer.ConfFile%</rec>
+    <rec key="p:Caption">^$</rec>
+    <rec key="p:Description">^$</rec>
+    <rec key="p:ElementName">^$</rec>
+    <rec key="p:ProductIdentifyingNumber">[0-9]</rec>
+    <rec key="p:ProductName">%ApacheServer.ConfFile%</rec>
+    <rec key="p:ProductVendor">%ApacheServer.Vendor%</rec>
+    <rec key="p:ProductVersion">%ApacheServer.ProductVersion%</rec>
+    <rec key="p:SystemID">%Linux.Host%</rec>
+    <rec key="p:CollectionID">%ApacheServer.Collection%</rec>
+    <rec key="p:Name">^$</rec>
+    <rec key="p:ModuleVersion">[0-9].[0-9].[0-9]-[0-9]{3} \([0-9]{8}\)</rec>
+    <rec key="p:ConfigurationFile">%ApacheServer.ConfFile%</rec>
+    <rec key="p:InstalledModules">[A-Za-z0-9]+.c</rec>
+    <rec key="p:InstalledModulesFormatted">[A-Za-z0-9]+.c</rec>
+    <rec key="p:ProcessName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:ServiceName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:OperatingStatus">OK</rec>
+    <rec key="p:OperatingStatusDetail">^$</rec>
+  </var>
   <!-- Test Variables Definition -->
   <grp cls="Scx.Test.Apache.Provider.GroupHelper">
-    <rec key="hostname">osst-cen5x86-01</rec>
+    <snipref id="LinuxInfo" />
+    <rec key="hostname">%Linux.Host%</rec>
     <rec key="omserver">osst-w12r2-01</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
@@ -42,28 +76,4 @@
     <rec key="skipagentdeploy">false</rec>
     <varref />
   </grp>
-
-  <!-- Test Case information -->
-  <var set="1" lvl="0" vid="1" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="" act="true">
-    <!--snipref id="UniqueOSInfo" /-->
-    <rec key="p:InstanceID">/etc/httpd/conf/httpd\.conf</rec>
-    <rec key="p:Caption">^$</rec>
-    <rec key="p:Description">^$</rec>
-    <rec key="p:ElementName">^$</rec>
-    <rec key="p:ProductIdentifyingNumber">1</rec>
-    <rec key="p:ProductName">/etc/httpd/conf/httpd\.conf</rec>
-    <rec key="p:ProductVendor">Apache Software Foundation</rec>
-    <rec key="p:ProductVersion">2\.2\.3</rec>
-    <rec key="p:SystemID">localhost</rec>
-    <rec key="p:CollectionID">/etc/httpd</rec>
-    <rec key="p:Name">^$</rec>
-    <rec key="p:ModuleVersion">[0-9].[0-9].[0-9]-[0-9]{3} \([0-9]{8}\)</rec>
-    <rec key="p:ConfigurationFile">/etc/httpd/conf/httpd\.conf</rec>
-    <!-->rec key="p:InstalledModules">\*</rec-->
-    <!-->rec key="p:InstalledModulesFormatted">\*</rec-->
-    <rec key="p:ProcessName">httpd</rec>
-    <rec key="p:ServiceName">httpd</rec>
-    <rec key="p:OperatingStatus">OK</rec>
-    <rec key="p:OperatingStatusDetail">^$</rec>
-  </var>
 </varmap>
