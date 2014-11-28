@@ -12,9 +12,9 @@ namespace Scx.Test.Apache.Provider
     using System.IO;
     using Infra.Frmwrk;
     using Scx.Test.Common;
-    
-    public class GroupHelper : ISetup,ICleanup 
-        /*ICleanup*/
+
+    public class GroupHelper : ISetup, ICleanup
+    /*ICleanup*/
     {
         private SshHelper sshHelper;
 
@@ -38,19 +38,19 @@ namespace Scx.Test.Apache.Provider
         /// <summary>
         /// Required: Command to install agent
         /// </summary>
-        private string installCmd;
+        private string installOmCmd;
         private string installApacheCmd;
 
         /// <summary>
         /// Required: Command to remove agent
         /// </summary>
-        private string uninstallCmd;
+        private string uninstallOmCmd;
         private string uninstallApacheCmd;
 
         /// <summary>
         /// Required: Command to clean the Client Machine:Uninstall/delete scx direcotries
         /// </summary>
-        private string cleanupCmd;
+        private string cleanupOmCmd;
         private string cleanupApacheCmd;
 
         /// <summary>
@@ -77,13 +77,12 @@ namespace Scx.Test.Apache.Provider
         /// <summary>
         /// Optional: Allows using the Agents from local path
         /// </summary>
-        private bool useLocalAgents = false;
+        private bool useAgentLocation = false;
 
         ///<summary>
         ///Optional: check Apache status command
         ///</summary>
 
-        private string checkApacheInstalled;
         private string installApachePkg;
         private string startApacheCmd;
         private string checkServiceCmd;
@@ -122,9 +121,9 @@ namespace Scx.Test.Apache.Provider
 
                 this.userName = ctx.Records.GetValue("username");
                 this.password = ctx.Records.GetValue("password");
-                this.installCmd = ctx.Records.GetValue("InstallCmd");
-                this.uninstallCmd = ctx.Records.GetValue("UninstallCmd");
-                this.cleanupCmd = ctx.Records.GetValue("CleanupCmd");
+                this.installOmCmd = ctx.Records.GetValue("InstallOMCmd");
+                this.uninstallOmCmd = ctx.Records.GetValue("UninstallOMCmd");
+                this.cleanupOmCmd = ctx.Records.GetValue("CleanupOMCmd");
                 this.agentPkgExt = ctx.Records.GetValue("AgentPkgExt");
                 this.directoryTag = ctx.Records.GetValue("DirectoryTag");
                 this.platformTag = ctx.Records.GetValue("PlatformTag");
@@ -132,44 +131,43 @@ namespace Scx.Test.Apache.Provider
                 this.installApacheCmd = ctx.Records.GetValue("installApacheCmd");
                 this.uninstallApacheCmd = ctx.Records.GetValue("UninstallApacheCmd");
                 this.cleanupApacheCmd = ctx.Records.GetValue("CleanupApacheCmd");
-                this.checkApacheInstalled = ctx.Records.GetValue("checkApacheInstalled");
                 this.installApachePkg = ctx.Records.GetValue("installApachePkg");
                 this.startApacheCmd = ctx.Records.GetValue("startApacheCmd");
                 this.checkServiceCmd = ctx.Records.GetValue("checkServiceCmd");
                 bool.TryParse(ctx.Records.GetValue("latestOnly"), out this.latestOnly);
 
                 // determine whether to search for older agents if agent is not present in the newest folder on the drop server
-                bool.TryParse(ctx.Records.GetValue("uselocalagents"), out this.useLocalAgents);
+                bool.TryParse(ctx.Records.GetValue("useagentlocation"), out this.useAgentLocation);
 
                 // Must specify use local agent or latest agent to test.
-                if (!this.latestOnly && !this.useLocalAgents)
+                if (!this.latestOnly && !this.useAgentLocation)
                 {
-                    throw new GroupAbort("Error! Both latestOnly and useLocalAgents value is 'false'. Please specify use local agents or latest agents to test!");
+                    throw new GroupAbort("Error! Both latestOnly and useAgentLocal value is 'false'. Please specify use local agents or latest agents to test!");
                 }
 
                 if (string.IsNullOrEmpty(this.userName) ||
-                    string.IsNullOrEmpty(this.password) || string.IsNullOrEmpty(this.installCmd) ||
+                    string.IsNullOrEmpty(this.password) || string.IsNullOrEmpty(this.installOmCmd) ||
                     string.IsNullOrEmpty(this.agentPkgExt) || string.IsNullOrEmpty(this.directoryTag) ||
-                    string.IsNullOrEmpty(this.platformTag) || string.IsNullOrEmpty(this.uninstallCmd) || string.IsNullOrEmpty(this.cleanupCmd))
+                    string.IsNullOrEmpty(this.platformTag) || string.IsNullOrEmpty(this.uninstallOmCmd) || string.IsNullOrEmpty(this.cleanupOmCmd))
                 {
-                    throw new GroupAbort("Error, check UserName, Password, InstallCmd, UninstallCmd,CleanupCmd, AgentPkgExt, DirectoryTag, platformTag");
+                    throw new GroupAbort("Error, check UserName, Password, installOmCmd, uninstallOmCmd,cleanupOmCmd, AgentPkgExt, DirectoryTag, platformTag");
                 }
 
-                this.agentHelper = new AgentHelper(ctx.Trc, this.hostName, this.userName, this.password, this.installCmd, this.cleanupCmd);
+                this.agentHelper = new AgentHelper(ctx.Trc, this.hostName, this.userName, this.password, this.installOmCmd, this.cleanupOmCmd);
 
                 this.agentHelper.VerifySSH();
 
                 this.agentHelper.SynchDateTime();
 
                 this.apacheHelper = new ApacheHelper(ctx.Trc, this.hostName, this.userName, this.password, this.installApacheCmd, this.cleanupApacheCmd);
-                
+
                 this.apacheHelper.VerifySSH();
 
                 this.CheckApacheInstalled();
 
-                this.CleanupAgent(ctx);
-
                 this.CleanupApache(ctx);
+
+                this.CleanupAgent(ctx);
 
                 this.InstallAgent(ctx);
 
@@ -180,17 +178,17 @@ namespace Scx.Test.Apache.Provider
             {
                 throw new GroupAbort(ex.Message);
             }
-        } 
+        }
 
         /// <summary>
         /// Remove agent from Posix host
         /// </summary>
         /// <param name="ctx">MCF group context</param>
-        
-       
+
+
         public void Cleanup(IContext ctx)
         {
-            
+
             try
             {
                 // Check for Warnings in SCX logs
@@ -216,17 +214,17 @@ namespace Scx.Test.Apache.Provider
 
                 if (installOnly == false)
                 {
-                    this.UninstallAgent(ctx);
                     this.UninstallApacheAgent(ctx);
+                    this.UninstallAgent(ctx);
                 }
             }
             catch (Exception ex)
             {
                 throw new GroupAbort(ex.Message);
             }
-             
+
         }
-       
+
         #endregion
 
         #region Private method
@@ -286,12 +284,12 @@ namespace Scx.Test.Apache.Provider
                 this.agentHelper.LocalCachePath = ctx.Records.GetValue("AgentCachePath");
             }
 
-            if (this.useLocalAgents)
+            if (this.useAgentLocation)
             {
-                string localAgents = ctx.Records.GetValue("localagents");
+                string Agentlocation = ctx.Records.GetValue("OMAgentLocation");
 
-                ctx.Trc("Searching for agent in " + localAgents);
-                DirectoryInfo di = new DirectoryInfo(localAgents);
+                ctx.Trc("Searching for agent in " + Agentlocation);
+                DirectoryInfo di = new DirectoryInfo(Agentlocation);
                 FileInfo[] fi = di.GetFiles("*" + this.platformTag + "*");
 
                 if (fi.Length == 0)
@@ -322,15 +320,15 @@ namespace Scx.Test.Apache.Provider
             this.agentHelper.Install();
         }
 
-      
+
         private void InstallApache(IContext ctx)
         {
             this.InstallApacheHelper(ctx, this.hostName);
         }
-      
+
         private void CheckApacheInstalled()
         {
-            this.apacheHelper.CheckApacheStatus(this.hostName, this.checkApacheInstalled, this.checkServiceCmd, this.startApacheCmd, this.userName, this.password);
+            this.apacheHelper.CheckApacheStatus(this.hostName, this.checkServiceCmd, this.startApacheCmd, this.userName, this.password);
         }
 
         private void InstallApacheHelper(IContext ctx, string targetHostName)
@@ -343,10 +341,10 @@ namespace Scx.Test.Apache.Provider
                 this.apacheHelper.LocalCachePath = ctx.Records.GetValue("apacheCachePath");
             }
 
-            string localapaches = ctx.Records.GetValue("localapaches");
+            string apachelocation = ctx.Records.GetValue("ApachesLocation");
 
-            ctx.Trc("Searching for apache in " + localapaches);
-            DirectoryInfo di = new DirectoryInfo(localapaches);
+            ctx.Trc("Searching for apache in " + apachelocation);
+            DirectoryInfo di = new DirectoryInfo(apachelocation);
             FileInfo[] fi = di.GetFiles("*" + this.ApacheTag + "*");
 
             if (fi.Length == 0)
@@ -363,14 +361,14 @@ namespace Scx.Test.Apache.Provider
 
             ctx.Trc("Installing apache");
             this.apacheHelper.Install();
-         }     
-         
+        }
+
 
         private void CleanupAgent(IContext ctx)
         {
             try
             {
-                // Calling the AgentHelper Uninstall method with CleanupCMD
+                // Calling the AgentHelper Uninstall method with Cleanup OM CMD
                 this.agentHelper.Uninstall();
             }
             catch (Exception ex)
@@ -389,10 +387,10 @@ namespace Scx.Test.Apache.Provider
                 this.apacheHelper.LocalCachePath = ctx.Records.GetValue("apacheCachePath");
             }
 
-            string localapaches = ctx.Records.GetValue("localapaches");
+            string apachelocation = ctx.Records.GetValue("ApachesLocation");
 
-            ctx.Trc("Searching for apache in " + localapaches);
-            DirectoryInfo di = new DirectoryInfo(localapaches);
+            ctx.Trc("Searching for apache in " + apachelocation);
+            DirectoryInfo di = new DirectoryInfo(apachelocation);
             FileInfo[] fi = di.GetFiles("*" + this.ApacheTag + "*");
 
             if (fi.Length == 0)
@@ -411,7 +409,7 @@ namespace Scx.Test.Apache.Provider
             this.apacheHelper.Uninstall();
             /*try
             {
-                // Calling the AgentHelper Uninstall method with CleanupCMD
+                // Calling the AgentHelper Uninstall method with Cleanup OM CMD
                 this.apacheHelper.Uninstall();
             }
             catch (Exception ex)
@@ -437,7 +435,7 @@ namespace Scx.Test.Apache.Provider
 
             // C:\\DSC_TFS\\DSC\\Test\\DSC\\DSC\\bin\\Debug\\x64\\sshcom.dll
             return sshcomPath;
-        } 
+        }
         #endregion
     }
 }

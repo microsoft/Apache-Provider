@@ -123,7 +123,6 @@ namespace Scx.Test.Common
         private string installApachePkg;
         private string startApacheCmd;
         private string checkServiceCmd;
-        private string checkApacheInstalled;
 
         #endregion Private Fields
 
@@ -186,7 +185,6 @@ namespace Scx.Test.Common
            string installApachePkg,
            string startApacheCmd,
            string checkServiceCmd,
-           string checkApacheInstalled,
            string dropLocation)
             : this(logger, hostName, userName, password, installApacheCmd, uninstallApacheCmd)
         {
@@ -198,10 +196,9 @@ namespace Scx.Test.Common
             this.installApachePkg = installApachePkg;
             this.startApacheCmd = startApacheCmd;
             this.checkServiceCmd = checkServiceCmd;
-            this.checkApacheInstalled = checkApacheInstalled;
             this.dropLocation = dropLocation;
         }
-   
+
         #endregion Constructors
 
         #region Properties
@@ -325,7 +322,7 @@ namespace Scx.Test.Common
 
             // Begin installation
             RunPosixCmd execInstall = new RunPosixCmd(this.hostName, this.userName, this.password);
-            
+
             // Execute installation command
             execInstall.FileName = string.Format(this.installApacheCmd, ApacheName);
             execInstall.Arguments = string.Empty;
@@ -343,7 +340,7 @@ namespace Scx.Test.Common
             execInstall.Arguments = "-f /tmp/" + ApacheName;
             execInstall.RunCmd();
         }
-        
+
         public void FindApache(bool useTodaysApache, string date, int minutes, bool latestOnly)
         {
             DateTime ApacheDate = new DateTime(0);
@@ -448,10 +445,10 @@ namespace Scx.Test.Common
 
                 PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
                 // Copy from server to Posix host
-                this.logger("Copying Apache from drop server to host"+ae.Message);
+                this.logger("Copying Apache from drop server to host" + ae.Message);
                 copyToHost.CopyTo(this.fullApachePath, "/tmp/" + ApacheName);
             }
-            
+
             // Begin installation
             RunPosixCmd execUninstall = new RunPosixCmd(this.hostName, this.userName, this.password);
 
@@ -465,15 +462,16 @@ namespace Scx.Test.Common
         }
 
 
-        public void CheckApacheStatus(string hostName, string checkApacheInstalled, string checkServiceCmd, string startApacheCmd, string userName, string password)
+        public void CheckApacheStatus(string hostName, string checkServiceCmd, string startApacheCmd, string userName, string password)
         {
             if (string.IsNullOrEmpty(hostName))
             {
                 throw new ArgumentNullException("hostName");
             }
-            if(string.IsNullOrEmpty(checkApacheInstalled))
+
+            if (string.IsNullOrEmpty(checkServiceCmd))
             {
-                throw new ArgumentNullException("checkApacheInstalled");
+                throw new ArgumentNullException("checkServiceCmd");
             }
 
             if (string.IsNullOrEmpty(startApacheCmd))
@@ -481,63 +479,54 @@ namespace Scx.Test.Common
                 throw new ArgumentNullException("startApacheCmd");
             }
 
+            string stdout = string.Empty;
+
             genericLogger.Write("Check Apache status:", hostName, checkServiceCmd);
-            RunPosixCmd execUninstall = new RunPosixCmd(hostName, userName, password)
+            RunPosixCmd execCheckService = new RunPosixCmd(hostName, userName, password)
             {
-                FileName = checkApacheInstalled,
+                FileName = checkServiceCmd,
                 Arguments = string.Empty
+            };
+
+            RunPosixCmd execStartService = new RunPosixCmd(hostName, userName, password)
+            {
+                FileName = startApacheCmd
             };
 
             try
             {
-                execUninstall.RunCmd();
-                //genericLogger.Write("Uninstall agent from '{0}' successfully.", hostName);
-
-                string stdout = execUninstall.StdOut;
-
-                if (string.IsNullOrEmpty(stdout))
+                execCheckService.RunCmd();
+                stdout = execCheckService.StdOut;
+            }
+            catch (ApplicationException e)
+            {
+                if (e.InnerException.Message.Contains("stopped"))
                 {
-                    throw new Exception("The apache didn't install on client");
-                }
-
-                execUninstall.FileName = checkServiceCmd;
-
-                try
-                {
-                    execUninstall.RunCmd();
-                }
-                catch (ApplicationException e)
-                {
-                    string message = e.InnerException.ToString();
-                    if (!(message.Contains("httpd is stopped")))
-                    { 
-                        throw; 
-                    }                      
-                }
-
-                stdout = execUninstall.StdOut;
-
-                if(!(stdout.Contains("running")))
-                {
-                    execUninstall.FileName = startApacheCmd;
-                    execUninstall.RunCmd();
+                    execStartService.RunCmd();
                     System.Threading.Thread.Sleep(1000);
-
-                    execUninstall.FileName = checkServiceCmd;
-                    execUninstall.RunCmd();
-
-                    stdout = execUninstall.StdOut;
-                    if (!(stdout.Contains("running")))
-                    {
-                        throw new Exception("Start apache instance failed.");
-                    }
                 }
 
             }
             catch (Exception e)
             {
-                throw e;
+                throw new Exception(string.Format("Running check apache status failed on client: {0}", checkServiceCmd));
             }
+            finally
+            {
+                execCheckService.RunCmd();
+
+                stdout = execCheckService.StdOut;
+                if (string.IsNullOrEmpty(stdout))
+                {
+                    throw new Exception(string.Format("The stdout is null for command {0}", checkServiceCmd));
+                }
+                if (!(stdout.Contains("running")))
+                {
+                    throw new Exception("Start apache instance failed.");
+                }
+
+            }
+
         }
 
         #endregion Public Methods
@@ -577,7 +566,7 @@ namespace Scx.Test.Common
                 return false;
             }
         }
-        
+
         #endregion Private Methods
         #endregion Methods
     }

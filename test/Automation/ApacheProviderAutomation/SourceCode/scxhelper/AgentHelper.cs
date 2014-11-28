@@ -104,12 +104,12 @@ namespace Scx.Test.Common
         /// <summary>
         /// Installation command for agent on Posix host
         /// </summary>
-        private string installCmd;
+        private string installOmCmd;
 
         /// <summary>
         /// Uninstallation command for agent on Posix host
         /// </summary>
-        private string uninstallCmd;
+        private string uninstallOmCmd;
 
         /// <summary>
         /// Path and name of decompression utility
@@ -137,9 +137,9 @@ namespace Scx.Test.Common
         /// <param name="hostName">Name of Posix host</param>
         /// <param name="userName">Valid user on Posix host</param>
         /// <param name="password">Password for user</param>
-        /// <param name="installCmd">Command to install agent package on Posix host</param>
-        /// <param name="uninstallCmd">Command to uninstall agent package from Posix host</param>
-        public AgentHelper(ScxLogDelegate logger, string hostName, string userName, string password, string installCmd, string uninstallCmd)
+        /// <param name="installOmCmd">Command to install agent package on Posix host</param>
+        /// <param name="uninstallOmCmd">Command to uninstall agent package from Posix host</param>
+        public AgentHelper(ScxLogDelegate logger, string hostName, string userName, string password, string installOmCmd, string uninstallOmCmd)
         {
             if (string.IsNullOrEmpty(hostName))
             {
@@ -156,14 +156,14 @@ namespace Scx.Test.Common
                 throw new ArgumentNullException("password not set");
             }
 
-            if (string.IsNullOrEmpty(installCmd))
+            if (string.IsNullOrEmpty(installOmCmd))
             {
-                throw new ArgumentNullException("installCmd not set");
+                throw new ArgumentNullException("installOmCmd not set");
             }
 
-            if (string.IsNullOrEmpty(uninstallCmd))
+            if (string.IsNullOrEmpty(uninstallOmCmd))
             {
-                throw new ArgumentNullException("uninstallCmd not set");
+                throw new ArgumentNullException("uninstallOmCmd not set");
             }
 
             this.specificAgentDate = new DateTime(0);
@@ -171,8 +171,8 @@ namespace Scx.Test.Common
             this.hostName = hostName;
             this.userName = userName;
             this.password = password;
-            this.installCmd = installCmd;
-            this.uninstallCmd = uninstallCmd;
+            this.installOmCmd = installOmCmd;
+            this.uninstallOmCmd = uninstallOmCmd;
         }
 
         /// <summary>
@@ -187,18 +187,18 @@ namespace Scx.Test.Common
         /// <param name="hostName">Name of Posix host</param>
         /// <param name="userName">Valid user on Posix host</param>
         /// <param name="password">Password for user</param>
-        /// <param name="installCmd">Command to install agent package on Posix host</param>
-        /// <param name="uninstallCmd">Command to uninstall agent package from Posix host</param>
+        /// <param name="installOmCmd">Command to install agent package on Posix host</param>
+        /// <param name="uninstallOmCmd">Command to uninstall agent package from Posix host</param>
         /// <param name="dropLocation">Drop location which is part of the agent file name</param>
         public AgentHelper
             (ScxLogDelegate logger,
             string hostName,
             string userName,
             string password,
-            string installCmd,
-            string uninstallCmd,
+            string installOmCmd,
+            string uninstallOmCmd,
             string dropLocation)
-            : this(logger, hostName, userName, password, installCmd, uninstallCmd)
+            : this(logger, hostName, userName, password, installOmCmd, uninstallOmCmd)
         {
             if (string.IsNullOrEmpty(dropLocation))
             {
@@ -264,21 +264,21 @@ namespace Scx.Test.Common
         }
 
         /// <summary>
-        /// Gets or sets the InstallCmd property to install the SCX agent.  Use formatted specification with {0} for file name
+        /// Gets or sets the InstallOmCmd property to install the SCX agent.  Use formatted specification with {0} for file name
         /// </summary>
-        public string InstallCmd
+        public string InstallOmCmd
         {
-            get { return this.installCmd; }
-            set { this.installCmd = value; }
+            get { return this.installOmCmd; }
+            set { this.installOmCmd = value; }
         }
 
         /// <summary>
-        /// Gets or sets the UninstallCmd property to uninstall the SCX agent
+        /// Gets or sets the UninstallOmCmd property to uninstall the SCX agent
         /// </summary>
-        public string UninstallCmd
+        public string UninstallOmCmd
         {
-            get { return this.uninstallCmd; }
-            set { this.uninstallCmd = value; }
+            get { return this.uninstallOmCmd; }
+            set { this.uninstallOmCmd = value; }
         }
 
         /// <summary>
@@ -445,9 +445,9 @@ namespace Scx.Test.Common
                 throw new ArgumentNullException("FullAgentPath not set");
             }
 
-            if (string.IsNullOrEmpty(this.installCmd) == true)
+            if (string.IsNullOrEmpty(this.installOmCmd) == true)
             {
-                throw new ArgumentNullException("InstallCmd not set");
+                throw new ArgumentNullException("InstallOmCmd not set");
             }
 
             // User-specified agent path takes precedent
@@ -480,7 +480,7 @@ namespace Scx.Test.Common
             RunPosixCmd execInstall = new RunPosixCmd(this.hostName, this.userName, this.password);
 
             // Execute installation command
-            execInstall.FileName = string.Format(this.installCmd, agentName);
+            execInstall.FileName = string.Format(this.installOmCmd, agentName);
             execInstall.Arguments = string.Empty;
             this.logger(string.Format("Installing agent to {0}: command: {1} ", this.hostName, execInstall.FileName));
             execInstall.RunCmd();
@@ -502,7 +502,7 @@ namespace Scx.Test.Common
         /// </summary>
         public void Uninstall()
         {
-            Uninstall(this.hostName, this.uninstallCmd, this.userName, this.password);
+            Uninstall(this.hostName, this.uninstallOmCmd, this.userName, this.password);
         }
 
         /// <summary>
@@ -510,24 +510,24 @@ namespace Scx.Test.Common
         /// This is a generic method which can be called from varmap, for example in multihost tests
         /// </summary>
         /// <param name="hostName">The hostNames you want to uninstall. Seperated by comma.</param>
-        /// <param name="uninstallCmd">Uninstall commands. Seperated by comma.</param>
+        /// <param name="uninstallOmCmd">Uninstall commands. Seperated by comma.</param>
         /// <param name="userName">username to connect host.</param>
         /// <param name="password">password for username.</param>
-        public void Uninstall(string hostName, string uninstallCmd, string userName, string password)
+        public void Uninstall(string hostName, string uninstallOmCmd, string userName, string password)
         {
             if (string.IsNullOrEmpty(hostName))
             {
                 throw new ArgumentNullException("hostName");
             }
-            if (string.IsNullOrEmpty(uninstallCmd))
+            if (string.IsNullOrEmpty(uninstallOmCmd))
             {
-                throw new ArgumentNullException("UninstallCmd");
+                throw new ArgumentNullException("UninstallOmCmd");
             }
 
-            genericLogger.Write("Uninstalling agent: from {0}: {1} ", hostName, uninstallCmd);
+            genericLogger.Write("Uninstalling agent: from {0}: {1} ", hostName, uninstallOmCmd);
             RunPosixCmd execUninstall = new RunPosixCmd(hostName, userName, password)
             {
-                FileName = uninstallCmd,
+                FileName = uninstallOmCmd,
                 Arguments = string.Empty
             };
 
@@ -547,19 +547,19 @@ namespace Scx.Test.Common
         /// This is a generic method which can be called from varmap, for example in multihost tests 
         /// </summary>
         /// <param name="hostNames">The hostnames you want to uninstalled. Can be different platforms.</param>
-        /// <param name="uninstallCmds">Uninstall command for each matched platform.</param>
+        /// <param name="uninstallOmCmds">Uninstall command for each matched platform.</param>
         /// <param name="userName">username to connect host.</param>
         /// <param name="password">password for username.</param>
-        public void Uninstall(string[] hostNames, string[] uninstallCmds, string userName, string password)
+        public void Uninstall(string[] hostNames, string[] uninstallOmCmds, string userName, string password)
         {
-            if (hostNames==null || uninstallCmds == null)
+            if (hostNames==null || uninstallOmCmds == null)
             {
-                throw new ArgumentNullException("hostNames or UninstallCmds");
+                throw new ArgumentNullException("hostNames or UninstallOmCmds");
             }
 
             for (int index = 0; index < hostNames.Length; index++)
             {
-                Uninstall(hostNames[index], uninstallCmds[index], userName, password);
+                Uninstall(hostNames[index], uninstallOmCmds[index], userName, password);
             }
         }
 
@@ -569,15 +569,15 @@ namespace Scx.Test.Common
         /// <param name="hostname">Client to talk to.</param>
         /// <param name="user">Super user.</param>
         /// <param name="pwd">Password for the super user.</param>
-        /// <param name="instCmd">Command that can be used to install the agent. (Optional) Can be left empty if not required.</param>
-        /// <param name="uninstcmd">Command that can be used to uninstall the agent. (Optional) Can be left empty if not required.</param>
-        public void Init(string hostname, string user, string pwd, string instCmd = "", string uninstcmd = "")
+        /// <param name="instOmCmd">Command that can be used to install the agent. (Optional) Can be left empty if not required.</param>
+        /// <param name="uninstOmCmd">Command that can be used to uninstall the agent. (Optional) Can be left empty if not required.</param>
+        public void Init(string hostname, string user, string pwd, string instOmCmd = "", string uninstOmCmd = "")
         {
             hostName = hostname;
             userName = user;
             password = pwd;
-            installCmd = instCmd;
-            uninstallCmd = uninstcmd;
+            installOmCmd = instOmCmd;
+            uninstallOmCmd = uninstOmCmd;
         }
 
         /// <summary>
@@ -701,8 +701,8 @@ namespace Scx.Test.Common
         /// <param name="versionIndicator">Indicates the version to install. Allowed values = "old"|"new".</param>
         /// <param name="platformTag">Platform tag which is part of the agent file name.</param>
         /// <param name="path">Full path of the agent. If this is specified, the other two parameters will be ignored.</param>
-        /// <param name="installcommand">Install command for current host.</param>
-        public void InstallAgent(string hostName, string versionIndicator, string platformTag, string path, string userName, string password, string installcommand = "")
+        /// <param name="installomcommand">Install command for current host.</param>
+        public void InstallAgent(string hostName, string versionIndicator, string platformTag, string path, string userName, string password, string installomcommand = "")
         {
             if ((string.IsNullOrEmpty(versionIndicator) || string.IsNullOrEmpty(platformTag)) &&
                  string.IsNullOrEmpty(path))
@@ -710,9 +710,9 @@ namespace Scx.Test.Common
                 throw new ApplicationException(@"Either the combination of versionIndicator and platformTag should be provided " +
                     "or the complete agent path should be provided");
             }
-            if (string.IsNullOrEmpty(installcommand))
+            if (string.IsNullOrEmpty(installomcommand))
             {
-                installcommand = this.installCmd;
+                installomcommand = this.installOmCmd;
             }
 
             FileInfo agent = !string.IsNullOrEmpty(path) ? new FileInfo(path) : GetAgentLocation(versionIndicator, platformTag);
@@ -727,7 +727,7 @@ namespace Scx.Test.Common
 
             RunPosixCmd execInstall = new RunPosixCmd(hostName, userName, password)
             {
-                FileName = string.Format(installcommand, agent.Name),
+                FileName = string.Format(installomcommand, agent.Name),
                 Arguments = string.Empty
             };
             genericLogger.Write("Installing agent to '{0}': command: '{1}' ", hostName, execInstall.FileName);
@@ -776,7 +776,7 @@ namespace Scx.Test.Common
             {
                 throw new ApplicationException("platfromTags not set or host count don't match platformTags.");
             }
-            string[] installcommands = this.installCmd.Split(',');
+            string[] installcommands = this.installOmCmd.Split(',');
 
             for (int index = 0; index < hostNames.Length; index++)
             {

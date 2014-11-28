@@ -5,37 +5,37 @@
         owner="v-litin" contact="v-litin">
 
   <!-- Test Variables Definition -->
-  <grp cls="Apache.GroupHelper">
-    <rec key="hostname">cmt-cent5x86-02</rec>
-    <rec key="omserver">osst-ws8r2-01</rec>
+  <grp cls="Scx.Test.Apache.Provider.GroupHelper">
+    <rec key="hostname">osst-cen5x86-01</rec>
+    <rec key="omserver">osst-w12r2-01</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
     <rec key="nonsuperuserpwd">scxuser</rec>
     <rec key="PlatformTag">universalr.1.x86</rec>
     <rec key="ApacheTag">universal.1.i686</rec>
-    <rec key="InstallCmd">sh /tmp/{0} --install</rec>
-    <rec key="UninstallCmd">/opt/microsoft/scx/bin/uninstall</rec>
-    <rec key="CleanupCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -rf /tmp/scx*;rm -rf /var/opt/microsoft]]></rec>
+    <rec key="InstallOMCmd">sh /tmp/{0} --install</rec>
+    <rec key="UninstallOMCmd">/opt/microsoft/scx/bin/uninstall</rec>
+    <rec key="CleanupOMCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -rf /tmp/scx*;rm -rf /var/opt/microsoft]]></rec>
     <rec key="AgentPkgExt">rpm</rec>
     <rec key="DirectoryTag">CentOS5.0_x86</rec>
     <rec key="installonly">false</rec>
     <rec key="knownIssueFormat">Known Issue: WI {0}: '{1}'</rec>
-    <rec key="localagents"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents\DownloadedKits]]></rec>
+    <rec key="OMAgentLocation"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents]]></rec>
     <!--cimprov-->
-    <rec key="localapaches"><![CDATA[C:\Apache\cimprov]]></rec>
+    <rec key="ApachesLocation"><![CDATA[C:\Apache\cimprov]]></rec>
     <rec key="installApacheCmd">sh /tmp/{0} --install</rec>
     <rec key="UninstallApacheCmd">sh /tmp/{0} --purge</rec>
-    <rec key="CleanupApacheCmd"><![CDATA[sh /tmp/{0} --purge;rm -rf /tmp/apache*;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -rf /var/opt/microsoft;]]></rec>
+    <rec key="CleanupApacheCmd"><![CDATA[sh /tmp/{0} --purge;rm -rf /etc/opt/microsoft/apache*;rm -rf /opt/microsoft/apache*;rm -rf /var/opt/microsoft/apache*;]]></rec>
     <!--check apache status-->
     <rec key="installApachePkg">yum install httpd</rec>
-    <rec key="startApacheCmd">/etc/init.d/httpd start</rec>
-    <rec key="checkServiceCmd">/etc/init.d/httpd status</rec>
-    <rec key="checkApacheInstalled">rpm -qa |grep httpd</rec>
+    <rec key="startApacheCmd">service httpd start</rec>
+    <rec key="checkServiceCmd">service httpd status</rec>
+    <!--<rec key="checkApacheInstalled">rpm -qa |grep httpd</rec>-->
 
-    <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'localagents' -->
-    <rec key="uselocalagents">true</rec>
-    <rec key="useLocalapaches">true</rec>
+    <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'OMAgentLocation' -->
+    <rec key="useagentlocation">true</rec>
+    <rec key="useapacheLocation">true</rec>
     <!-- Use only the latest agent: if an agent is not available in the latest build folder, exit with an error -->
     <rec key="latestonly">true</rec>
     <!-- Skip agent deployment: run WSMAN tests without attempting to install a new agent on the client machine, and don't uninstall the agent when testing is done-->
@@ -44,7 +44,7 @@
   </grp>
 
   <!-- Test Case information -->
-  <var set="1" lvl="0" vid="1" cid="Apache_HTTPDServer" cls="Apache.VerifyEnumerate" dsc="" act="true">
+  <var set="1" lvl="0" vid="1" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="" act="true">
     <!--snipref id="UniqueOSInfo" /-->
     <rec key="p:InstanceID">/etc/httpd/conf/httpd\.conf</rec>
     <rec key="p:Caption">^$</rec>
@@ -54,10 +54,10 @@
     <rec key="p:ProductName">/etc/httpd/conf/httpd\.conf</rec>
     <rec key="p:ProductVendor">Apache Software Foundation</rec>
     <rec key="p:ProductVersion">2\.2\.3</rec>
-    <rec key="p:SystemID">www\.example\.com</rec>
+    <rec key="p:SystemID">localhost</rec>
     <rec key="p:CollectionID">/etc/httpd</rec>
     <rec key="p:Name">^$</rec>
-    <rec key="p:ModuleVersion">1\.0\.0-177 \(20140919\)</rec>
+    <rec key="p:ModuleVersion">[0-9].[0-9].[0-9]-[0-9]{3} \([0-9]{8}\)</rec>
     <rec key="p:ConfigurationFile">/etc/httpd/conf/httpd\.conf</rec>
     <!-->rec key="p:InstalledModules">\*</rec-->
     <!-->rec key="p:InstalledModulesFormatted">\*</rec-->
