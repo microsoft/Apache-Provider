@@ -159,20 +159,19 @@ namespace Scx.Test.Apache.Provider
 
                 this.agentHelper.SynchDateTime();
 
-                this.apacheHelper = new ApacheHelper(ctx.Trc, this.hostName, this.userName, this.password, this.installApacheCmd, this.cleanupApacheCmd);
+                this.apacheHelper = new ApacheHelper(ctx.Trc, this.hostName, this.userName, this.password);
 
-                this.apacheHelper.VerifySSH();
+                this.apacheHelper.CheckApacheServiceStatus(this.checkServiceCmd);
 
-                this.CheckApacheInstalled();
+                this.SetApacheAgentPath(ctx);
 
-                this.CleanupApache(ctx);
+                this.apacheHelper.UninstallApacheAgent(this.uninstallApacheCmd);
 
                 this.CleanupAgent(ctx);
 
                 this.InstallAgent(ctx);
 
-                this.InstallApache(ctx);
-
+                this.apacheHelper.InstallApacheAgent(this.installApacheCmd);
             }
             catch (Exception ex)
             {
@@ -214,7 +213,8 @@ namespace Scx.Test.Apache.Provider
 
                 if (installOnly == false)
                 {
-                    this.UninstallApacheAgent(ctx);
+                    this.apacheHelper.UninstallApacheAgent(this.uninstallApacheCmd);
+                    this.apacheHelper.Cleanup();
                     this.UninstallAgent(ctx);
                 }
             }
@@ -226,8 +226,7 @@ namespace Scx.Test.Apache.Provider
         }
 
         #endregion
-
-        #region Private method
+        #region private method
         /// <summary>
         /// install the agent to the host
         /// </summary>
@@ -235,38 +234,6 @@ namespace Scx.Test.Apache.Provider
         private void InstallAgent(IContext ctx)
         {
             this.InstallAgentHelper(ctx, this.hostName);
-        }
-
-        /// <summary>
-        /// Uninstall the agent
-        /// </summary>
-        /// <param name="ctx">Current MCF Context</param>
-        private void UninstallAgent(IContext ctx)
-        {
-            try
-            {
-                this.agentHelper.Uninstall();
-            }
-            catch (Exception ex)
-            {
-                ctx.Trc("Uninstall failed: " + ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Uninstall the agent
-        /// </summary>
-        /// <param name="ctx">Current MCF Context</param>
-        private void UninstallApacheAgent(IContext ctx)
-        {
-            try
-            {
-                this.apacheHelper.Uninstall();
-            }
-            catch (Exception ex)
-            {
-                ctx.Trc("Uninstall failed: " + ex.Message);
-            }
         }
 
         /// <summary>
@@ -284,12 +251,24 @@ namespace Scx.Test.Apache.Provider
                 this.agentHelper.LocalCachePath = ctx.Records.GetValue("AgentCachePath");
             }
 
+            // Optional decompression
+            if (ctx.Records.HasKey("Decompression"))
+            {
+                this.agentHelper.DecompressUtil = ctx.Records.GetValue("Decompression");
+                this.agentHelper.CompressionExt = ctx.Records.GetValue("CompressionExt");
+                if (string.IsNullOrEmpty(this.agentHelper.DecompressUtil) ||
+                    string.IsNullOrEmpty(this.agentHelper.CompressionExt))
+                {
+                    throw new GroupAbort("Check values for Decompression and CompressionExt records");
+                }
+            }
+
             if (this.useAgentLocation)
             {
-                string Agentlocation = ctx.Records.GetValue("OMAgentLocation");
+                string localAgents = ctx.Records.GetValue("OMAgentLocation");
 
-                ctx.Trc("Searching for agent in " + Agentlocation);
-                DirectoryInfo di = new DirectoryInfo(Agentlocation);
+                ctx.Trc("Searching for agent in " + localAgents);
+                DirectoryInfo di = new DirectoryInfo(localAgents);
                 FileInfo[] fi = di.GetFiles("*" + this.platformTag + "*");
 
                 if (fi.Length == 0)
@@ -320,27 +299,24 @@ namespace Scx.Test.Apache.Provider
             this.agentHelper.Install();
         }
 
-
-        private void InstallApache(IContext ctx)
-        {
-            this.InstallApacheHelper(ctx, this.hostName);
-        }
-
-        private void CheckApacheInstalled()
-        {
-            this.apacheHelper.CheckApacheStatus(this.hostName, this.checkServiceCmd, this.startApacheCmd, this.userName, this.password);
-        }
-
-        private void InstallApacheHelper(IContext ctx, string targetHostName)
-        {
-            this.apacheHelper.AgentPkgExt = this.agentPkgExt;
-            this.apacheHelper.DirectoryTag = this.directoryTag;
-
-            if (ctx.Records.HasKey("apacheCachePath") == true)
+        /// <summary>
+        /// Uninstall the agent
+        /// </summary>
+        /// <param name="ctx">Current MCF Context</param>
+        private void UninstallAgent(IContext ctx)
+        { 
+            try
             {
-                this.apacheHelper.LocalCachePath = ctx.Records.GetValue("apacheCachePath");
+                this.agentHelper.Uninstall();
             }
+            catch (Exception ex)
+            {
+                ctx.Trc("Uninstall failed: " + ex.Message);
+            }
+        }
 
+        private void SetApacheAgentPath(IContext ctx)
+        {
             string apachelocation = ctx.Records.GetValue("ApachesLocation");
 
             ctx.Trc("Searching for apache in " + apachelocation);
@@ -358,9 +334,6 @@ namespace Scx.Test.Apache.Provider
             }
 
             this.apacheHelper.FullApachePath = fi[0].FullName;
-
-            ctx.Trc("Installing apache");
-            this.apacheHelper.Install();
         }
 
 
@@ -376,48 +349,6 @@ namespace Scx.Test.Apache.Provider
                 ctx.Trc("Cleanup failed: " + ex.Message);
             }
         }
-
-        private void CleanupApache(IContext ctx)
-        {
-            this.apacheHelper.AgentPkgExt = this.agentPkgExt;
-            this.apacheHelper.DirectoryTag = this.directoryTag;
-
-            if (ctx.Records.HasKey("apacheCachePath") == true)
-            {
-                this.apacheHelper.LocalCachePath = ctx.Records.GetValue("apacheCachePath");
-            }
-
-            string apachelocation = ctx.Records.GetValue("ApachesLocation");
-
-            ctx.Trc("Searching for apache in " + apachelocation);
-            DirectoryInfo di = new DirectoryInfo(apachelocation);
-            FileInfo[] fi = di.GetFiles("*" + this.ApacheTag + "*");
-
-            if (fi.Length == 0)
-            {
-                throw new GroupAbort("Found no apache installer matching ApacheTag: " + this.ApacheTag);
-            }
-
-            if (fi.Length > 1)
-            {
-                throw new GroupAbort("Found more than one apache installer matching ApacheTag: " + this.ApacheTag);
-            }
-
-            this.apacheHelper.FullApachePath = fi[0].FullName;
-
-            ctx.Trc("Uninstall apache");
-            this.apacheHelper.Uninstall();
-            /*try
-            {
-                // Calling the AgentHelper Uninstall method with Cleanup OM CMD
-                this.apacheHelper.Uninstall();
-            }
-            catch (Exception ex)
-            {
-                ctx.Trc("Cleanup failed: " + ex.Message);
-            }*/
-        }
-
 
         private string GetSshcomPath()
         {

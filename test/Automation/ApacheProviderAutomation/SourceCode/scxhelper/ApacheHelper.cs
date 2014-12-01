@@ -34,51 +34,11 @@ namespace Scx.Test.Common
         /// Generic logger. This is the ConsoleLogger by default.
         /// </summary>
         private ILogger genericLogger = new ConsoleLogger();
-
-        /// <summary>
-        /// Path to a local cache directory
-        /// </summary>
-        private string localCachePath = ".";
-
-        /// <summary>
-        /// UNC path to agent directory 
-        /// </summary>
-        private string dropLocation;
-
-        /// <summary>
-        /// Path to the SCX log on the remote client.
-        /// </summary>
-        private const string scxLogPath = "/var/opt/microsoft/scx/log/scx.log";
-
-        /// <summary>
-        /// Path to the SCX CIMD log on the remote client
-        /// </summary>
-        private const string scxcimLogPath = "/var/opt/microsoft/scx/log/scxcimd.log";
-
+                
         /// <summary>
         /// Full path to the agent package file.
         /// </summary>
-        private string fullApachePath;
-
-        /// <summary>
-        /// Agent FileInfo structure, populated from RecurseToFile()
-        /// </summary>
-        private FileInfo ApacheFile;
-
-        /// <summary>
-        /// Agent package extension
-        /// </summary>
-        private string agentPkgExt;
-
-        /// <summary>
-        /// Specific agent date to wait for
-        /// </summary>
-        private DateTime specificApacheDate;
-
-        /// <summary>
-        /// Text contained within directory structure denoting agent architecture
-        /// </summary>
-        private string directoryTag;
+        private string fullApacheAgentPath;
 
         /// <summary>
         /// Posix host name
@@ -96,33 +56,18 @@ namespace Scx.Test.Common
         private string password;
 
         /// <summary>
-        /// Installation command for agent on Posix host
+        /// The name of apache agent.
         /// </summary>
-        private string installApacheCmd;
-
-        /// <summary>
-        /// Uninstallation command for agent on Posix host
-        /// </summary>
-        private string uninstallApacheCmd;
-
-        /// <summary>
-        /// Path and name of decompression utility
-        /// </summary>
-        private string decompressUtil;
-
-        /// <summary>
-        /// Extension for compressed file
-        /// </summary>
-        private string compressionExt;
+        private string apacheAgentName;
 
         /// <summary>
         /// Log Delegate to allow writing using a log mechanism provided by the user.
         /// </summary>
         private ScxLogDelegate logger = ScxMethods.ScxNullLogDelegate;
 
-        private string installApachePkg;
-        private string startApacheCmd;
-        private string checkServiceCmd;
+        //private string installApachePkg;
+        //private string startApacheCmd;
+        //private string checkServiceCmd;
 
         #endregion Private Fields
 
@@ -135,9 +80,7 @@ namespace Scx.Test.Common
         /// <param name="hostName">Name of Posix host</param>
         /// <param name="userName">Valid user on Posix host</param>
         /// <param name="password">Password for user</param>
-        /// <param name="installApacheCmd">Command to install agent package on Posix host</param>
-        /// <param name="uninstallApacheCmd">Command to uninstall agent package from Posix host</param>
-        public ApacheHelper(ScxLogDelegate logger, string hostName, string userName, string password, string installApacheCmd, string uninstallApacheCmd)
+        public ApacheHelper(ScxLogDelegate logger, string hostName, string userName, string password)
         {
             if (string.IsNullOrEmpty(hostName))
             {
@@ -154,50 +97,13 @@ namespace Scx.Test.Common
                 throw new ArgumentNullException("password not set");
             }
 
-            if (string.IsNullOrEmpty(installApacheCmd))
-            {
-                throw new ArgumentNullException("installApacheCmd not set");
-            }
-
-            if (string.IsNullOrEmpty(uninstallApacheCmd))
-            {
-                throw new ArgumentNullException("uninstallApacheCmd not set");
-            }
-
-            this.specificApacheDate = new DateTime(0);
             this.logger = logger;
             this.hostName = hostName;
             this.userName = userName;
             this.password = password;
-            this.installApacheCmd = installApacheCmd;
-            this.uninstallApacheCmd = uninstallApacheCmd;
         }
 
         public ApacheHelper() { }
-
-        public ApacheHelper
-           (ScxLogDelegate logger,
-           string hostName,
-           string userName,
-           string password,
-           string installApacheCmd,
-           string uninstallApacheCmd,
-           string installApachePkg,
-           string startApacheCmd,
-           string checkServiceCmd,
-           string dropLocation)
-            : this(logger, hostName, userName, password, installApacheCmd, uninstallApacheCmd)
-        {
-            if (string.IsNullOrEmpty(dropLocation))
-            {
-                throw new ArgumentNullException("dropLocation");
-            }
-
-            this.installApachePkg = installApachePkg;
-            this.startApacheCmd = startApacheCmd;
-            this.checkServiceCmd = checkServiceCmd;
-            this.dropLocation = dropLocation;
-        }
 
         #endregion Constructors
 
@@ -207,86 +113,24 @@ namespace Scx.Test.Common
         /// Bad name is due to conflict with previous logger class. Changing that might break other code. TODO: Fix this later.
         /// </summary>
         public ILogger GenericLogger { set { genericLogger = value; } }
-
-        /// <summary>
-        /// Gets or sets the LocalCachePath property, path to local directory for current agent files
-        /// </summary>
-        public string LocalCachePath
-        {
-            get { return this.localCachePath; }
-            set { this.localCachePath = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the DropLocation property 
-        /// </summary>
-        public string DropLocation
-        {
-            get { return this.dropLocation; }
-            set { this.dropLocation = value; }
-        }
-
+        
         /// <summary>
         /// Gets or sets the FullApachePath property
         /// </summary>
         public string FullApachePath
         {
-            get { return this.fullApachePath; }
-            set { this.fullApachePath = value; }
-        }
+            get { return this.fullApacheAgentPath; }
+            set 
+            { 
+                this.fullApacheAgentPath = value;
+                // User-specified Apache path takes precedent
+                apacheAgentName = Path.GetFileName(this.fullApacheAgentPath);
 
-        /// <summary>
-        /// Gets or sets the AgentPkgExt property for the package file extension
-        /// </summary>
-        public string AgentPkgExt
-        {
-            get { return this.agentPkgExt; }
-            set { this.agentPkgExt = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the DirectoryTag property to match within directory name
-        /// </summary>
-        public string DirectoryTag
-        {
-            get { return this.directoryTag; }
-            set { this.directoryTag = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the installApacheCmd property to install the SCX agent.  Use formatted specification with {0} for file name
-        /// </summary>
-        public string InstallApacheCmd
-        {
-            get { return this.installApacheCmd; }
-            set { this.installApacheCmd = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the UninstallApacheCmd property to uninstall the SCX agent
-        /// </summary>
-        public string UninstallApacheCmd
-        {
-            get { return this.uninstallApacheCmd; }
-            set { this.uninstallApacheCmd = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets path, binary, and options for decompression utility. Use formatted specification with {0} for file name
-        /// </summary>
-        public string DecompressUtil
-        {
-            get { return this.decompressUtil; }
-            set { this.decompressUtil = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets file extension used by compression utility, .Z, .gz, etc.
-        /// </summary>
-        public string CompressionExt
-        {
-            get { return this.compressionExt; }
-            set { this.compressionExt = value; }
+                PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
+                // Copy from server to Posix host
+                this.logger("Copying Apache from drop server to host");
+                copyToHost.CopyTo(this.fullApacheAgentPath, "/tmp/" + apacheAgentName);
+            }
         }
 
         #endregion Properties
@@ -296,278 +140,147 @@ namespace Scx.Test.Common
         #region Public Methods
 
         /// <summary>
+        /// Run special cmd.
+        /// </summary>
+        /// <remarks>WaitForNewAgent is optional.  If it is not run, then FullApachePath must be set.</remarks>
+        public RunPosixCmd RunCmd(string cmd)
+        {
+            // Begin cmd
+            RunPosixCmd execCmd = new RunPosixCmd(this.hostName, this.userName, this.password);
+
+            // Execute command
+            execCmd.FileName = cmd;
+            execCmd.Arguments = string.Empty;
+            this.logger(string.Format("Run Command {0} on host {1} ", execCmd.FileName , this.hostName));
+            execCmd.RunCmd();
+            this.logger(string.Format("Command {0} out: {1}",execCmd.FileName , execCmd.StdOut));
+            return execCmd;
+        }
+
+        /// <summary>
         /// Install an agent on Posix host. Set AgentArchitecture and DirectoryTag properties.
         /// </summary>
         /// <remarks>WaitForNewAgent is optional.  If it is not run, then FullApachePath must be set.</remarks>
-        public void Install()
+        public void InstallApacheAgent(string installCmd)
         {
-            if (string.IsNullOrEmpty(this.fullApachePath) == true)
+            if (string.IsNullOrEmpty(this.fullApacheAgentPath) == true)
             {
                 throw new ArgumentNullException("FullApachePath not set");
             }
 
-            if (string.IsNullOrEmpty(this.installApacheCmd) == true)
-            {
-                throw new ArgumentNullException("installApacheCmd not set");
-            }
-
-            // User-specified Apache path takes precedent
-            string ApacheName;
-            ApacheName = this.ApacheFile == null ? Path.GetFileName(this.fullApachePath) : this.ApacheFile.Name;
-
-            PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
-            // Copy from server to Posix host
-            this.logger("Copying Apache from drop server to host");
-            copyToHost.CopyTo(this.fullApachePath, "/tmp/" + ApacheName);
-
-            // Begin installation
-            RunPosixCmd execInstall = new RunPosixCmd(this.hostName, this.userName, this.password);
-
-            // Execute installation command
-            execInstall.FileName = string.Format(this.installApacheCmd, ApacheName);
-            execInstall.Arguments = string.Empty;
-            this.logger(string.Format("Installing Apache to {0}: command: {1} ", this.hostName, execInstall.FileName));
-            execInstall.RunCmd();
-            this.logger("Install() installation out: " + execInstall.StdOut);
-
-            // record installation in SCX CIMD log
-            string serverHostName = Dns.GetHostEntry(Dns.GetHostName()).HostName;
-            execInstall.RunCmd(string.Format("echo \"{0} INFO ApacheHelper: Apache {1} installed by {2} from {3}\" >> {4}", DateTime.Now.ToString(), ApacheName, serverHostName, this.fullApachePath, scxcimLogPath));
-
-            // Delete temporary file
-            this.logger("Removing files in /tmp");
-            execInstall.FileName = "/bin/rm";
-            execInstall.Arguments = "-f /tmp/" + ApacheName;
-            execInstall.RunCmd();
-        }
-
-        public void FindApache(bool useTodaysApache, string date, int minutes, bool latestOnly)
-        {
-            DateTime ApacheDate = new DateTime(0);
-            string pathToApache = string.Empty;
-
-            if (useTodaysApache == true)
-            {
-                ApacheDate = DateTime.Today;
-            }
-            else
-            {
-                // If an absolute Apache date has been specified, initialize optional ApacheDate
-                if (string.IsNullOrEmpty(date) == false)
-                {
-                    ApacheDate = DateTime.Parse(date, new System.Globalization.CultureInfo("en"));
-                }
-                else if (this.specificApacheDate.Ticks != 0)
-                {
-                    ApacheDate = this.specificApacheDate;
-                }
-            }
-
-            if (string.IsNullOrEmpty(this.AgentPkgExt))
-            {
-                throw new ArgumentNullException("ApachePkgExt");
-            }
-
-            if (string.IsNullOrEmpty(this.directoryTag))
-            {
-                throw new ArgumentNullException("DirectoryTag");
-            }
-
-            // Try to find Apache
-            this.logger("FindApache: dropLocation=" + this.dropLocation + ", ApachePkgExt=" + this.AgentPkgExt + ", directoryTag=" + this.directoryTag);
-            while ((this.RecurseToFile(out pathToApache, this.dropLocation, this.AgentPkgExt, this.directoryTag) == false) && (minutes > 0))
-            {
-                minutes--;
-                this.logger(string.Format("Apache not found.  Waiting for 1 minute; {0} attempts remaining", minutes));
-                System.Threading.Thread.Sleep(minutes * 60000);
-            }
-
-            this.logger("FindApache: pathToApache=" + pathToApache);
-            if (string.IsNullOrEmpty(pathToApache) == false)
-            {
-                this.fullApachePath = pathToApache;
-            }
-            else
-            {
-                throw new Exception("Apache not found on drop server");
-            }
-        }
-
-        public void VerifySSH()
-        {
-            this.logger("Verifying if client respond to SSH login");
-            RunPosixCmd echoTest = new RunPosixCmd(this.hostName, this.userName, this.password);
-
             try
             {
-                echoTest.RunCmd("echo test", 3);
-
-                if (echoTest.ExitCode != 0)
-                {
-                    throw new Exception(echoTest.ExitCode.ToString());
-                }
+                this.RunCmd(string.Format(installCmd, apacheAgentName));
             }
             catch (Exception e)
-            {
-                throw new Exception(string.Format("VerifySSH(): Could not SSH to remote host: '{0}' ExitCode: {1}", hostName, e.Message));
+            {                
+                throw new Exception("Install apache CimProv agent failed: " + e.Message);
             }
-
-            this.logger(string.Format("Ssh test against {0} succeeded", hostName));
-        }
+            
+        }       
 
         /// <summary>
         /// Uninstall an agent from a Posix host
         /// </summary>
-        public void Uninstall()
+        public void UninstallApacheAgent(string uninstallCmd)
         {
-            if (string.IsNullOrEmpty(this.fullApachePath) == true)
-            {
-                throw new ArgumentNullException("FullApachePath not set");
-            }
-
-            if (string.IsNullOrEmpty(this.uninstallApacheCmd) == true)
-            {
-                throw new ArgumentNullException("uninstallApacheCmd not set");
-            }
-
-            // User-specified Apache path takes precedent
-            string ApacheName;
-            ApacheName = this.ApacheFile == null ? Path.GetFileName(this.fullApachePath) : this.ApacheFile.Name;
-
             try
             {
-                RunPosixCmd CheckApacheFile = new RunPosixCmd(this.hostName, this.userName, this.password);
-                CheckApacheFile.FileName = "/bin/ls /tmp/" + ApacheName;
-                CheckApacheFile.RunCmd();
-            }
-            catch (ApplicationException ae)
-            {
-
-                PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
-                // Copy from server to Posix host
-                this.logger("Copying Apache from drop server to host" + ae.Message);
-                copyToHost.CopyTo(this.fullApachePath, "/tmp/" + ApacheName);
-            }
-
-            // Begin installation
-            RunPosixCmd execUninstall = new RunPosixCmd(this.hostName, this.userName, this.password);
-
-            // Execute installation command
-            execUninstall.FileName = string.Format(this.uninstallApacheCmd, ApacheName);
-            execUninstall.Arguments = string.Empty;
-            this.logger(string.Format("UnInstalling Apache to {0}: command: {1} ", this.hostName, execUninstall.FileName));
-            execUninstall.RunCmd();
-            this.logger("UnInstall() Uninstallation out: " + execUninstall.StdOut);
-
-        }
-
-
-        public void CheckApacheStatus(string hostName, string checkServiceCmd, string startApacheCmd, string userName, string password)
-        {
-            if (string.IsNullOrEmpty(hostName))
-            {
-                throw new ArgumentNullException("hostName");
-            }
-
-            if (string.IsNullOrEmpty(checkServiceCmd))
-            {
-                throw new ArgumentNullException("checkServiceCmd");
-            }
-
-            if (string.IsNullOrEmpty(startApacheCmd))
-            {
-                throw new ArgumentNullException("startApacheCmd");
-            }
-
-            string stdout = string.Empty;
-
-            genericLogger.Write("Check Apache status:", hostName, checkServiceCmd);
-            RunPosixCmd execCheckService = new RunPosixCmd(hostName, userName, password)
-            {
-                FileName = checkServiceCmd,
-                Arguments = string.Empty
-            };
-
-            RunPosixCmd execStartService = new RunPosixCmd(hostName, userName, password)
-            {
-                FileName = startApacheCmd
-            };
-
-            try
-            {
-                execCheckService.RunCmd();
-                stdout = execCheckService.StdOut;
-            }
-            catch (ApplicationException e)
-            {
-                if (e.InnerException.Message.Contains("stopped"))
-                {
-                    execStartService.RunCmd();
-                    System.Threading.Thread.Sleep(1000);
-                }
-
+                this.RunCmd(string.Format(uninstallCmd , apacheAgentName));
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("Running check apache status failed on client: {0}", checkServiceCmd));
-            }
-            finally
-            {
-                execCheckService.RunCmd();
-
-                stdout = execCheckService.StdOut;
-                if (string.IsNullOrEmpty(stdout))
-                {
-                    throw new Exception(string.Format("The stdout is null for command {0}", checkServiceCmd));
-                }
-                if (!(stdout.Contains("running")))
-                {
-                    throw new Exception("Start apache instance failed.");
-                }
-
+                throw new Exception("Uninstall apache CimProv agent failed: " + e.Message);
             }
 
         }
 
-        #endregion Public Methods
-
-        #region Private Methods
-        private bool RecurseToFile(out string fullPath, string rootPath, string fileExt, string directoryArchTag)
+        /// <summary>
+        /// Check apache server status
+        /// return values:
+        /// true: running
+        /// false: not running
+        /// </summary>
+        public bool CheckApacheServiceStatus(string checkApacheServiceStatus)
         {
-            DirectoryInfo di;
-            fullPath = string.Empty;
-
             try
             {
-                di = new DirectoryInfo(rootPath);
+                RunPosixCmd returnValue = this.RunCmd(checkApacheServiceStatus);
+                if (returnValue.StdOut.ToLower().Contains("running"))
+                {
+                    return true;
+                }
             }
-            catch
+            catch (Exception e)
             {
-                genericLogger.Write("RecurseToFile: Could not get directory listing of root path!: " + rootPath);
-                return false;
+                throw new Exception("Check apache status failed: " + e.Message);
             }
+            return false;
+        }
 
+        /// <summary>
+        /// Start apache server
+        /// </summary>
+        public void StartApacheServiceStatus(string startApacheService)
+        {
             try
             {
-                //Get the latest folder and try to locate the Apache.
-                genericLogger.Write("Attempting to find the new Apache...");
-                DirectoryInfo diNew = new DirectoryInfo(rootPath).
-                    GetDirectories(string.Format("{0}*", directoryArchTag)).First().
-                    GetDirectories().OrderByDescending(d => d.CreationTimeUtc).First();
-
-                // Split the platform. E.g. directoryTag: "AIX5.3_ppc", it will return "AIX".
-                string platform = Regex.Split(directoryArchTag, "[1-9]", RegexOptions.IgnoreCase)[0];
-                fullPath = diNew.GetDirectories(string.Format("*{0}*", platform))[0].GetFiles(string.Format("*{0}", fileExt))[0].FullName;
-                return true;
+                this.RunCmd(startApacheService);
             }
-            catch
+            catch (Exception e)
             {
-                genericLogger.Write("Apache not found!");
-                return false;
+                throw new Exception("Check apache status failed: " + e.Message);
             }
         }
 
-        #endregion Private Methods
+        /// <summary>
+        /// Stop apache server
+        /// </summary>
+        public void StopApacheServiceStatus(string stopApacheService)
+        {
+            try
+            {
+                this.RunCmd(stopApacheService);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Check apache status failed: " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// restart apache server
+        /// </summary>
+        public void RestartApacheServiceStatus(string restartApacheService)
+        {
+            try
+            {
+                this.RunCmd(restartApacheService);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Check apache status failed: " + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Cleanup the temp files
+        /// </summary>
+        public void Cleanup()
+        {
+            // Delete temporary file
+            this.logger("Removing files in /tmp");
+            // Begin cmd
+            RunPosixCmd execCmd = new RunPosixCmd(this.hostName, this.userName, this.password);
+
+            // Execute command
+            execCmd.FileName = "/bin/rm";
+            execCmd.Arguments = "-f /tmp/" + apacheAgentName;
+            execCmd.RunCmd();
+        }
+
+        #endregion Public Methods      
+
         #endregion Methods
     }
 }
