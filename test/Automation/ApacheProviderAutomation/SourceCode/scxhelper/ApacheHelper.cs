@@ -103,6 +103,42 @@ namespace Scx.Test.Common
             this.password = password;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the ApacheHelper class.
+        /// </summary>
+        /// <param name="logger">Log delegate method (takes single string as argument)</param>
+        /// <param name="hostName">Name of Posix host</param>
+        /// <param name="userName">Valid user on Posix host</param>
+        /// <param name="password">Password for user</param>
+        public ApacheHelper(ScxLogDelegate logger, string hostName, string userName, string password, string apcheAgentFullPath, bool needCopyFile = false)
+        {
+            if (string.IsNullOrEmpty(hostName))
+            {
+                throw new ArgumentNullException("hostName not set");
+            }
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                throw new ArgumentNullException("userName not set");
+            }
+
+            if (string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentNullException("password not set");
+            }
+
+            if (string.IsNullOrEmpty(apcheAgentFullPath))
+            {
+                throw new ArgumentNullException("apcheAgentFullPath not set");
+            }
+
+            this.logger = logger;
+            this.hostName = hostName;
+            this.userName = userName;
+            this.password = password;
+            this.SetApacheAgentFullPath(apcheAgentFullPath, needCopyFile);
+        }
+
         public ApacheHelper() { }
 
         #endregion Constructors
@@ -120,17 +156,6 @@ namespace Scx.Test.Common
         public string FullApachePath
         {
             get { return this.fullApacheAgentPath; }
-            set 
-            { 
-                this.fullApacheAgentPath = value;
-                // User-specified Apache path takes precedent
-                apacheAgentName = Path.GetFileName(this.fullApacheAgentPath);
-
-                PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
-                // Copy from server to Posix host
-                this.logger("Copying Apache from drop server to host");
-                copyToHost.CopyTo(this.fullApacheAgentPath, "/tmp/" + apacheAgentName);
-            }
         }
 
         #endregion Properties
@@ -140,17 +165,36 @@ namespace Scx.Test.Common
         #region Public Methods
 
         /// <summary>
+        /// Set the apacheFullPath.
+        /// </summary>
+        /// <remarks>WaitForNewAgent is optional.  If it is not run, then FullApachePath must be set.</remarks>
+        public void SetApacheAgentFullPath(string apcheAgentFullPath, bool needCopyFile = false)
+        {
+            this.fullApacheAgentPath = apcheAgentFullPath;
+            // User-specified Apache path takes precedent
+            apacheAgentName = Path.GetFileName(this.fullApacheAgentPath);
+
+            if (needCopyFile)
+            {
+                PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
+                // Copy from server to Posix host
+                this.logger("Copying Apache from drop server to host");
+                copyToHost.CopyTo(this.fullApacheAgentPath, "/tmp/" + apacheAgentName);
+            }
+        }
+
+        /// <summary>
         /// Run special cmd.
         /// </summary>
         /// <remarks>WaitForNewAgent is optional.  If it is not run, then FullApachePath must be set.</remarks>
-        public RunPosixCmd RunCmd(string cmd)
+        public RunPosixCmd RunCmd(string cmd, string arguments = "")
         {
             // Begin cmd
             RunPosixCmd execCmd = new RunPosixCmd(this.hostName, this.userName, this.password);
 
             // Execute command
             execCmd.FileName = cmd;
-            execCmd.Arguments = string.Empty;
+            execCmd.Arguments = arguments;
             this.logger(string.Format("Run Command {0} on host {1} ", execCmd.FileName , this.hostName));
             execCmd.RunCmd();
             this.logger(string.Format("Command {0} out: {1}",execCmd.FileName , execCmd.StdOut));

@@ -333,7 +333,7 @@ namespace Scx.Test.Apache.Provider
                 throw new GroupAbort("Found more than one apache installer matching ApacheTag: " + this.ApacheTag);
             }
 
-            this.apacheHelper.FullApachePath = fi[0].FullName;
+            this.apacheHelper.SetApacheAgentFullPath(fi[0].FullName, true);
         }
 
 
