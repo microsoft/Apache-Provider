@@ -22,13 +22,13 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 %Files
 #if HTTP_VERSION == 22
 /opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v22;   755; root; root
-/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v22; 755; root; root
+/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v22; 755; root; root
 #elseif HTTP_VERSION == 24
 /opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v24;   755; root; root
-/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v24; 755; root; root
+/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v24; 755; root; root
 #else
 /opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}};       755; root; root
-/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}; 755; root; root
+/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}; 755; root; root
 #endif
 
 /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf;                installer/conf/mod_cimprov.conf;                                  644; root; root; conffile
@@ -37,6 +37,7 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 /etc/opt/microsoft/omi/conf/omiregister/root-apache/ApacheHttpdProvider.reg; installer/conf/omi/ApacheHttpdProvider.reg;                  755; root; root
 
 %Links
+/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; /opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; 644; root; root
 
 %Directories
 /etc;                                                   755; root; root; sysdir
@@ -208,10 +209,24 @@ WriteInstallInfo() {
 }
 WriteInstallInfo
 
+# Create linkage to libapr-1.so.0 if needed (from a source install)
+if [ -e /usr/local/apache2/bin/httpd ]; then
+    TARGET_LOCATION=`ldd /usr/local/apache2/bin/httpd | grep libapr-1.so | awk -e '{print $3}'`
+
+    ln -s $TARGET_LOCATION /opt/microsoft/apache-cimprov/lib/libapr-1.so.0
+fi
+
 #include ConfigureApacheConf
 ConfigureApacheConf_File
 
 %Postuninstall_10
+# Clean up libapr-1.so.0 linkage
+rm -f /opt/microsoft/apache-cimprov/lib/libapr-1.so*
+rmdir /opt/microsoft/apache-cimprov/lib 2> /dev/null
+rmdir /opt/microsoft/apache-cimprov 2> /dev/null
+rmdir /opt/microsoft 2> /dev/null
+rmdir /opt 2> /dev/null
+
 # Clean up installinfo.txt file (registered as "conf" file to pass rpmcheck)
 rm -f /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt*
 rmdir /etc/opt/microsoft/apache-cimprov/conf 2> /dev/null
