@@ -211,7 +211,7 @@ WriteInstallInfo
 
 # Create linkage to libapr-1.so.0 if needed (from a source install)
 if [ -e /usr/local/apache2/bin/httpd ]; then
-    TARGET_LOCATION=`ldd /usr/local/apache2/bin/httpd | grep libapr-1.so | awk -e '{print $3}'`
+    TARGET_LOCATION=`ldd /usr/local/apache2/bin/httpd | grep libapr-1.so | awk '{print $3}'`
 
     ln -s $TARGET_LOCATION /opt/microsoft/apache-cimprov/lib/libapr-1.so.0
 fi
