@@ -88,7 +88,10 @@
     <Compile Include="scxhelper\ScxStatistics.cs" />
     <Compile Include="scxhelper\ScxTypes.cs" />
     <Compile Include="scxhelper\SshHelper.cs" />
+    <Compile Include="VerifyCimProv\VerifyCimProvHelper.cs" />
+    <Compile Include="VerifyCimProv\VerifyCimProv.cs" />
     <Compile Include="VerifyEnumerate.cs" />
+    <Compile Include="VerifyVirtualHost.cs" />
   </ItemGroup>
   <ItemGroup>
     <Fakes Include="Fakes\Interop.sshcomLib.fakes" />

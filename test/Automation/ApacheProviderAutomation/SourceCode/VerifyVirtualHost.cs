@@ -1,11 +1,11 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="VerifyEnumerate.cs" company="Microsoft">
+// <copyright file="VerifyVirtualHost.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
-// <author>a-brmill</author>
+// <author>v-litin</author>
 // <description></description>
-// <history>3/25/2009 2:27:44 PM: Created</history>
-//-----------------------------------------------------------------------
+// <history>12/01/2014 3:50:44 PM: Created</history>
+//--  
 
 namespace Scx.Test.Apache.Provider
 {
@@ -18,15 +18,7 @@ namespace Scx.Test.Apache.Provider
     using System.Xml;
     using Infra.Frmwrk;
     using Scx.Test.Common;
-
-    /// <summary>
-    /// <para>The VerifyEnumerate test verifies the basic information for an
-    /// enumeration query.  The fields are verified against a regular
-    /// expression from the MCF variation records.</para>
-    /// <para>Specify the class to query in the Custom ID (cid) field
-    /// of the variation.</para>
-    /// </summary>
-    public class VerifyEnumerate : ISetup, IRun, IVerify, ICleanup
+    class VerifyVirtualHost : ISetup, IRun, IVerify, ICleanup
     {
         #region Private Fields
 
@@ -125,7 +117,7 @@ namespace Scx.Test.Apache.Provider
         /// <summary>
         /// Initializes a new instance of the VerifyEnumerate class.
         /// </summary>
-        public VerifyEnumerate()
+        public VerifyVirtualHost()
         {
             this.queryXmlResult = new List<string>();
         }
@@ -212,7 +204,7 @@ namespace Scx.Test.Apache.Provider
             if (mcfContext.Records.HasKey("StopApcheServer") &&
                mcfContext.Records.GetValue("StopApcheServer") == "true")
             {
-                this.needStopServer = true;
+                //this.needStopServer = true;
                 this.stopServerCmd = mcfContext.ParentContext.Records.GetValue("stopApacheCmd");
                 this.apacheHelper.StopApacheServiceStatus(stopServerCmd);
             }
@@ -298,14 +290,7 @@ namespace Scx.Test.Apache.Provider
             string[] recordKeys = mcfContext.Records.GetKeys();
 
             // Check records for DebugXML record flag from mcf command line. For example: MCF.exe /m:%VarMap%.xml /debugxml:true
-            try
-            {
-                debugRecord = mcfContext.Framework.GetValue("debugxml");
-            }
-            catch
-            {
-                mcfContext.Trc("The value of \'debugxml\' is null.");
-            }
+           
 
             if (string.IsNullOrEmpty(debugRecord) == false)
             {

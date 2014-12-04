@@ -34,11 +34,13 @@ namespace Scx.Test.Common
         /// Generic logger. This is the ConsoleLogger by default.
         /// </summary>
         private ILogger genericLogger = new ConsoleLogger();
-                
+
         /// <summary>
         /// Full path to the agent package file.
         /// </summary>
         private string fullApacheAgentPath;
+
+        private string apacheTag;
 
         /// <summary>
         /// Posix host name
@@ -58,7 +60,7 @@ namespace Scx.Test.Common
         /// <summary>
         /// The name of apache agent.
         /// </summary>
-        private string apacheAgentName;
+        public string apacheAgentName;
 
         /// <summary>
         /// Log Delegate to allow writing using a log mechanism provided by the user.
@@ -110,7 +112,7 @@ namespace Scx.Test.Common
         /// <param name="hostName">Name of Posix host</param>
         /// <param name="userName">Valid user on Posix host</param>
         /// <param name="password">Password for user</param>
-        public ApacheHelper(ScxLogDelegate logger, string hostName, string userName, string password, string apcheAgentFullPath, bool needCopyFile = false)
+        public ApacheHelper(ScxLogDelegate logger, string hostName, string userName, string password, string apcheAgentFullPath, string apacheTag, bool needCopyFile = false)
         {
             if (string.IsNullOrEmpty(hostName))
             {
@@ -136,7 +138,7 @@ namespace Scx.Test.Common
             this.hostName = hostName;
             this.userName = userName;
             this.password = password;
-            this.SetApacheAgentFullPath(apcheAgentFullPath, needCopyFile);
+            this.SetApacheAgentFullPath(apcheAgentFullPath, apacheTag, needCopyFile);
         }
 
         public ApacheHelper() { }
@@ -149,7 +151,7 @@ namespace Scx.Test.Common
         /// Bad name is due to conflict with previous logger class. Changing that might break other code. TODO: Fix this later.
         /// </summary>
         public ILogger GenericLogger { set { genericLogger = value; } }
-        
+
         /// <summary>
         /// Gets or sets the FullApachePath property
         /// </summary>
@@ -168,18 +170,32 @@ namespace Scx.Test.Common
         /// Set the apacheFullPath.
         /// </summary>
         /// <remarks>WaitForNewAgent is optional.  If it is not run, then FullApachePath must be set.</remarks>
-        public void SetApacheAgentFullPath(string apcheAgentFullPath, bool needCopyFile = false)
+        public void SetApacheAgentFullPath(string apcheAgentFullPath, string apcheTag, bool needCopyFile = false)
         {
             this.fullApacheAgentPath = apcheAgentFullPath;
+            this.apacheTag = apcheTag;
+            //"Searching for apache in " + this.fullApacheAgentPath;
+            DirectoryInfo di = new DirectoryInfo(this.fullApacheAgentPath);
+            FileInfo[] fi = di.GetFiles("*" + this.apacheTag + "*");
+            if (fi.Length == 0)
+            {
+                throw new Exception("Found no apache installer matching ApacheTag: " + this.apacheTag);
+            }
+
+            if (fi.Length > 1)
+            {
+                throw new Exception("Found more than one apache installer matching ApacheTag: " + this.apacheTag);
+            }
+
             // User-specified Apache path takes precedent
-            apacheAgentName = Path.GetFileName(this.fullApacheAgentPath);
+            apacheAgentName = Path.GetFileName(fi[0].FullName);
 
             if (needCopyFile)
             {
                 PosixCopy copyToHost = new PosixCopy(this.hostName, this.userName, this.password);
                 // Copy from server to Posix host
                 this.logger("Copying Apache from drop server to host");
-                copyToHost.CopyTo(this.fullApacheAgentPath, "/tmp/" + apacheAgentName);
+                copyToHost.CopyTo(fi[0].FullName, "/tmp/" + apacheAgentName);
             }
         }
 
@@ -195,9 +211,9 @@ namespace Scx.Test.Common
             // Execute command
             execCmd.FileName = cmd;
             execCmd.Arguments = arguments;
-            this.logger(string.Format("Run Command {0} on host {1} ", execCmd.FileName , this.hostName));
+            this.logger(string.Format("Run Command {0} on host {1} ", execCmd.FileName, this.hostName));
             execCmd.RunCmd();
-            this.logger(string.Format("Command {0} out: {1}",execCmd.FileName , execCmd.StdOut));
+            this.logger(string.Format("Command {0} out: {1}", execCmd.FileName, execCmd.StdOut));
             return execCmd;
         }
 
@@ -217,11 +233,11 @@ namespace Scx.Test.Common
                 this.RunCmd(string.Format(installCmd, apacheAgentName));
             }
             catch (Exception e)
-            {                
+            {
                 throw new Exception("Install apache CimProv agent failed: " + e.Message);
             }
-            
-        }       
+
+        }
 
         /// <summary>
         /// Uninstall an agent from a Posix host
@@ -230,7 +246,7 @@ namespace Scx.Test.Common
         {
             try
             {
-                this.RunCmd(string.Format(uninstallCmd , apacheAgentName));
+                this.RunCmd(string.Format(uninstallCmd, apacheAgentName));
             }
             catch (Exception e)
             {
@@ -323,7 +339,7 @@ namespace Scx.Test.Common
             execCmd.RunCmd();
         }
 
-        #endregion Public Methods      
+        #endregion Public Methods
 
         #endregion Methods
     }

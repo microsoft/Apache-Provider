@@ -3,6 +3,12 @@
         assembly="..\Apache.dll"
         dsc="Apache Automation Test"
         owner="v-litin" contact="v-litin">
+
+  <snippet id="ApacheInstallInfo">
+    <rec key="Apache.InstallCmd">sh /tmp/{0}</rec>
+    <rec key="Apache.VerifyFolderExistCmd"><![CDATA[/bin/ls /opt/microsoft/|grep -ic "apache";/bin/ls /var/opt/microsoft/|grep -ic "apache";/bin/ls /etc/opt/microsoft/|grep -ic "apache"]]></rec>
+    <rec key="Apache.VerifyApacheInstalledCmd">rpm -qa|grep apache</rec>
+  </snippet>
   <snippet id="UniqueApacheServerInfo">
     <rec key="ApacheServer.ConfFile">/etc/httpd/conf/httpd\.conf</rec>
     <rec key="ApacheServer.Vendor">Apache Software Foundation</rec>
@@ -11,9 +17,10 @@
     <rec key="ApacheServer.Collection">/etc/httpd</rec>
   </snippet>
   <snippet id="LinuxInfo">
-    <rec key="Linux.Host">cmt-cent5x86-02.scx.com</rec>
+    <rec key="Linux.Host">osst-cen5x86-01</rec>
   </snippet>
   <!-- Test Case information -->
+
   <var set="1" lvl="0" vid="724411" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="Verify enumeration of Apache_HTTPDServer works for 1 Apache Server." act="true">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
@@ -37,11 +44,82 @@
     <rec key="p:OperatingStatus">OK</rec>
     <rec key="p:OperatingStatusDetail">^$</rec>
   </var>
+
+  <!-- 724953-VerifyCimProvInstallationUsingOptionInstall -->
+  <var set="2" lvl="0" vid="724953" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="isInvalidInstall">false</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <!-- The apache-cimprov folder under /opt/microsoft and /var/opt/microsoft and /etc/opt/microsoft should be 1,1,1 -->
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="installLogKeyWorlds">OK</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724954-VerifyCimProvInstallationUsingOptionInstallAndForce -->
+  <var set="2" lvl="0" vid="724954" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --install --force</rec>
+    <rec key="isInvalidInstall">false</rec>
+    <!-- The apache-cimprov folder under /opt/microsoft and /var/opt/microsoft and /etc/opt/microsoft should be 1,1,1 -->
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="installLogKeyWorlds">OK</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724955-VerifyCimProvInstallationtwicefailed -->
+  <var set="2" lvl="0" vid="724955" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="isInvalidInstall">true</rec>
+    <rec key="installTwice">true</rec>
+  </var>
+
+  <!-- 724956-VerifyCimProvInstallationUsingInvalidOptions-->
+  <var set="2" lvl="0" vid="724956" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --invalidinstall</rec>
+    <rec key="isInvalidInstall">true</rec>
+  </var>
+
+  <!-- 724957-VerifyCimProvInstallationWithOutOption -->
+  <var set="2" lvl="0" vid="724957" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <rec key="apacheCmd">sh /tmp/{0}</rec>
+    <rec key="isInvalidInstall">true</rec>
+    <rec key="installLogKeyWorlds">usage</rec>
+  </var>
+
+  <!-- 724963-VerifyCimProvUsingRemoveOption -->
+  <var set="2" lvl="0" vid="724963" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --remove</rec>
+    <rec key="isRemoveOption">true</rec>
+    <rec key="expectedFolderCount">0,0,0</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724964-VerifyCimProvUsingRemoveOption -->
+  <var set="2" lvl="0" vid="724964" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --purge</rec>
+    <rec key="isRemoveOption">true</rec>
+    <rec key="expectedFolderCount">0,0,0</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724965-VerifyCimProvHelpOption -->
+  <var set="2" lvl="0" vid="724965" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --help</rec>
+    <rec key="isHelpOption">true</rec>
+  </var>
+
   <!-- Test Variables Definition -->
   <grp cls="Scx.Test.Apache.Provider.GroupHelper">
     <snipref id="LinuxInfo" />
     <rec key="hostname">%Linux.Host%</rec>
-    <rec key="omserver">osst-w12r2-01</rec>
+    <rec key="omserver">osst-w12r2-02</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>

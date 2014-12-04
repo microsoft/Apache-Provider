@@ -187,7 +187,6 @@ namespace Scx.Test.Apache.Provider
 
         public void Cleanup(IContext ctx)
         {
-
             try
             {
                 // Check for Warnings in SCX logs
@@ -304,7 +303,7 @@ namespace Scx.Test.Apache.Provider
         /// </summary>
         /// <param name="ctx">Current MCF Context</param>
         private void UninstallAgent(IContext ctx)
-        { 
+        {
             try
             {
                 this.agentHelper.Uninstall();
@@ -319,21 +318,7 @@ namespace Scx.Test.Apache.Provider
         {
             string apachelocation = ctx.Records.GetValue("ApachesLocation");
 
-            ctx.Trc("Searching for apache in " + apachelocation);
-            DirectoryInfo di = new DirectoryInfo(apachelocation);
-            FileInfo[] fi = di.GetFiles("*" + this.ApacheTag + "*");
-
-            if (fi.Length == 0)
-            {
-                throw new GroupAbort("Found no apache installer matching ApacheTag: " + this.ApacheTag);
-            }
-
-            if (fi.Length > 1)
-            {
-                throw new GroupAbort("Found more than one apache installer matching ApacheTag: " + this.ApacheTag);
-            }
-
-            this.apacheHelper.SetApacheAgentFullPath(fi[0].FullName, true);
+            this.apacheHelper.SetApacheAgentFullPath(apachelocation, this.ApacheTag, true);
         }
 
 
