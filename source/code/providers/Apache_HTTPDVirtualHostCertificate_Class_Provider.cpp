@@ -251,8 +251,11 @@ static void EnumerateOneInstance(
             mi::Datetime certificateExpirationCimTime;
             certificateExpirationCimTime.Set(certs[item].certificateExpirationCimTime);
 
-            mi::Uint16 certificateDaysUntilExpiration((unsigned short)((certs[item].certificateExpirationAprTime - timeNow) /
-                                                                       ((apr_int64_t)1000000 * 60 * 60 * 24)));
+            mi::Uint16 certificateDaysUntilExpiration(
+                ( certs[item].certificateExpirationAprTime >= timeNow
+                  ? (mi::Uint16)((certs[item].certificateExpirationAprTime - timeNow) /
+                                     ((apr_int64_t)1000000 * 60 * 60 * 24))
+                  : 0 ));
             inst.ExpirationDate_value(certificateExpirationCimTime);
             inst.DaysUntilExpiration_value(certificateDaysUntilExpiration);
         }
