@@ -1,0 +1,1667 @@
+<varmap assembly="..\Scx.Test.Apache.SDK.ApacheSDKTests.dll" contact="a-brdust" dsc="SDK-based BVT" owner="a-brdust" xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap">
+  <snippet id="ExpressionStdOutForShellCommandRule">
+    <!-- (StdOut matches int value) and (ReturnCode == 0) -->
+    <recm key="expression">
+      <val><![CDATA[
+          <Expression>
+          <And>
+            <Expression>
+              <RegExExpression>
+                <ValueExpression> 
+                  <XPathQuery Type="String">//*[local-name()="StdOut"] </XPathQuery> 
+                </ValueExpression> 
+                <Operator>MatchesRegularExpression</Operator> 
+                <Pattern>PATTERN_VALUE</Pattern> 
+              </RegExExpression>
+            </Expression>
+            <Expression>
+              <SimpleExpression>
+                <ValueExpression>
+                  <XPathQuery Type="Integer">//*[local-name()="ReturnCode"]
+                          </XPathQuery>
+                </ValueExpression>
+                <Operator>Equal</Operator>
+                <ValueExpression>
+                  <Value Type="Integer">0
+                          </Value>
+                </ValueExpression>
+              </SimpleExpression>
+            </Expression>
+          </And>
+        </Expression>]]></val>
+    </recm>
+  </snippet>
+  <snippet id="WarningExpressionStdOutWarning">
+    <!-- (StdOut contains 'warning') and (ReturnCode == 0)-->
+    <recm key="warningExpression">
+      <val><![CDATA[
+            <Expression>
+             <And>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">//*[local-name()="StdOut"]
+                            </XPathQuery>
+                  </ValueExpression>
+                  <Operator>ContainsSubstring</Operator>
+                  <Pattern>warning</Pattern>
+                </RegExExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">//*[local-name()="ReturnCode"]
+                            </XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">0
+                            </Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </Expression>]]></val>
+    </recm>
+  </snippet>
+  <snippet id="HealthyExpressionStdOutHealthy">
+    <!-- (StdOut contains 'healthy') and (ReturnCode == 0) -->
+    <recm key="healthyExpression">
+      <val><![CDATA[
+           <Expression>
+            <And>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">//*[local-name()="StdOut"]
+                            </XPathQuery>
+                  </ValueExpression>
+                  <Operator>ContainsSubstring</Operator>
+                  <Pattern>healthy</Pattern>
+                </RegExExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">//*[local-name()="ReturnCode"]
+                            </XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">0
+                            </Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </Expression>]]></val>
+    </recm>
+  </snippet>
+  <snippet id="ErrorExpressionStdOutError">
+    <!-- (StdOut contains 'error') and (ReturnCode == 0)-->
+    <recm key="errorExpression">
+      <val><![CDATA[
+            <Expression>
+             <And>
+              <Expression>
+                <RegExExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="String">//*[local-name()="StdOut"]
+                            </XPathQuery>
+                  </ValueExpression>
+                  <Operator>ContainsSubstring</Operator>
+                  <Pattern>error</Pattern>
+                </RegExExpression>
+              </Expression>
+              <Expression>
+                <SimpleExpression>
+                  <ValueExpression>
+                    <XPathQuery Type="Integer">//*[local-name()="ReturnCode"]
+                            </XPathQuery>
+                  </ValueExpression>
+                  <Operator>Equal</Operator>
+                  <ValueExpression>
+                    <Value Type="Integer">0
+                            </Value>
+                  </ValueExpression>
+                </SimpleExpression>
+              </Expression>
+            </And>
+          </Expression>]]></val>
+    </recm>
+  </snippet>
+  <!-- Security Health -->
+  <var set="2" lvl="0" vid="373342" cid="suRootFailureSecurityHealth" cls="Scx.Test.SDK.SDKTests.SecurityHealth" dsc="This test will test the su root failure alert 40654" permutation="rows">
+    <recm key="entityname">
+      <val>suRootFailureAlert</val>
+    </recm>
+    <!-- shell command that will trigger the alert -->
+    <recm key="action">
+      <val>Aug 23 06:29:09 scxomt-test-01 su[17758]: pam_unix(su:auth): authentication failure; logname=root uid=1001 euid=0 tty=/dev/pts/0 ruser=scxuser rhost=  user=root</val>
+    </recm>
+    <!-- followup password to enter along with action for su or sudo -->
+    <recm key="followuppwd">
+      <val>invalidpassword</val>
+    </recm>
+    <!-- Name of the monitor which must be in healthy state for test setup to be complete -->
+    <recm key="rulename">
+      <val>Microsoft.Linux.Universal.LogFile.Syslog.SU.Command.Root.Failure.Alert</val>
+    </recm>
+  </var>
+  <var set="2" lvl="1" vid="373168" cid="securityHealth" cls="Scx.Test.SDK.SDKTests.SecurityHealth" dsc="This test will test security alerts(41765,40664) 41762" permutation="rows">
+    <recm key="entityname">
+      <val>pamRootFailureAlert</val>
+      <val>pamRootSuccessAlert</val>
+      <val>suRootSuccessAlert</val>
+    </recm>
+    <!-- shell command that will trigger the rule -->
+    <recm key="action">
+      <val>Aug 23 06:34:22 scxomt-test-01 sshd[18076]: Failed password for root from 172.18.24.111 port 31143 ssh2</val>
+      <val>Aug 23 06:32:29 scxomt-test-01 sshd[17846]: Accepted password for root from 172.18.24.111 port 31141 ssh2</val>
+      <val>Aug 23 06:29:17 scxomt-test-01 su[17761]: pam_unix(su:session): session opened for user root by root(uid=1001)</val>
+    </recm>
+    <!-- followup password to enter along with action for su or sudo -->
+    <recm key="followuppwd">
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>%superuserpwd%</val>
+    </recm>
+    <!-- Name of the monitor which must be in healthy state for test setup to be complete -->
+    <recm key="rulename">
+      <val>Microsoft.Linux.Universal.LogFile.Syslog.SSHAuth.PAM.Root.Failure.Alert</val>
+      <val>Microsoft.Linux.Universal.LogFile.Syslog.Root.SSHAuth.Password.Alert</val>
+      <val>Microsoft.Linux.Universal.LogFile.Syslog.SU.Command.Root.Success.Alert</val>
+    </recm>
+  </var>
+  <!-- Process Availability Health -->
+  <var set="1" lvl="1" vid="373357" cid="processHealth" cls="Scx.Test.SDK.SDKTests.ProcessHealth" dsc="This test will test process Heartbeat availability 40645" permutation="rows">
+    <recm key="entityname">
+      <val>Heartbeat</val>
+    </recm>
+    <!-- shell command that will trigger the monitor -->
+    <recm key="action">
+      <val>/opt/microsoft/scx/bin/tools/scxadmin -stop</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.Unix.WSMan.Heartbeat.Monitor</val>
+    </recm>
+    <!-- For those monitors where diagnostics exist, run and verify what was expected-->
+    <recm key="diagnostics">
+      <val>Microsoft.Unix.SCX.Restart.Diagnostic</val>
+    </recm>
+    <!-- For those monitors with the recovery task in the MP, run that command. -->
+    <recm key="recovery">
+      <val>Microsoft.Unix.SCX.Restart.Recovery</val>
+    </recm>
+    <!-- Cleanup/SSH Recovery command in case the Recovery Task fails -->
+    <recm key="recoveryCmd">
+      <val>/opt/microsoft/scx/bin/tools/scxadmin -start</val>
+    </recm>
+    <recm key="AlertName">
+      <val>Heartbeat failed</val>
+    </recm>
+  </var>
+  <var set="1" lvl="1" vid="373242" cid="processHealth" cls="Scx.Test.SDK.SDKTests.ProcessHealth" dsc="This test will test process availability&#xD;&#xA;       (41370,31380,41368,42475,41153,41367,42476,41154,41336,40477,42479,41155,41364,40479,39899,41159,41369) 41160" permutation="rows">
+    <recm key="entityname">
+      <!--<val>cron</val>-->
+      <val>ssh</val>
+    </recm>
+    <!-- shell command that will trigger the monitor -->
+    <recm key="action">
+      <!--<val>/etc/init.d/crond stop</val>-->
+      <val>/etc/init.d/sshd stop</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <!--<val>Microsoft.Linux.Universal.Process.Cron.Monitor</val>-->
+      <val>Microsoft.Linux.Universal.Process.Ssh.Monitor</val>
+    </recm>
+    <!-- Incase of Process Monitors Diagnostic Task is mandatory -->
+    <recm key="diagnostics">
+      <!--<val>Microsoft.Linux.Universal.Process.Cron.Diagnostic</val>-->
+      <val>Microsoft.Linux.Universal.Process.Ssh.Diagnostic</val>
+    </recm>
+    <!-- For those monitors with the recovery task in the MP, run that command. -->
+    <recm key="recovery">
+      <val>Microsoft.Linux.Universal.Process.Ssh.Restart</val>
+    </recm>
+    <!-- Cleanup/SSH Recovery command in case the Recovery Task fails-->
+    <recm key="recoveryCmd">
+      <!--<val>/etc/init.d/crond start</val>-->
+      <val>/etc/init.d/sshd start</val>
+    </recm>
+    <!-- Alert's Name-->
+    <recm key="AlertName">
+      <!--<val>Cron daemon is not running</val>-->
+      <val>SSH daemon is not running</val>
+    </recm>
+  </var>
+  <!-- Performance Health -->
+  <var set="3" lvl="0" vid="372742" cid="cpuperformanceHealth" cls="Scx.Test.SDK.SDKTests.PerformanceHealth" dsc="This test will test performance health 42468" permutation="rows">
+    <recm key="entityname">
+      <val>TotalPercentProcessorTime</val>
+    </recm>
+    <recm key="action">
+      <val>/tmp/scxtestapp.pl -lc</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentProcessorTime.Monitor</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+    </recm>
+    <!-- Target of the monitor -->
+    <recm key="monitortarget">
+      <val>
+      </val>
+    </recm>
+    <!-- The default threshold for the monitor, to make an error condition hard to generate. -->
+    <recm key="defaultmonitorthreshold">
+      <val>95</val>
+    </recm>
+    <!-- Threshold value to use in monitor override, to make an error condition easy to generate. -->
+    <recm key="monitorthreshold">
+      <val>10</val>
+    </recm>
+    <!-- For those monitors where diagnostics exist, run and verify what was expected. 
+    If the particular monitor does not have diagnostic, then leave this empty -->
+    <recm key="diagnostics">
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentProcessorTime.TopProcesses.Diagnostic</val>
+    </recm>
+    <!-- Shell command to run to bring the monitor to a healthy state -->
+    <recm key="recoverycmd">
+      <val>
+      </val>
+    </recm>
+  </var>
+  <!-- Performance Health -->
+  <var set="3" lvl="1" vid="372008" cid="FreeSpacePerformanceHealth" cls="Scx.Test.SDK.SDKTests.FreeSpacePerformanceHealth" dsc="This test will test performance health of free space monitor(50838,50838,50839) 50835" permutation="rows">
+    <recm key="entityname">
+      <val>FreeSpaceWarning</val>
+      <val>FreeSpaceError</val>
+      <val>FreeSpaceOnlySatisfyOneErrorCondition</val>
+      <val>FreeSpaceOnlySatisfyOneWarningCondition</val>
+    </recm>
+    <!-- Command for getting the file system of the target logic disk -->
+    <recm key="touchFileSystemcmd">
+      <val>df -m / | grep /dev/mapper</val>
+      <val>df -m / | grep /dev/mapper</val>
+      <val>df -m / | grep /dev/mapper</val>
+      <val>df -m / | grep /dev/mapper</val>
+    </recm>
+    <!-- Command for getting the all space in MByte of the target logic disk -->
+    <recm key="touchspacecmdStd">
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $2}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $2}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $2}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $2}'</val>
+    </recm>
+    <!-- Command for getting the all space in MByte of the target logic disk -->
+    <recm key="touchspacecmdVg">
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $1}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $1}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $1}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $1}'</val>
+    </recm>
+    <!-- Command for getting the used MByte of the target logic disk -->
+    <recm key="touchusedcmdStd">
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $5}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $5}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $5}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $5}'</val>
+    </recm>
+    <!-- Command for getting the used MByte of the target logic disk -->
+    <recm key="touchusedcmdVg">
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $4}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $4}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $4}'</val>
+      <val>df -m / | grep % | grep -v 'Use%' | awk '{print $4}'</val>
+    </recm>
+    <!-- Action command for raising the occupation of the target disk-->
+    <recm key="action">
+      <val>/tmp/scxtestapp.pl -fd /</val>
+      <val>/tmp/scxtestapp.pl -fd /</val>
+      <val>/tmp/scxtestapp.pl -fd /</val>
+      <val>/tmp/scxtestapp.pl -fd /</val>
+    </recm>
+    <!-- The value of raising the occupation of the target disk-->
+    <recm key="fillpercent">
+      <val>10</val>
+      <val>20</val>
+      <val>20</val>
+      <val>10</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.Linux.Universal.LogicalDisk.FreeSpace.Monitor</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.FreeSpace.Monitor</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.FreeSpace.Monitor</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.FreeSpace.Monitor</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+    </recm>
+    <!-- Target of the monitor -->
+    <recm key="monitortarget">
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+    </recm>
+    <!-- Warning Percent Threshold needs to be override in monitor -->
+    <recm key="warningpercentthreshold">
+      <val>WarningPctThreshold</val>
+      <val>WarningPctThreshold</val>
+      <val>WarningPctThreshold</val>
+      <val>WarningPctThreshold</val>
+    </recm>
+    <!-- The default percent threshold for the monitor, to make an exception condition hard to generate. -->
+    <recm key="defaultwarningpercentthreshold">
+      <val>10</val>
+      <val>10</val>
+      <val>10</val>
+      <val>10</val>
+    </recm>
+    <!-- Threshold value to use in percent Threshold Override, to make an exception condition easy to generate. -->
+    <recm key="overridewarningpercentThreshold">
+      <val>5</val>
+      <val>5</val>
+      <val>5</val>
+      <val>5</val>
+    </recm>
+    <!-- Warning MByteThreshold needs to be override in monitor -->
+    <recm key="warningmbytethreshold">
+      <val>WarningMBThreshold</val>
+      <val>WarningMBThreshold</val>
+      <val>WarningMBThreshold</val>
+      <val>WarningMBThreshold</val>
+    </recm>
+    <!-- The default Warning MByte threshold for the monitor, to make an exception condition hard to generate. -->
+    <recm key="defaultwarningmbytethreshold">
+      <val>200</val>
+      <val>200</val>
+      <val>200</val>
+      <val>200</val>
+    </recm>
+    <!-- The override Warning MByte threshold for the monitor in percentage, to make an exception condition easy to generate. -->
+    <recm key="overridewarningmbytethresholdinpercent">
+      <val>5</val>
+      <val>5</val>
+      <val>5</val>
+      <val>15</val>
+    </recm>
+    <!-- MByteThreshold needs to be override in monitor -->
+    <recm key="errorpercentthreshold">
+      <val>ErrorPctThreshold</val>
+      <val>ErrorPctThreshold</val>
+      <val>ErrorPctThreshold</val>
+      <val>ErrorPctThreshold</val>
+    </recm>
+    <!-- The default percent threshold for the monitor, to make an exception condition hard to generate. -->
+    <recm key="defaulterrorpercentthreshold">
+      <val>5</val>
+      <val>5</val>
+      <val>5</val>
+      <val>5</val>
+    </recm>
+    <!-- Threshold value to use in percent Threshold Override, to make an exception condition easy to generate. -->
+    <recm key="overrideerrorpercentthreshold">
+      <val>15</val>
+      <val>15</val>
+      <val>15</val>
+      <val>15</val>
+    </recm>
+    <!-- Error MByteThreshold needs to be override in monitor -->
+    <recm key="errormbytethreshold">
+      <val>ErrorMBThreshold</val>
+      <val>ErrorMBThreshold</val>
+      <val>ErrorMBThreshold</val>
+      <val>ErrorMBThreshold</val>
+    </recm>
+    <!-- The default MByte threshold for the monitor, to make an exception condition hard to generate. -->
+    <recm key="defaulterrormbytethreshold">
+      <val>100</val>
+      <val>100</val>
+      <val>100</val>
+      <val>100</val>
+    </recm>
+    <!-- The override MByte threshold for the monitor in percentage, to make an exception condition hard to generate. -->
+    <recm key="overrideerrormbytethresholdinpercent">
+      <val>15</val>
+      <val>15</val>
+      <val>25</val>
+      <val>15</val>
+    </recm>
+    <!-- Expected monitor state -->
+    <recm key="expectedmonitorstate">
+      <val>warning</val>
+      <val>error</val>
+      <val>warning</val>
+      <val>success</val>
+    </recm>
+    <!-- For those monitors where diagnostics exist, run and verify what was expected. If the particular monitor does not have diagnostic, then leave this empty -->
+    <recm key="diagnostics">
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+    </recm>
+    <!-- Shell command to run to bring the monitor to a healthy state -->
+    <recm key="recoverycmd">
+      <val>/tmp/scxtestapp.pl -stop /</val>
+      <val>/tmp/scxtestapp.pl -stop /</val>
+      <val>/tmp/scxtestapp.pl -stop /</val>
+      <val>/tmp/scxtestapp.pl -stop /</val>
+    </recm>
+  </var>
+  <var set="3" lvl="0" vid="372746" cid="HardwarePerformanceHealth" cls="Scx.Test.SDK.SDKTests.PerformanceHealth" dsc="This test will test performance health(41385,42470,41386,42471,41156,42472,42473,42474,49904) 42472" permutation="rows">
+    <recm key="entityname">
+      <val>LogicalDiskPercentFreeSpace</val>
+    </recm>
+    <recm key="action">
+      <val>/tmp/scxtestapp.pl -fd /</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.Linux.Universal.LogicalDisk.PercentFreeSpace.Monitor</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+    </recm>
+    <!-- Target of the monitor -->
+    <recm key="monitortarget">
+      <val>/</val>
+    </recm>
+    <!-- The default threshold for the monitor, to make an error condition hard to generate. -->
+    <recm key="defaultmonitorthreshold">
+      <val>5</val>
+    </recm>
+    <!-- Threshold value to use in monitor override, to make an error condition easy to generate. -->
+    <recm key="monitorthreshold">
+      <val>90</val>
+    </recm>
+    <!-- For those monitors where diagnostics exist, run and verify what was expected. 
+    If the particular monitor does not have diagnostic, then leave this empty -->
+    <recm key="diagnostics">
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+    </recm>
+    <!-- Shell command to run to bring the monitor to a healthy state -->
+    <recm key="recoverycmd">
+      <val>/tmp/scxtestapp.pl -stop /</val>
+    </recm>
+  </var>
+  <var set="3" lvl="2" vid="372743" cid="performanceHealth" cls="Scx.Test.SDK.SDKTests.PerformanceHealth" dsc="This test will test performance health(41385,42470,41386,42471,41156,42473,42474,49904) 42469" permutation="rows">
+    <recm key="entityname">
+      <val>AvailableMBytes</val>
+      <val>AvailableMBytesSwap</val>
+      <val>LogicalDisk</val>
+      <val>NetworkAdapter</val>
+      <val>PhysicalDiskReadTime</val>
+      <val>PhysicalDiskWriteTime</val>
+      <val>PhysicalDiskTransferTime</val>
+      <val>LogicalDiskPercentFreeInode</val>
+      <val>PercentProcessorTime</val>
+    </recm>
+    <recm key="action">
+      <val>/tmp/scxtestapp.pl -fm</val>
+      <val>/tmp/scxtestapp.pl -fs</val>
+      <val>umount /boot</val>
+      <!-- 
+        <val>echo "/sbin/ifconfig eth0 down; sleep 600; /sbin/ifconfig eth0 up" > /tmp/iface_down.sh; chmod +x /tmp/iface_down.sh; nohup /tmp/iface_down.sh</val>
+        -->
+      <val>/tmp/testapp</val>
+      <val>/tmp/scxtestapp.pl -cd /</val>
+      <val>/tmp/scxtestapp.pl -cd /</val>
+      <val>/tmp/scxtestapp.pl -cd /</val>
+      <val>/tmp/scxtestapp.pl -fi / 10%</val>
+      <!--command to raise the inode usage of special logicalDisk -->
+      <val>/tmp/scxtestapp.pl -lc</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.Linux.Universal.OperatingSystem.AvailableMBytes.Monitor</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.AvailableMBytesSwap.Monitor</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Monitor</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter.Health.Monitor</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.AverageDiskReadTime.Monitor</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.AverageDiskWriteTime.Monitor</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.AverageDiskTransferTime.Monitor</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.PercentFreeInodes.Monitor</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentProcessorTime.Monitor</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+    </recm>
+    <!-- Target of the monitor -->
+    <recm key="monitortarget">
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>/boot</val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>/</val>
+      <val>Processor0</val>
+    </recm>
+    <!-- The default threshold for the monitor, to make an error condition hard to generate. -->
+    <recm key="defaultmonitorthreshold">
+      <val>2.5</val>
+      <val>2.5</val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>50</val>
+      <val>50</val>
+      <val>50</val>
+      <val>5</val>
+      <val>95</val>
+    </recm>
+    <!-- Threshold value to use in monitor override, to make an error condition easy to generate. -->
+    <recm key="monitorthreshold">
+      <val>8192</val>
+      <val>32768</val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>0</val>
+      <val>0</val>
+      <val>0</val>
+      <val>95</val>
+      <val>45</val>
+    </recm>
+    <!-- For those monitors where diagnostics exist, run and verify what was expected. 
+    If the particular monitor does not have diagnostic, then leave this empty -->
+    <recm key="diagnostics">
+      <val>Microsoft.Linux.Universal.OperatingSystem.AvailableMBytes.TopProcesses.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.AvailableMBytesSwap.TopProcesses.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter.Health.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskHealth.Diagnostic</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentProcessorTime.TopProcesses.Diagnostic</val>
+    </recm>
+    <!-- Shell command to run to bring the monitor to a healthy state -->
+    <recm key="recoverycmd">
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>mount /boot</val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>
+      </val>
+      <val>/tmp/scxtestapp.pl -stop /</val>
+      <!--command to release the inode usage of special logicalDisk -->
+      <val>/tmp/scxtestapp.pl -stop</val>
+    </recm>
+  </var>
+  <!-- Performance collection Health -->
+  <var set="5" lvl="0" vid="372079" cid="performancecollectionHealth" cls="Scx.Test.SDK.SDKTests.PerformanceCollectionHealth" dsc="This test will test Performance Collection Rule 49909" permutation="rows">
+    <recm key="entityname">
+      <val>FreeInodes</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+    </recm>
+    <recm key="monitortarget">
+      <val>/</val>
+    </recm>
+    <recm key="ruleName">
+      <val>Microsoft.Linux.Universal.LogicalDisk.PercentFreeInodes.Collection</val>
+    </recm>
+    <recm key="pattern">
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+    </recm>
+  </var>
+  <var set="5" lvl="1" vid="372080" cid="performancecollectionHealth" cls="Scx.Test.SDK.SDKTests.PerformanceCollectionHealth" dsc="This test will test Performance Collection Rule(50619,42520,42528,50623,50626,50618,42521,50621,50620,&#xD;&#xA;               50617,42526,42527,42525,50614,50634,42535,50613,42538,50624,42529,42522,42539,50627,42530,50614,50616,42518,&#xD;&#xA;               42533,50629,42536,42523,42519,50630,42541,42540,50631,50636,42544,50624,50615,50632,50633,42545,42532) 49910" permutation="rows">
+    <recm key="entityname">
+      <val>UsedInodes</val>
+      <val>DiskReadBytesPerSecond</val>
+      <val>PercentFreeSpace</val>
+      <val>FreeMegabytes</val>
+      <val>DiskWritesPerSecond</val>
+      <val>UsedMegabyte</val>
+      <val>DiskReadsPerSecond</val>
+      <val>PercentUsedSpace</val>
+      <val>DiskTransfersPerSecond</val>
+      <val>DiskWriteBytesPerSecond</val>
+      <val>DiskBytesPerSecond</val>
+      <val>BytesSentPerSec</val>
+      <val>BytesTotalSec</val>
+      <val>BytesReceivedPerSec</val>
+      <val>AvailableMBytesSwap</val>
+      <val>TotalPercentUserTime</val>
+      <val>TotalPercentPrivilegedTime</val>
+      <val>PageReadsPerSecond</val>
+      <val>UsedMBytesSwap</val>
+      <val>TotalPercentNiceTime</val>
+      <val>PagesPerSecond</val>
+      <val>PercentUsedMemory</val>
+      <val>UsedMemoryMBytes</val>
+      <val>TotalPercentDPCTime</val>
+      <val>PageWritesPerSecond</val>
+      <val>AvailableMBytes</val>
+      <val>TotalPercentIdleTime</val>
+      <val>PercentAvailableMemory</val>
+      <val>TotalPercentIOWaitTime</val>
+      <val>TotalPercentInterruptTime</val>
+      <val>TotalPercentProcessorTime</val>
+      <val>PercentUsedSwapSpace</val>
+      <val>PercentAvailableSwap</val>
+      <val>AverageDiskReadTime</val>
+      <val>DiskBytesPerSecond</val>
+      <val>AverageDiskTransferTime</val>
+      <val>AverageDiskWriteTime</val>
+      <val>PercentProcessorTime</val>
+      <val>PercentIdleTime</val>
+      <val>PercentUserTime</val>
+      <val>PercentNiceTime</val>
+      <val>PercentPrivilegedTime</val>
+      <val>PercentIOWaitTime</val>
+      <val>PercentInterruptTime</val>
+      <val>PercentDPCTime</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+      <val>Microsoft.Linux.Universal.Processor</val>
+    </recm>
+    <recm key="monitortarget">
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>/</val>
+      <val>eth0</val>
+      <val>eth0</val>
+      <val>eth0</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>Oracle Linux Server 6.0 (i686)</val>
+      <val>sda</val>
+      <val>sda</val>
+      <val>sda</val>
+      <val>sda</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+      <val>Processor0</val>
+    </recm>
+    <recm key="ruleName">
+      <val>Microsoft.Linux.Universal.LogicalDisk.PercentUsedInodes.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskReadBytesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.PercentFreeSpace.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.FreeMegabytes.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskWritesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.UsedMegabyte.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskReadsPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.PercentUsedSpace.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskTransfersPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskWriteBytesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.LogicalDisk.DiskBytesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter.BytesSentPerSec.Collection</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter.BytesTotalSec.Collection</val>
+      <val>Microsoft.Linux.Universal.NetworkAdapter.BytesReceivedPerSec.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.AvailableMBytesSwap.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentUserTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentPrivilegedTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PageReadsPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.UsedMBytesSwap.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentNiceTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PagesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PercentUsedMemory.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.UsedMemoryMBytes.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentDPCTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PageWritesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.AvailableMBytes.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentIdleTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PercentAvailableMemory.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentIOWaitTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentInterruptTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.TotalPercentProcessorTime.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PercentUsedSwapSpace.Collection</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem.PercentAvailableSwap.Collection</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.AverageDiskReadTime.Collection</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.DiskBytesPerSecond.Collection</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.AverageDiskTransferTime.Collection</val>
+      <val>Microsoft.Linux.Universal.PhysicalDisk.AverageDiskWriteTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentProcessorTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentIdleTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentUserTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentNiceTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.PercentPrivilegedTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.TotalPercentIOWaitTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.TotalPercentInterruptTime.Collection</val>
+      <val>Microsoft.Linux.Universal.Processor.TotalPercentDPCTime.Collection</val>
+    </recm>
+    <recm key="pattern">
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^([0-9]*\.[0-9]+|[0-9]+)$</val>
+    </recm>
+  </var>
+  <!--Process Template Validation-->
+  <var set="5" lvl="0" vid="372081" cid="ProcessHealth" cls="Scx.Test.SDK.SDKTests.ProcessTemplate" dsc="Process Template Monitor test with full scenario 49911" permutation="rows">
+    <!-- Alert severity for process monitoring object -->
+    <recm key="alertseverity">
+      <val>0</val>
+    </recm>
+    <!-- Arguments filter expression for process monitoring object -->
+    <recm key="argumentsfilterexpression">
+      <val>2000</val>
+    </recm>
+    <!-- Maxprocesscount for process monitoring object -->
+    <recm key="maxprocesscount">
+      <val>2</val>
+    </recm>
+    <!-- Minprocesscount for process monitoring object -->
+    <recm key="minprocesscount">
+      <val>1</val>
+    </recm>
+    <!-- The process name specifies which process should be monitored. -->
+    <recm key="processname">
+      <val>sleep</val>
+    </recm>
+    <!-- Description for process monitoring object -->
+    <recm key="description">
+      <val>Sleep Process Mon for Test</val>
+    </recm>
+    <!-- Name of process monitoring object that will be created -->
+    <recm key="processmonitoringname">
+      <val>ProcessMonTest</val>
+    </recm>
+    <!-- Prerequisiten command to set the processes under monitoring in healthy state -->
+    <recm key="prerequisitecmd">
+      <val>sleep 2000</val>
+    </recm>
+    <!-- Execuing times for prerequisite command -->
+    <recm key="prerequisitecount">
+      <val>1</val>
+    </recm>
+    <!-- Shell command that will trigger the monitor -->
+    <recm key="action">
+      <val>sleep 2000</val>
+    </recm>
+    <!-- Execuing times for action command -->
+    <recm key="actioncount">
+      <val>2</val>
+    </recm>
+    <!-- Specify which health state should be expected after actions being executed  -->
+    <recm key="healthStateExpected">
+      <val>Error</val>
+    </recm>
+    <!-- Recovery command to reset the processes under monitor -->
+    <recm key="recoveryCmd">
+      <val>for PID in `ps -ef | egrep 'sleep 2000|20001' | grep -v grep | awk '{print $2}'`; do kill -9 $PID; done</val>
+    </recm>
+    <!-- Execuing times for recovery command -->
+    <recm key="recoverycount">
+      <val>2</val>
+    </recm>
+    <!-- Alert's Name-->
+    <recm key="AlertName">
+      <val>Process Count is Outside of Range - ProcessMonTest</val>
+    </recm>
+    <!-- For verification: Alert's Description-->
+    <recm key="alertdescriptiontemplate">
+      <val>The count ({0}) of running instances of the sleep (ProcessMonTest) process on server {1} is outside of the defined threshold range ({2}-{3}).</val>
+    </recm>
+    <!-- For verification: Alert's priority-->
+    <recm key="alertpriority">
+      <val>Normal</val>
+    </recm>
+    <!-- For verification: Key word in alert's context-->
+    <recm key="keyworkinalertcontext">
+      <val>SCX_UnixProcess</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>pkill sleep</val>
+    </recm>
+  </var>
+  <!--Log file Template Validation-->
+  <var set="5" lvl="0" vid="372038" cid="LogFileTemplate" cls="Scx.Test.SDK.SDKTests.LogFileTemplate" dsc="Log File Template Monitor test with full scenario 50496" permutation="rows">
+    <!-- Alert severity for log file monitoring object -->
+    <recm key="alertseverity">
+      <val>2</val>
+    </recm>
+    <!-- Regular expression for log file entry -->
+    <recm key="expression">
+      <val>.*Hello World.*</val>
+    </recm>
+    <!-- Log file path for log file monitoring object -->
+    <recm key="logfilepath">
+      <val>/tmp/logfiletest.log</val>
+    </recm>
+    <!-- Runas profile for log file monitoring object -->
+    <recm key="runasprofile">
+      <val>PrivilegedAccount</val>
+    </recm>
+    <!-- Type display name used in the alert name -->
+    <recm key="typedisplayname">
+      <val>LogFileTempTest_PrivilegedError</val>
+    </recm>
+    <!-- Prerequisiten command to setup the environment -->
+    <recm key="prerequisiteaction">
+      <val>touch %logfilepath%</val>
+    </recm>
+    <!-- Prerequisiten command 1 to setup the environment -->
+    <recm key="prerequisiteaction1">
+      <val>chmod 755 %logfilepath%</val>
+    </recm>
+    <!-- Shell command that will trigger the log file alert -->
+    <recm key="action">
+      <val>echo "Hello World" &gt;&gt; %logfilepath%</val>
+    </recm>
+    <!-- The repeatCount in log file alert to generate -->
+    <recm key="actioncount">
+      <val>1</val>
+    </recm>
+    <!-- Is log file alert expected -->
+    <recm key="isalertexpect">
+      <val>true</val>
+    </recm>
+    <!-- The expected repeatCount field in target log file alert -->
+    <recm key="expectrepeatcountinalert">
+      <val>0</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>rm -r %logfilepath%</val>
+    </recm>
+  </var>
+  <!--Log file Template Validation-->
+  <var set="5" lvl="1" vid="373333" cid="LogFileTemplate" cls="Scx.Test.SDK.SDKTests.LogFileTemplate" dsc="Log File Template Monitor test with full scenario(40670, 40671, 42406, 42405, 42410)  40670" permutation="rows">
+    <!-- Alert severity for log file monitoring object -->
+    <recm key="alertseverity">
+      <val>2</val>
+      <val>1</val>
+      <val>0</val>
+    </recm>
+    <!-- Regular expression for log file entry -->
+    <recm key="expression">
+      <val>.*Hello World.*</val>
+      <val>.*Hello World.*</val>
+      <val>.*Hello World.*</val>
+    </recm>
+    <!-- Log file path for log file monitoring object -->
+    <recm key="logfilepath">
+      <val>/tmp/logfiletest.log</val>
+      <val>/tmp/logfiletest.log</val>
+      <val>/tmp/logfiletest.log</val>
+    </recm>
+    <!-- Runas profile for log file monitoring object -->
+    <recm key="runasprofile">
+      <val>ActionAccount</val>
+      <val>PrivilegedAccount</val>
+      <val>PrivilegedAccount</val>
+    </recm>
+    <!-- Type display name used in the alert name -->
+    <recm key="typedisplayname">
+      <val>LogFileTempTest_ActionError</val>
+      <val>LogFileTempTest_PrivilegedWarning</val>
+      <val>LogFileTempTest_PrivilegedInformation</val>
+    </recm>
+    <!-- Prerequisiten command to setup the environment -->
+    <recm key="prerequisiteaction">
+      <val>touch %logfilepath%</val>
+      <val>touch %logfilepath%</val>
+      <val>touch %logfilepath%</val>
+    </recm>
+    <!-- Prerequisiten command 1 to setup the environment -->
+    <recm key="prerequisiteaction1">
+      <val>chmod 755 %logfilepath%</val>
+      <val>chmod 755 %logfilepath%</val>
+      <val>chmod 755 %logfilepath%</val>
+    </recm>
+    <!-- Shell command that will trigger the log file alert -->
+    <recm key="action">
+      <val>echo "Hello World" &gt;&gt; %logfilepath%</val>
+      <val>echo "Hello World" &gt;&gt; %logfilepath%</val>
+      <val>echo "Hello World" &gt;&gt; %logfilepath%</val>
+    </recm>
+    <!-- The repeatCount in log file alert to generate -->
+    <recm key="actioncount">
+      <val>1</val>
+      <val>1</val>
+      <val>1</val>
+    </recm>
+    <!-- Is log file alert expected -->
+    <recm key="isalertexpect">
+      <val>true</val>
+      <val>true</val>
+      <val>true</val>
+    </recm>
+    <!-- The expected repeatCount field in target log file alert -->
+    <recm key="expectrepeatcountinalert">
+      <val>0</val>
+      <val>0</val>
+      <val>0</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>rm -r %logfilepath%</val>
+      <val>rm -r %logfilepath%</val>
+      <val>rm -r %logfilepath%</val>
+    </recm>
+  </var>
+  <!--Consumer Task Health-->
+  <var set="6" lvl="0" vid="373433" cid="ConsumerTaskHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ConsumerTaskHealth" dsc="This test will test consumer task object 39841" permutation="rows">
+    <recm key="EntityName">
+      <val>RunVMStat</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.Linux.Universal.Invoke.VMStat.Task</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>SCX_OperatingSystem</val>
+    </recm>
+  </var>
+  <var set="6" lvl="1" vid="373214" cid="ConsumerTaskHealth" cls="Scx.Test.SDK.SDKTests.ConsumerTaskHealth" dsc="This test will test consumer task object(39943,40755,40757,40758) 41396" permutation="rows">
+    <recm key="EntityName">
+      <val>MemoryInformation</val>
+      <val>Top10CPUProcesses</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.Linux.Universal.Invoke.MemoryInfo.Task</val>
+      <val>Microsoft.Linux.Universal.Invoke.TopProcesses.Task</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>SCX_MemoryStatisticalInformation</val>
+      <val>SCX_UnixProcess</val>
+    </recm>
+  </var>
+  <var set="6" lvl="0" vid="371919" cid="ShellCommandTaskTemplate" cls="Scx.Test.SDK.SDKTests.ConsumerTaskHealth" dsc="Shell command task template test with full scenario 52653" permutation="rows">
+    <recm key="EntityName">
+      <val>ShellCommandTaskTemplateTestWithPrivilegedAccount</val>
+    </recm>
+    <recm key="TaskName">
+      <val>ConsoleTaskGeneratedByUIa586d2de554349478a422ded957b3039</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>SCX_OperatingSystem_OUTPUT</val>
+    </recm>
+  </var>
+  <var set="6" lvl="1" vid="371918" cid="ShellCommandTaskTemplate" cls="Scx.Test.SDK.SDKTests.ConsumerTaskHealth" dsc="Shell command task template test with full scenario 52652" permutation="rows">
+    <recm key="EntityName">
+      <val>ShellCommandTaskTemplateTestWithActionAccount</val>
+    </recm>
+    <recm key="TaskName">
+      <val>ConsoleTaskGeneratedByUIe995841449be4728bbe6c55dbcfdf574</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>SCX_OperatingSystem_OUTPUT</val>
+    </recm>
+  </var>
+  <!--ShellCommandTemp Two-States Monitor-->
+  <var set="7" lvl="1" vid="371899" cid="UnixShellCommandStateMonitor" cls="Scx.Test.SDK.SDKTests.UnixShellCommandStateMonitor" dsc="Verify can a Two-State Monitor with priviledged action account and generating alert works well. 52706" permutation="rows">
+    <!-- The unit monitor type Id -->
+    <recm key="unitMonitorTypeId">
+      <val>Microsoft.Unix.ShellCommand.TwoState.MonitorType</val>
+    </recm>
+    <!-- interval for the monitoring object -->
+    <recm key="interval">
+      <val>20</val>
+    </recm>
+    <!-- syncTime for the monitoring object -->
+    <recm key="syncTime">
+      <val>12:00</val>
+    </recm>
+    <!-- targetSystem for the monitoring object -->
+    <recm key="targetSystem">
+      <val>%targetcomputerclass%</val>
+    </recm>
+    <!-- Runas profile for the monitoring object -->
+    <recm key="runasprofile">
+      <val>Privileged</val>
+    </recm>
+    <!-- Type display name used in the alert name -->
+    <recm key="typedisplayname">
+      <val>StateMonTest</val>
+    </recm>
+    <!-- shellCommand for the monitoring object -->
+    <recm key="shellCommand">
+      <val>ls /tmp</val>
+    </recm>
+    <!-- timeOut for the monitoring object -->
+    <recm key="timeOut">
+      <val>30</val>
+    </recm>
+    <!-- Healthy expression for the monitoring object -->
+    <snipref id="HealthyExpressionStdOutHealthy" />
+    <!-- Error expression for the monitoring object -->
+    <snipref id="ErrorExpressionStdOutError" />
+    <!-- Prerequisiten command to setup the environment -->
+    <recm key="prerequisiteaction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+    <!-- healthy action -->
+    <recm key="healthyAction">
+      <val>rm -f /tmp/error;rm -f /tmp/warning;touch /tmp/healthy</val>
+    </recm>
+    <!-- error action -->
+    <recm key="errorAction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/warning;touch /tmp/error</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+  </var>
+  <!--ShellCommandTemp Two-States Monitor-->
+  <var set="7" lvl="1" vid="371915" cid="UnixShellCommandStateMonitor" cls="Scx.Test.SDK.SDKTests.UnixShellCommandStateMonitor" dsc="Create a Two-State Monitor on Default MP with target UNIX/Linux Computers and generating alert. 52663" permutation="rows">
+    <!-- The unit monitor type Id -->
+    <recm key="unitMonitorTypeId">
+      <val>Microsoft.Unix.ShellCommand.TwoState.MonitorType</val>
+    </recm>
+    <!-- The target MP name -->
+    <recm key="managementpackname">
+      <val>Microsoft.SystemCenter.OperationsManager.DefaultUser</val>
+    </recm>
+    <!-- interval for the monitoring object -->
+    <recm key="interval">
+      <val>20</val>
+    </recm>
+    <!-- syncTime for the monitoring object -->
+    <recm key="syncTime">
+      <val>12:00</val>
+    </recm>
+    <!-- targetSystem for the monitoring object -->
+    <recm key="targetSystem">
+      <val>Microsoft.Unix.Computer</val>
+    </recm>
+    <!-- Runas profile for the monitoring object -->
+    <recm key="runasprofile">
+      <val>Privileged</val>
+    </recm>
+    <!-- Type display name used in the alert name -->
+    <recm key="typedisplayname">
+      <val>StateMonTest</val>
+    </recm>
+    <!-- shellCommand for the monitoring object -->
+    <recm key="shellCommand">
+      <val>ls /tmp</val>
+    </recm>
+    <!-- timeOut for the monitoring object -->
+    <recm key="timeOut">
+      <val>30</val>
+    </recm>
+    <!-- Healthy expression for the monitoring object -->
+    <snipref id="HealthyExpressionStdOutHealthy" />
+    <!-- Error expression for the monitoring object -->
+    <snipref id="ErrorExpressionStdOutError" />
+    <!-- Prerequisiten command to setup the environment -->
+    <recm key="prerequisiteaction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+    <!-- healthy action -->
+    <recm key="healthyAction">
+      <val>rm -f /tmp/error;rm -f /tmp/warning;touch /tmp/healthy</val>
+    </recm>
+    <!-- error action -->
+    <recm key="errorAction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/warning;touch /tmp/error</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+  </var>
+  <!--ShellCommandTemp Three-States Monitor-->
+  <var set="7" lvl="0" vid="371875" cid="UnixShellCommandStateMonitor" cls="Scx.Test.SDK.SDKTests.UnixShellCommandStateMonitor" dsc="Verify a Three-State Monitor with priviledged action account and generating alert works well. 52835" permutation="rows">
+    <!-- The unit monitor type Id -->
+    <recm key="unitMonitorTypeId">
+      <val>Microsoft.Unix.ShellCommand.ThreeState.MonitorType</val>
+    </recm>
+    <!-- interval for the monitoring object -->
+    <recm key="interval">
+      <val>20</val>
+    </recm>
+    <!-- syncTime for the monitoring object -->
+    <recm key="syncTime">
+      <val>12:00</val>
+    </recm>
+    <!-- targetSystem for the monitoring object -->
+    <recm key="targetSystem">
+      <val>%targetcomputerclass%</val>
+    </recm>
+    <!-- Runas profile for the monitoring object -->
+    <recm key="runasprofile">
+      <val>Privileged</val>
+    </recm>
+    <!-- Type display name used in the alert name -->
+    <recm key="typedisplayname">
+      <val>StateMonTest</val>
+    </recm>
+    <!-- shellCommand for the monitoring object -->
+    <recm key="shellCommand">
+      <val>ls /tmp</val>
+    </recm>
+    <!-- timeOut for the monitoring object -->
+    <recm key="timeOut">
+      <val>30</val>
+    </recm>
+    <!-- Healthy expression for the monitoring object -->
+    <snipref id="HealthyExpressionStdOutHealthy" />
+    <!-- Error expression for the monitoring object -->
+    <snipref id="ErrorExpressionStdOutError" />
+    <!-- Warning expression for the monitoring object -->
+    <snipref id="WarningExpressionStdOutWarning" />
+    <!-- Prerequisiten command to setup the environment -->
+    <recm key="prerequisiteaction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+    <!-- healthy action -->
+    <recm key="healthyAction">
+      <val>rm -f /tmp/error;rm -f /tmp/warning;touch /tmp/healthy</val>
+    </recm>
+    <!-- error action -->
+    <recm key="errorAction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/warning;touch /tmp/error</val>
+    </recm>
+    <!-- warning action -->
+    <recm key="warningAction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;touch /tmp/warning</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+  </var>
+  <!--ShellCommandTemp Three-States Monitor-->
+  <var set="7" lvl="1" vid="371872" cid="UnixShellCommandStateMonitor" cls="Scx.Test.SDK.SDKTests.UnixShellCommandStateMonitor" dsc="Verify a Three-State Monitor on new MP with shell command set to script file path on the UNIX/Linux host works well. 52851" permutation="rows">
+    <!-- The unit monitor type Id -->
+    <recm key="unitMonitorTypeId">
+      <val>Microsoft.Unix.ShellCommand.ThreeState.MonitorType</val>
+    </recm>
+    <!-- interval for the monitoring object -->
+    <recm key="interval">
+      <val>20</val>
+    </recm>
+    <!-- syncTime for the monitoring object -->
+    <recm key="syncTime">
+      <val>12:00</val>
+    </recm>
+    <!-- targetSystem for the monitoring object -->
+    <recm key="targetSystem">
+      <val>%targetcomputerclass%</val>
+    </recm>
+    <!-- Runas profile for the monitoring object -->
+    <recm key="runasprofile">
+      <val>Privileged</val>
+    </recm>
+    <!-- Type display name used in the alert name -->
+    <recm key="typedisplayname">
+      <val>StateMonTest</val>
+    </recm>
+    <!-- shellCommand for the monitoring object -->
+    <recm key="shellCommand">
+      <val>/tmp/teststate.sh</val>
+    </recm>
+    <!-- timeOut for the monitoring object -->
+    <recm key="timeOut">
+      <val>30</val>
+    </recm>
+    <!-- Healthy expression for the monitoring object -->
+    <snipref id="HealthyExpressionStdOutHealthy" />
+    <!-- Error expression for the monitoring object -->
+    <snipref id="ErrorExpressionStdOutError" />
+    <!-- Warning expression for the monitoring object -->
+    <snipref id="WarningExpressionStdOutWarning" />
+    <!-- Prerequisiten command to setup the environment -->
+    <recm key="prerequisiteaction">
+      <val>rm -f /tmp/teststate.sh;touch /tmp/teststate.sh;echo 'ls /tmp' &gt;&gt; /tmp/teststate.sh;chmod 755 /tmp/teststate.sh;rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+    <!-- healthy action -->
+    <recm key="healthyAction">
+      <val>rm -f /tmp/error;rm -f /tmp/warning;touch /tmp/healthy</val>
+    </recm>
+    <!-- error action -->
+    <recm key="errorAction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/warning;touch /tmp/error</val>
+    </recm>
+    <!-- warning action -->
+    <recm key="warningAction">
+      <val>rm -f /tmp/healthy;rm -f /tmp/error;touch /tmp/warning</val>
+    </recm>
+    <!-- Clean up command to clean up the test environment -->
+    <recm key="cleanupcmd">
+      <val>rm -f /tmp/teststate.sh;rm -f /tmp/healthy;rm -f /tmp/error;rm -f /tmp/warning</val>
+    </recm>
+  </var>
+  <!--Shell Command Perf Rule Testing -->
+  <var set="7" lvl="1" vid="371861" cid="ShellCommandPerfRuleTemplate" cls="Scx.Test.SDK.SDKTests.ShellCommandPerfRuleTemplate" dsc="Shell Command performance rule test with full scenario (52979, 52986) 52979" permutation="rows">
+    <!-- Target management pack name -->
+    <recm key="managementPackName">
+      <val>
+      </val>
+      <val>Microsoft.SystemCenter.OperationsManager.DefaultUser</val>
+    </recm>
+    <!-- Display name for the rule-->
+    <recm key="shellCommandName">
+      <val>ShellCommandPerfRuleTest52979</val>
+      <val>ShellCommandPerfRuleTest52986</val>
+    </recm>
+    <!-- Description for the rule -->
+    <recm key="description">
+      <val>Shell command perf rule test, case id 52979</val>
+      <val>Shell command perf rule test, case id 52986</val>
+    </recm>
+    <!-- targetComputerClass for the monitoring object -->
+    <recm key="targetComputerClass">
+      <val>Microsoft.Unix.Computer</val>
+      <val>Microsoft.Linux.Universal.Computer</val>
+    </recm>
+    <!-- targetComputerClass for the monitoring object -->
+    <recm key="targetComputerClassRefMP">
+      <val>Microsoft.Unix.Library</val>
+      <val>Microsoft.Linux.Universal.Library</val>
+    </recm>
+    <!-- Runas profile for the rule {PrivilegedAccount, ActionAccount} -->
+    <recm key="runAsProfile">
+      <val>PrivilegedAccount</val>
+      <val>PrivilegedAccount</val>
+    </recm>
+    <!-- The command content for the rule -->
+    <recm key="command">
+      <val>echo 10</val>
+      <val>echo 12</val>
+    </recm>
+    <!-- timeOut for the rule -->
+    <recm key="timeOut">
+      <val>15</val>
+      <val>15</val>
+    </recm>
+    <!-- interval for the rule -->
+    <recm key="interval">
+      <val>20</val>
+      <val>20</val>
+    </recm>
+    <!-- patter for the rule output -->
+    <recm key="pattern">
+      <val>^[-+]?\d*[0-9]*(\.[0-9]+)?[Ee]?[-+]?[0-9]*$</val>
+      <val>^[-+]?\d*[0-9]*(\.[0-9]+)?[Ee]?[-+]?[0-9]*$</val>
+    </recm>
+    <!-- Expression for the monitoring object -->
+    <snipref id="ExpressionStdOutForShellCommandRule" />
+  </var>
+  <!--Shell Command Perf Rule Testing -->
+  <var set="7" lvl="0" vid="371852" cid="ShellCommandPerfRuleTemplate" cls="Scx.Test.SDK.SDKTests.ShellCommandPerfRuleTemplate" dsc="Shell Command performance rule test with full scenario (52985) 52985" permutation="rows">
+    <!-- Target management pack name -->
+    <recm key="managementPackName">
+      <val>Microsoft.SystemCenter.OperationsManager.DefaultUser</val>
+    </recm>
+    <!-- Display name for the rule-->
+    <recm key="shellCommandName">
+      <val>ShellCommandPerfRuleTest52985</val>
+    </recm>
+    <!-- Description for the rule -->
+    <recm key="description">
+      <val>Shell command perf rule test, case id 52985</val>
+    </recm>
+    <!-- targetComputerClass for the monitoring object -->
+    <recm key="targetComputerClass">
+      <val>Microsoft.Linux.Universal.Computer</val>
+    </recm>
+    <!-- targetComputerClass for the monitoring object -->
+    <recm key="targetComputerClassRefMP">
+      <val>Microsoft.Linux.Universal.Library</val>
+    </recm>
+    <!-- Runas profile for the rule {PrivilegedAccount, ActionAccount} -->
+    <recm key="runAsProfile">
+      <val>ActionAccount</val>
+    </recm>
+    <!-- The command content for the rule -->
+    <recm key="command">
+      <val>echo 21</val>
+    </recm>
+    <!-- timeOut for the rule -->
+    <recm key="timeOut">
+      <val>15</val>
+    </recm>
+    <!-- interval for the rule -->
+    <recm key="interval">
+      <val>20</val>
+    </recm>
+    <!-- patter for the rule output -->
+    <recm key="pattern">
+      <val>^[-+]?\d*[0-9]*(\.[0-9]+)?[Ee]?[-+]?[0-9]*$</val>
+    </recm>
+    <!-- Expression for the monitoring object -->
+    <snipref id="ExpressionStdOutForShellCommandRule" />
+  </var>
+  <!--Shell Command Alert Rule Testing -->
+  <var set="7" lvl="1" vid="371935" cid="ShellCommandAlertRuleTemplate" cls="Scx.Test.SDK.SDKTests.ShellCommandAlertRuleTemplate" dsc="Shell Command alert rule test with full scenario (52557, 52563, 52564) 52557" permutation="rows">
+    <!-- Target management pack name -->
+    <recm key="managementPackName">
+      <val>
+      </val>
+      <val>Microsoft.SystemCenter.OperationsManager.DefaultUser</val>
+      <val>Microsoft.SystemCenter.OperationsManager.DefaultUser</val>
+    </recm>
+    <!-- Display name for the rule-->
+    <recm key="shellCommandName">
+      <val>ShellCommandAlertRuleTest52557</val>
+      <val>ShellCommandAlertRuleTest52563</val>
+      <val>ShellCommandAlertRuleTest52564</val>
+    </recm>
+    <!-- Description for the rule -->
+    <recm key="description">
+      <val>Shell command alert rule test, case id 52557</val>
+      <val>Shell command alert rule test, case id 52563</val>
+      <val>Shell command alert rule test, case id 52564</val>
+    </recm>
+    <!-- targetComputerClass for the monitoring object -->
+    <recm key="targetComputerClass">
+      <val>Microsoft.Unix.Computer</val>
+      <val>Microsoft.Unix.Computer</val>
+      <val>Microsoft.Linux.Universal.Computer</val>
+    </recm>
+    <!-- targetComputerClass for the monitoring object -->
+    <recm key="targetComputerClassRefMP">
+      <val>Microsoft.Unix.Library</val>
+      <val>Microsoft.Unix.Library</val>
+      <val>Microsoft.Linux.Universal.Library</val>
+    </recm>
+    <!-- Runas profile for the rule {PrivilegedAccount, ActionAccount} -->
+    <recm key="runAsProfile">
+      <val>PrivilegedAccount</val>
+      <val>ActionAccount</val>
+      <val>PrivilegedAccount</val>
+    </recm>
+    <!-- The command content for the rule -->
+    <recm key="command">
+      <val>echo error</val>
+      <val>echo error</val>
+      <val>echo error</val>
+    </recm>
+    <!-- timeOut for the rule -->
+    <recm key="timeOut">
+      <val>60</val>
+      <val>60</val>
+      <val>60</val>
+    </recm>
+    <!-- interval for the rule -->
+    <recm key="interval">
+      <val>60</val>
+      <val>60</val>
+      <val>60</val>
+    </recm>
+    <!-- patter for the rule output -->
+    <recm key="pattern">
+      <val>error</val>
+      <val>error</val>
+      <val>error</val>
+    </recm>
+    <!-- Alert priority: {Low = 0, Medium = 1, High = 2} -->
+    <recm key="priority">
+      <val>1</val>
+      <val>2</val>
+      <val>1</val>
+    </recm>
+    <!-- Alert severity: {Information = 0, Warning = 1, Critical = 2} -->
+    <recm key="severity">
+      <val>2</val>
+      <val>1</val>
+      <val>1</val>
+    </recm>
+    <!-- Alert name show in the alert view -->
+    <recm key="alertName">
+      <val>ShellCommandAlertRuleTestName52557</val>
+      <val>ShellCommandAlertRuleTestName52563</val>
+      <val>ShellCommandAlertRuleTestName52564</val>
+    </recm>
+    <!-- Alert description -->
+    <recm key="alertDescription">
+      <val>Shell command alert rule test, case id 52557</val>
+      <val>Shell command alert rule test, case id 52563</val>
+      <val>Shell command alert rule test, case id 52564</val>
+    </recm>
+    <!-- Alert owner name -->
+    <recm key="alertOwner">
+      <val>ShellCommandAlertRuleTestOwner52557</val>
+      <val>ShellCommandAlertRuleTestOwner52563</val>
+      <val>ShellCommandAlertRuleTestOwner52564</val>
+    </recm>
+    <!-- Expression for the monitoring object -->
+    <snipref id="ExpressionStdOutForShellCommandRule" />
+  </var>
+  <var set="8" lvl="1" vid="665009" cid="FileAppServerProviderGetRemoved" cls="Scx.Test.SDK.SDKTests.FileAppServerProviderGetRemoved" dsc="This test will test /var/opt/microsoft/scx/lib/state/AppServerProvider cache file gets removed on a upgrade of the agent" permutation="rows">
+    <recm key="VerifyCmd">
+      <val>test -e /var/opt/microsoft/scx/lib/state/AppServerProvider;echo $?</val>
+    </recm>
+    <recm key="AppInstalledVerifyCmd">
+      <val>rpm -q scx</val>
+    </recm>
+    <recm key="CreateCmd">
+      <val>touch /var/opt/microsoft/scx/lib/state/AppServerProvider</val>
+    </recm>
+    <recm key="RemoveCmd">
+      <val>rm /var/opt/microsoft/scx/lib/state/AppServerProvider</val>
+    </recm>
+    <recm key="ElevatedUninstallAgentTask">
+      <val>Microsoft.Linux.UniversalR.1.Agent.Uninstall.Task</val>
+    </recm>
+    <recm key="ElevatedInstallAgentTask">
+      <val>Microsoft.Linux.UniversalR.1.Agent.Install.Task</val>
+    </recm>
+  </var>
+  <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
+    <!-- <rec key="hostname">scxomd-cent5-01.scx.com</rec>-->
+    <rec key="hostname">a22p-ora6-01.scx.com</rec>
+    <rec key="superuser">root</rec>
+    <rec key="superuserpwd">OpsMgr2007R2</rec>
+    <rec key="nonsuperuser">scxuser</rec>
+    <rec key="nonsuperuserpwd">scxuser</rec>
+    <rec key="testingoverride">SCXTestOverrideUniversalMP</rec>
+    <rec key="cleanupcommand"><![CDATA[rpm -e scx;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.0.*;rm -rf /var/opt/microsoft]]></rec>
+    <rec key="platformtag">universalr.1.x86</rec>
+    <rec key="architecture">x86</rec>
+    <rec key="logicalprocessors">[0-9]{1}</rec>
+    <rec key="isvirtualmachine">Virtual</rec>
+    <rec key="physicalprocessors">\s{0}</rec>
+    <rec key="targetcomputerclass">Microsoft.Linux.Computer</rec>
+    <rec key="targetosclass">Microsoft.Linux.Universal.OperatingSystem</rec>
+    <rec key="managementpack">Microsoft.Linux.UniversalR.1</rec>
+    <rec key="deploytestapp">true</rec>
+    <rec key="omserver"></rec>
+    <rec key="omusername">scxsvc</rec>
+    <rec key="omdomain">scx</rec>
+    <rec key="ompassword">OpsMgr2007R2</rec>
+    <rec key="defaultresourcepool">All Management Servers Resource Pool</rec>
+    <rec key="localagents"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents\DownloadedKits]]></rec>
+    <rec key="remoteagents"><![CDATA[\\scxrel02\ScxCore\MAIN]]></rec>
+    <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'localagents' -->
+    <rec key="uselocalagents">true</rec>
+<!-- If this is true, Use "Install/Upgrade Apache CIM Module" task to install apache CIM module, it false, use command to install apache agent. -->
+    <rec key="useTaskInstallApacheAgent">false</rec>
+    <rec key="apacheAgentPath"><![CDATA[C:\Apache\cimprov]]></rec>
+    <rec key="AgentPkgExt">rpm</rec>
+    <rec key="DirectoryTag">CENTOS5.0_X86</rec>
+    <rec key="latestonly">true</rec>
+    <rec key="installonly">false</rec>
+    <!--
+      Agent maintenance account settings
+      1. credentials type: 
+         SSHKey = 0, BasicAuth = 1,;
+     
+      2. type of account: 
+         priviledged = 0, unpriviledged = 1  
+  
+      3. sshkey credential type
+         withPassphrase = 0, withoutPassphrase = 1
+  
+      4. elevated credential type
+         None = 0, su = 1, sudo = 2 
+     -->
+    <rec key="UseAgentMaintenanceAccount">true</rec>
+    <rec key="agentcredentialSettings">1,0,0,0</rec>
+    <!--
+    Performanace Data Collection test Setting
+    -->
+    <rec key="basetime">
+    </rec>
+    <rec key="startrange">-23:59:59</rec>
+    <rec key="endrange">23:59:59</rec>
+    <varref />
+  </grp>
+</varmap>

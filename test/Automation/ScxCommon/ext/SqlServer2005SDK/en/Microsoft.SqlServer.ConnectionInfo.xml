@@ -1,0 +1,1618 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+	<assembly>
+		<name>Microsoft.SqlServer.ConnectionInfo</name>
+	</assembly>
+	<members>
+		<member name="N:Microsoft.SqlServer.Management.Common">
+			<summary>The <see cref="Microsoft.SqlServer.Management.Common"></see> namespace contains classes that represent a connection to an instance of SQL Server from an SMO or RMO application. </summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.AutoDisconnectMode">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.AutoDisconnectMode"></see> enumeration contains values that are used to specify the automatic disconnection options for a connection to an instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.AutoDisconnectMode.DisconnectIfPooled">
+			<summary>The connection is disconnected from the instance of MicrosoftSQL Server if the connection is pooled.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.AutoDisconnectMode.NoAutoDisconnect">
+			<summary>The connection is not disconnected automatically.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.CapturedSql">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.CapturedSql"></see> class represents the Transact-SQL commands that are sent to the instance of Microsoft SQL Server by way of the referenced connection but then redirected to a buffer rather than run immediately on the instance of SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.CapturedSql.Add(System.String)">
+			<summary>Adds a Transact-SQL statement to the captured Transact-SQL commands in the buffer.</summary>
+			<param name="sqlStatement">A <see cref="T:System.String"></see> value that specifies the Transact-SQL statement.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.CapturedSql.Clear">
+			<summary>Clears the buffer that contains the captured Transact-SQL commands.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.CapturedSql.Text">
+			<summary>Gets the captured Transact-SQL commands in the buffer.</summary>
+			<returns>A <see cref="T:System.Collections.Specialized.StringCollection"></see> system object value that contains the captured Transact-SQL commands.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException"></see> class is an exception that is raised when an unsuccessful attempt is made to change the password of the logon used to establish a connection with the instance of MicrosoftSQL Server by using SQL Server Authentication.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ChangePasswordFailureException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException"></see> class is an exception that is raised when an unsuccessful attempt is made to change the connection to the instance of Microsoft SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionCannotBeChangedException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionException"></see> class is an exception that is raised when an error occurs on the connection to the instance of Microsoft SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionException"></see> class with the specified serialization information and streaming context.</summary>
+			<param name="context">A <see cref="T:System.Runtime.Serialization.StreamingContext"></see> system object that specifies the streaming context for the exception.</param>
+			<param name="info">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> system object that specifies the serialization information for the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionFailureException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionFailureException"></see> class is an exception that is raised when an unsuccessful attempt is made to establish a connection with the instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionFailureException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionFailureException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionFailureException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionFailureException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionFailureException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionFailureException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase"></see> object is a base class that is used in the construction of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class and it represents information used to connect to an instance of SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.#ctor(Microsoft.SqlServer.Management.Common.ConnectionInfoBase)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase"></see> class based on the specified object.</summary>
+			<param name="conn">A <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase"></see> object value that specifies connection information on which to base the new object.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.#ctor(Microsoft.SqlServer.Management.Common.ConnectionType)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase"></see> class with the specified connection type.</summary>
+			<param name="serverType">A <see cref="T:Microsoft.AnalysisServices.ConnectionType"></see>  object value that specifies the type of connection.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.ToString">
+			<summary>Returns the object as a string value.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionInfoBase"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.ServerCaseSensitivity">
+			<summary>Gets or sets the server case sensitivity for the connection.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.ServerCaseSensitivity"></see> system object value that specifies the server case sensitivity for the connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.ServerType">
+			<summary>Gets or sets the server connection type.</summary>
+			<returns>A <see cref="T:Microsoft.AnalysisServices.ConnectionType"></see> system object value that specifies the type of connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionInfoBase.ServerVersion">
+			<summary>Gets or sets the version information about the instance of SQL Server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.ServerVersion"></see> system object value that specifies the version information about the instance of SQL Server.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionManager">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionManager"></see> class manages the connection to an instance of SQL Server.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Common.ConnectionManager.InfoMessage">
+			<summary>The event that occurs when the instance of SQL Server generates an informational message. </summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Common.ConnectionManager.RemoteLoginFailed">
+			<summary>This event occurs when a remote login fails to connect to the instance of SQL Server.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Common.ConnectionManager.StateChange">
+			<summary>The event that occurs when the instance of SQL Server changes state. </summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Common.ConnectionManager.StatementExecuted">
+			<summary>The event that occurs when the instance of SQL Server executes a statement on the current connection. </summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionManager.Connect">
+			<summary>Connects to the instance of SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionManager.Disconnect">
+			<summary>Disconnects from the instance of SQL Server.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.AutoDisconnectMode">
+			<summary>Gets or sets the automatic disconnection mode of the referenced connection to the instance of SQL Server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.AutoDisconnectMode"></see> object value that specifies the automatic disconnection mode of the referenced connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.CapturedSql">
+			<summary>Gets the Transact-SQL statements that are captured when the connection is running in capture mode.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.CapturedSql"></see> object value that contains the captured Transact-SQL statements.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.InUse">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether the connection is being used.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> object value that specifies whether the connection is in use.If True, the connection is in use.In False (default), the connection is not in use.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.IsOpen">
+			<summary>Gets the <see cref="T:System.Boolean"></see> property value that specifies whether the connection is currently open.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection is open.If True, the connection is open.If False (default), the connection is not open.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.LockTimeout">
+			<summary>Gets or sets the time in seconds required for the connection to time out when the current transaction is locked.</summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the time in seconds for the connection to time out when the current transaction is locked.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.ServerVersion">
+			<summary>Gets the version of the connected instance of SQL Server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.ServerVersion"></see> object value that specifies the version of the connected instance of SQL Server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionManager.SqlConnectionObject">
+			<summary>Gets the connection object.</summary>
+			<returns>A <see cref="T:System.Data.SqlClient.SqlConnection"></see> object value that specifies the connection.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionSettings">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionSettings"></see> class represents the settings used by a connection to an instance of a server, such as MicrosoftSQL Server. The <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class inherits <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionSettings"></see> class. </summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionSettings.NoConnectionTimeout">
+			<summary>Gets or sets the <see cref="T:System.Int32"></see> value that specifies the time the connection takes to time out in seconds.</summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the time the connection takes to time out in seconds.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ConnectionSettings.ToString">
+			<summary>Returns the referenced object name as a string.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the referenced object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ApplicationName">
+			<summary>Gets or sets the name of the application that has established the connection with the server.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the application.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ConnectAsUser">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether the connection is established using impersonation.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection is established using impersonation.If True, the connection is established using impersonation.If False (default), the connection is established using the credentials specified by the <see cref="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.Login"></see> and <see cref="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.Password"></see> properties.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ConnectAsUserName">
+			<summary>Gets or sets the name of the user when connecting using impersonation.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the user name used when the connection is established using impersonation of a user.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ConnectAsUserPassword">
+			<summary>Gets or sets the password for the user when connecting using impersonation.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the user password used when the connection is established using impersonation of a user.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ConnectionString">
+			<summary>Gets or sets the connection string used to establish a connection with a specified data source. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the connection string used to establish a connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ConnectTimeout">
+			<summary>Gets or sets the connection time-out period in seconds.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the connection time-out period in seconds.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.DatabaseName">
+			<summary>Gets or sets the database required by the connection.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the database specified by the connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.EncryptConnection">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether the connection is encrypted.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection is encrypted.If True, the connection is encrypted.If False (default), the connection is not encrypted.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.Login">
+			<summary>Gets or sets the logon required to establish a connection with the instance of the server.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the logon required to establish a connection with the instance of the server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.LoginSecure">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property that specifies whether the connection is established to the server by using Windows Authentication or SQL Server Authentication.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection is established to the server by using Windows Authentication or SQL Server Authentication.If True (default), Windows Authentication is used to establish a connection with the server.If False, SQL Server Authentication is used to establish a connection with the server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.MaxPoolSize">
+			<summary>Gets or sets the maximum number of connections in a connection pool that the specified connection accepts when establishing a connection with a server.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the maximum number of connections in a connection pool.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.MinPoolSize">
+			<summary>Gets or sets the minimum number of connections in a connection pool that the specified connection accepts when establishing a connection with a server.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the minimum number of connections in a connection pool.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.MultipleActiveResultSets">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether more than one active result set is permitted.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether more than one active result set is permitted.If True, multiple active result sets are permitted.If False (default), multiple active result sets are not permitted.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.NetworkProtocol">
+			<summary>Gets or sets the network protocol used to establish the connection to the server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.NetworkProtocol"></see> object value that specifies the network protocol used to establish the connection to the server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.NonPooledConnection">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether the connection may be pooled or nonpooled.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection may be pooled or nonpooled. If True, the connection must be nonpooled and not be part of a connection pool.If False (default), the connection may be pooled and part of a connection pool.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.PacketSize">
+			<summary>Gets or sets the packets of data sent between the client and the server over the network in bytes.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the network packet size in bytes.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.Password">
+			<summary>Gets or sets the password used with the logon to establish a connection with the server when SQL Server Authentication is used. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the password that is required when you are using SQL Server Authentication.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.PooledConnectionLifetime">
+			<summary>Gets or sets the lifetime of the pooled connection.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the lifetime of the pooled connection in seconds.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.SecurePassword">
+			<summary>Gets or sets the secure password used with the logon to establish a connection with the server when SQL Server Authentication is used. </summary>
+			<returns>A <see cref="T:System.Security.SecureString"></see> value that specifies the secure password that is required when you are using SQL Server Authentication.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.ServerInstance">
+			<summary>Gets or sets the name of the server. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ConnectionSettings.WorkstationId">
+			<summary>Gets or sets the ID value that uniquely identifies the workstation.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the ID value that uniquely identifies the workstation.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ConnectionType">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionType"></see> enumeration contains values that are used to specify the type of server with which the connection is established.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionType.Olap">
+			<summary>An Analysis Services online analytical processing (OLAP) server.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionType.ReportServer">
+			<summary>A Reporting Services server.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionType.Sql">
+			<summary>An instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionType.SqlCE">
+			<summary>An instance of MicrosoftSQL Server CE.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionType.SqlConnection">
+			<summary>A connection to an instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ConnectionType.WmiManagementScope">
+			<summary>A Microsoft Windows Management Instrumentation (WMI) management service connection.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.DataTransferEventArgs">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventArgs"></see> class represents the arguments used when a data transfer event is raised.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.DataTransferEventArgs.#ctor(Microsoft.SqlServer.Management.Common.DataTransferEventType,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventArgs"></see> class for the specified event and with the specified message.</summary>
+			<param name="eventType">A <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventType"></see> object that specifies the type of event that is associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventArgs"></see> object.</param>
+			<param name="message">A string value that specifies the message text associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventType"></see> object.</param>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.DataTransferEventArgs.DataTransferEventType">
+			<summary>Gets the type of data transfer event associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventArgs"></see> object.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventType"></see> object that specifies the type of data transfer event associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventArgs"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.DataTransferEventArgs.Message">
+			<summary>Gets the message text associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventType"></see> object.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the message text associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventType"></see> object.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.DataTransferEventHandler">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventHandler"></see> class represents the method that handles the event raised by the data transfer process.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.DataTransferEventType">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferEventType"></see> enumeration contains values that are used to specify the type of data transfer event.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferEventType.Information">
+			<summary>An informational event.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferEventType.Progress">
+			<summary>A progress event.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferEventType.Warning">
+			<summary>A warning event.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs"></see> class represents the arguments used when a data transfer progress event is raised.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs.DataTransferProgressEventType">
+			<summary>Gets the type of data transfer progress event associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs"></see> object.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType"></see> object that specifies the type of data transfer progress event associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs.Exception">
+			<summary>Gets the exception associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType"></see> object.</summary>
+			<returns>An Exception object value that specifies the exception associated with the <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs.ProgressCount">
+			<summary>Gets the current number of items transferred. </summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the current number of items transferred..</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.DataTransferProgressEventArgs.TransferId">
+			<summary>Gets the ID value that uniquely identifies the data transfer progress event. </summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the ID value that uniquely identifies the data transfer progress event.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventHandler">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventHandler"></see> class represents the method that handles the event raised by the data transfer progress reporting process.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType"></see> enumeration contains values that are used to specify the type of data transfer progress event.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.AllowedToFailPrologueSql">
+			<summary>An event that occurs when a prologue Transact-SQL command is allowed to fail.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.CancelQuery">
+			<summary>An event that occurs when a Transact-SQL query is canceled.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.CommitTransaction">
+			<summary>An event that occurs when a transaction is committed.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.Error">
+			<summary>An event that occurs when an error occurs.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.ExecuteCompensatingSql">
+			<summary>An event that occurs when compensating Transact-SQL commands are executed.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.ExecuteEpilogueSql">
+			<summary>An event that occurs when epilogue Transact-SQL commands are executed.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.ExecuteNonTransactableSql">
+			<summary>An event that occurs when non-transactable Transact-SQL commands are executed.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.ExecutePrologueSql">
+			<summary>An event that occurs when prologue Transact-SQL commands are executed.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.ExecutingDataFlow">
+			<summary>An event that occurs when executing data flow.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.GenerateDataFlow">
+			<summary>An event that occurs when generating data flow.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.RollbackTransaction">
+			<summary>An event that occurs when a transaction is rolled back.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.StartTransaction">
+			<summary>An event that occurs when a transaction is started.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.DataTransferProgressEventType.TransferringRows">
+			<summary>An event that occurs when transferring rows.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ExecutionFailureException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionFailureException"></see> class is an exception that is raised when an execution failure is encountered on the connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ExecutionFailureException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionFailureException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ExecutionFailureException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionFailureException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ExecutionFailureException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionFailureException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ExecutionTypes">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionTypes"></see> enumeration contains values that are used to specify execution options for the Transact-SQL commands sent to the server using the referenced connection.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ExecutionTypes.ContinueOnError">
+			<summary>Continue execution after an error occurs.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ExecutionTypes.Default">
+			<summary>Default execution path.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ExecutionTypes.NoCommands">
+			<summary>No executable commands.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ExecutionTypes.NoExec">
+			<summary>No execution.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ExecutionTypes.ParseOnly">
+			<summary>Parse the executable commands only.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ExecutionTypes.QuotedIdentifierOn">
+			<summary>Identifiers are used to delimit commands.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.FixedServerRoles">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.FixedServerRoles"></see> enumeration contains values that are used to specify fixed server roles that can be assigned to logons.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.BulkAdmin">
+			<summary>Administers bulk operations.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.DBCreator">
+			<summary>Can create databases.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.DiskAdmin">
+			<summary>Can alter resources.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.None">
+			<summary>No server role.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.ProcessAdmin">
+			<summary>Can alter connections.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.SecurityAdmin">
+			<summary>Can alter logons.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.ServerAdmin">
+			<summary>Can alter MicrosoftSQL Server settings, shut down the SQL Server Service, create and alter endpoints, alter the SQL Server state, and alter resources.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.SetupAdmin">
+			<summary>Can alter linked servers.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.FixedServerRoles.SysAdmin">
+			<summary>Can control any aspect of the instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.IAlterable">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.IAlterable"></see> class represents an interface that implements the Alter method on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.IAlterable.Alter">
+			<summary>Updates any property changes on an instance of Microsoft SQL Server. </summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ICreatable">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ICreatable"></see> class represents an interface that implements the Create method on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ICreatable.Create">
+			<summary>Creates an object on the server as defined by the referenced SQL Server Management Objects (SMO) object.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.IDataTransferProvider">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.IDataTransferProvider"></see> class represents an interface that implements data transfers on the referenced connection.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Common.IDataTransferProvider.TransferEvent">
+			<summary>Represents the event raised when the transfer process occurs.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.IDataTransferProvider.Configure(Microsoft.SqlServer.Management.Common.ITransferMetadataProvider)">
+			<summary>Configures the data transfer interface for the data transfer process.</summary>
+			<param name="metadataProvider">An <see cref="T:Microsoft.SqlServer.Management.Common.ITransferMetadataProvider"></see> object that specifies the metadata required for the data transfer process.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.IDataTransferProvider.ExecuteTransfer">
+			<summary>Executes the transfer process.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.IDroppable">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.IDroppable"></see> class represents an interface that implements the Drop method on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.IDroppable.Drop">
+			<summary>Removes the referenced object.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.IMarkForDrop">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.IMarkForDrop"></see> class represents an interface that implements the IMarkForDrop method on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.IMarkForDrop.MarkForDrop(System.Boolean)">
+			<summary>Marks the referenced object to be dropped next time its parent object is altered by the Alter method. </summary>
+			<param name="dropOnAlter">A <see cref="T:System.Boolean"></see> value that specifies whether to drop an object when its parent object is altered with the Alter method.If True, the object is dropped when the Alter method is run on the parent object.If False, the object is dropped immediately.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.InvalidArgumentException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.InvalidArgumentException"></see> class is an exception that is raised when a parameter that is not valid is passed to a method on the referenced connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.InvalidArgumentException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.InvalidArgumentException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.InvalidArgumentException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.InvalidArgumentException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.InvalidArgumentException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.InvalidArgumentException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException"></see> class is an exception that is raised when a property is set to a value that is not valid on the referenced connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.InvalidPropertyValueException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.IRenamable">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.IRenamable"></see> class represents an interface that implements the Rename method on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.IRenamable.Rename(System.String)">
+			<summary>Renames the referenced object.</summary>
+			<param name="newname">A <see cref="T:System.String"></see> value that specifies the new name of the object.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.IRestrictedAccess">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.IRestrictedAccess"></see> class represents an interface that implements single-user access to the server for the referenced connection.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.IRestrictedAccess.SingleConnection">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property that specifies whether access to the server is restricted to a single user.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether access to the server is restricted to a single user.If True, access to the server is restricted to a single user.If False (default), access to the server is not restricted and multiple users can connect.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ITransferMetadataProvider">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ITransferMetadataProvider"></see> class represents an interface that implements the transfer metadata process on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ITransferMetadataProvider.GetOptions">
+			<summary>Gets the options for the transfer metadata process on the referenced connection.</summary>
+			<returns>A <see cref="T:System.Collections.SortedList"></see> system object that contains the options for the transfer metadata process.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ITransferMetadataProvider.SaveMetadata">
+			<summary>Saves the metadata for the transfer process on the referenced connection.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.NetworkProtocol">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.NetworkProtocol"></see> enumeration contains values that are used to specify network protocols used on the network where the referenced connection is established. </summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.AppleTalk">
+			<summary>AppleTalk network protocol.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.BanyanVines">
+			<summary>Banyan Vines network protocol.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.Multiprotocol">
+			<summary>Multiprotocol network protocol.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.NamedPipes">
+			<summary>Named pipes network protocol.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.NotSpecified">
+			<summary>Network protocol is not specified.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.NWLinkIpxSpx">
+			<summary>NWLink IPX/SPX network protocol.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.SharedMemory">
+			<summary>Shared memory.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.TcpIp">
+			<summary>TCP/IP network protocol.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.NetworkProtocol.Via">
+			<summary>VIA network protocol.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.NotInTransactionException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.NotInTransactionException"></see> class is an exception that is raised when an error occurs within a transaction on the referenced connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.NotInTransactionException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.NotInTransactionException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.NotInTransactionException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.NotInTransactionException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.NotInTransactionException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.NotInTransactionException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.OlapConnectionInfo">
+			<summary>This class supports the SQL Server Management Objects infrastructure and is not intended to be used directly from your code. </summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.OlapConnectionInfo.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.OlapConnectionInfo.CreateConnectionObject">
+			<summary>Creates the connection object and returns the <see cref="T:System.Data.IDbConnection"></see> object value.</summary>
+			<returns>A <see cref="T:System.Data.IDbConnection"></see> value that specifies the connection object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.OlapConnectionInfo.ConnectionString">
+			<summary>Gets the connection string.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the connection string.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException"></see> class is an exception that is raised when an unavailable property is requested on the connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotAvailableException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.PropertyNotSetException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotSetException"></see> class is an exception that is raised when a process requests a property that has not been set on the connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.PropertyNotSetException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotSetException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.PropertyNotSetException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotSetException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.PropertyNotSetException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.PropertyNotSetException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ServerCaseSensitivity">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ServerCaseSensitivity"></see> enumeration contains values that are used to specify whether the server is sensitive to the case (lower or upper) of text.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerCaseSensitivity.CaseInsensitive">
+			<summary>The server is case-insensitive.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerCaseSensitivity.CaseSensitive">
+			<summary>The server is case-sensitive.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerCaseSensitivity.Unknown">
+			<summary>The case-sensitivity of the server is unknown.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ServerConnection">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> object represents a connection to a server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.#ctor(System.Data.SqlClient.SqlConnection)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class with the specified connection parameters.</summary>
+			<param name="sqlConnection">A <see cref="T:System.Data.SqlClient.SqlConnection"></see> system object that specifies connection parameters associated with the referenced connection.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.#ctor(Microsoft.SqlServer.Management.Common.SqlConnectionInfo)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class with the specified connection information.</summary>
+			<param name="sci">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the connection information that is required to establish a connection.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class with the specified server instance.</summary>
+			<param name="serverInstance">A <see cref="T:System.String"></see> value that specifies the name of the instance of the server with which the connection is established.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.#ctor(System.String,System.String,System.Security.SecureString)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class with the specified server instance and logon credentials.</summary>
+			<param name="userName">A <see cref="T:System.String"></see> value that specifies the logon account used to establish the referenced connection.</param>
+			<param name="serverInstance">A <see cref="T:System.String"></see> value that specifies the name of the instance of the server with which the connection is established.</param>
+			<param name="password">A <see cref="T:System.Security.SecureString"></see> value that specifies the password used with the logon account.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.#ctor(System.String,System.String,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> class with the specified server instance and logon credentials.</summary>
+			<param name="userName">A <see cref="T:System.String"></see> value that specifies the logon account used to establish the referenced connection.</param>
+			<param name="serverInstance">A <see cref="T:System.String"></see> value that specifies the name of the instance of the server with which the connection is established.</param>
+			<param name="password">A <see cref="T:System.String"></see> value that specifies the password used with the logon account.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.BeginTransaction">
+			<summary>Starts a transaction on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.Cancel">
+			<summary>Cancels the connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ChangePassword(System.Security.SecureString)">
+			<summary>Changes the login password that is used with standard authentication.</summary>
+			<param name="newPassword">A <see cref="T:System.Security.SecureString"></see> value that specifies the new password.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ChangePassword(System.String)">
+			<summary>Changes the logon password that is used with standard authentication.</summary>
+			<param name="newPassword">A <see cref="T:System.String"></see> value that specifies the new password.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.CommitTransaction">
+			<summary>Commits the current transaction on the referenced connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.Copy">
+			<summary>Returns a copy of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> object.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> object that is a copy of the referenced <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> object.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteNonQuery(System.String)">
+			<summary>Executes a statement that does not return a result set.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the total number of rows affected by the Transact-SQL command for UPDATE, INSERT, and DELETE statements. For all other types of statements, the return value is -1.</returns>
+			<param name="sqlCommand">A <see cref="T:System.String"></see> value that specifies the Transact-SQL command to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteNonQuery(System.Collections.Specialized.StringCollection)">
+			<summary>Executes a batch of statements that do not return a result set.</summary>
+			<returns>An <see cref="T:System.Int32"></see> array value that specifies the total number of rows affected by each element of the <see cref="T:System.Collections.Specialized.StringCollection"></see> object used as the sqlCommands parameter. The return value specifies the total number of rows affected by the Transact-SQL command for UPDATE, INSERT, and DELETE statements. For all other types of statements, the return value is -1.</returns>
+			<param name="sqlCommands">A <see cref="T:System.Collections.Specialized.StringCollection"></see> system object value that specifies the batches of Transact-SQL statements to be executed. </param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteNonQuery(System.String,Microsoft.SqlServer.Management.Common.ExecutionTypes)">
+			<summary>Executes a statement with the specified execution options that does not return a result set.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the total number of rows affected by the Transact-SQL command for UPDATE, INSERT, and DELETE statements. For all other types of statements, the return value is -1.</returns>
+			<param name="executionType">An <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionTypes"></see> object value that specifies the execution options for the Transact-SQL statement.</param>
+			<param name="sqlCommand">A <see cref="T:System.String"></see> value that specifies the Transact-SQL command to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteNonQuery(System.Collections.Specialized.StringCollection,Microsoft.SqlServer.Management.Common.ExecutionTypes)">
+			<summary>Executes a batch of statements with the specified execution options that does not return a result set.</summary>
+			<returns>An <see cref="T:System.Int32"></see> array value that specifies the total number of rows affected by each element of the <see cref="T:System.Collections.Specialized.StringCollection"></see> object used as the sqlCommands parameter. The return value specifies the total number of rows affected by the Transact-SQL command for UPDATE, INSERT, and DELETE statements. For all other types of statements, the return value is -1.</returns>
+			<param name="sqlCommands">A <see cref="T:System.Collections.Specialized.StringCollection"></see> system object value that specifies the batches of Transact-SQL statements to be executed. </param>
+			<param name="executionType">An <see cref="T:Microsoft.SqlServer.Management.Common.ExecutionTypes"></see> object value that specifies the execution options for the Transact-SQL statement.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteReader(System.String)">
+			<summary>Executes Transact-SQL statements that return one or multiple result sets.</summary>
+			<returns>A <see cref="T:System.Data.SqlClient.SqlDataReader"></see> object value that contains one or more result sets.</returns>
+			<param name="sqlCommand">A <see cref="T:System.String"></see> value that specifies the Transact-SQL command to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteScalar(System.String)">
+			<summary>Executes a Transact-SQL statement and returns the first column of the first row as an object value.</summary>
+			<returns>An <see cref="T:System.Object"></see> system object value that specifies the first column of the first row of the result set.</returns>
+			<param name="sqlCommand">A <see cref="T:System.String"></see> value that specifies the Transact-SQL command to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteScalar(System.Collections.Specialized.StringCollection)">
+			<summary>Executes a batch of Transact-SQL statements and returns the first column of the first row as an object value.</summary>
+			<returns>An object array value that specifies the first column of the first row for each result set.</returns>
+			<param name="sqlCommands">A <see cref="T:System.Collections.Specialized.StringCollection"></see> system object value that specifies the batches of Transact-SQL statements to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteWithResults(System.String)">
+			<summary>Executes a Transact-SQL statement that returns a result set.</summary>
+			<returns>A <see cref="T:System.Data.DataSet"></see> system object value that contains the result set.</returns>
+			<param name="sqlCommand">A <see cref="T:System.String"></see> value that specifies the Transact-SQL command to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.ExecuteWithResults(System.Collections.Specialized.StringCollection)">
+			<summary>Executes a batch of Transact-SQL statements that return multiple result sets.</summary>
+			<returns>A <see cref="T:System.Data.DataSet"></see> system object array value that contains multiple result sets.</returns>
+			<param name="sqlCommands">A <see cref="T:System.Collections.Specialized.StringCollection"></see> system object value that specifies the batches of Transact-SQL statements to be executed.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.IsInFixedServerRole(Microsoft.SqlServer.Management.Common.FixedServerRoles)">
+			<summary>Tests whether the logon associated with the referenced connection is a member of the specified fixed server role.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the logon is a member of the specified fixed server role.If True, the logon is a member of the specified fixed server role.If False, the logon is not a member of the specified fixed server role.</returns>
+			<param name="fixedServerRole">A <see cref="P:Microsoft.SqlServer.Management.Common.ServerConnection.FixedServerRoles"></see> object value that specifies the fixed server role to be compared with the logon.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerConnection.RollBackTransaction">
+			<summary>Rolls back the current transaction.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.BatchSeparator">
+			<summary>Gets or sets the string value used to separate batches in the referenced connection.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the batch separator for the referenced connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.FixedServerRoles">
+			<summary>Gets the fixed server role associated with the referenced connection.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.FixedServerRoles"></see> object value that specifies the fixed server role associated with the referenced connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.ProcessID">
+			<summary>Gets the ID value that uniquely identifies the process associated with the referenced connection to the server.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the ID value that uniquely identifies the process associated with the referenced connection to the server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.SqlExecutionModes">
+			<summary>Gets or sets the execution mode associated with the referenced connection to the server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.SqlExecutionModes"></see> object value that specifies the execution mode associated with the referenced connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.StatementTimeout">
+			<summary>Gets or sets the number of seconds a statement is given to run before failing with a time-out error.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the number of seconds a statement is given to run before failing with a time-out error.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.TransactionDepth">
+			<summary>Gets the current transaction depth for the referenced connection.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the current transaction depth for the referenced connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.TrueLogin">
+			<summary>Gets the current logon record name used by the referenced connection.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the current logon record name used by the referenced connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.TrueName">
+			<summary>Gets the name of the server.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerConnection.UserProfile">
+			<summary>Gets the user profile associated with the referenced connection.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.ServerUserProfiles"></see> object value that specifies the user profile associated with the referenced connection.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs"></see> class represents the arguments used when a server message event is raised.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs.#ctor(System.Data.SqlClient.SqlError)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs"></see> class for the specified event and with the specified error.</summary>
+			<param name="sqlError">A <see cref="T:System.Data.SqlClient.SqlError"></see> system object value that specifies the error associated with the server message event.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs.ToString">
+			<summary>Returns a <see cref="T:System.String"></see> that represents the <see cref="T:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs"></see> object.</summary>
+			<returns>A <see cref="T:System.String"></see> that represents the <see cref="T:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerMessageEventArgs.Error">
+			<summary>Gets the error associated with the server message event.</summary>
+			<returns>A <see cref="T:System.Data.SqlClient.SqlError"></see> system object value that specifies the error associated with the server message event.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ServerMessageEventHandler">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ServerMessageEventHandler"></see> class represents the method that handles the event raised by a server message.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ServerUserProfiles">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ServerUserProfiles"></see> enumeration contains values that are used to specify user profiles on the server.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerUserProfiles.All">
+			<summary>All types of profiles.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerUserProfiles.CreateDatabase">
+			<summary>Creates a create database profile.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerUserProfiles.CreateXP">
+			<summary>Creates a create extended stored procedure profile.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.ServerUserProfiles.None">
+			<summary>No profile is created.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.ServerVersion">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.ServerVersion"></see> class represents the version information for the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerVersion.#ctor(System.Int32,System.Int32)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerVersion"></see> class.</summary>
+			<param name="major">An <see cref="T:System.Int32"></see> value that specifies the major part of the server version number.</param>
+			<param name="minor">An <see cref="T:System.Int32"></see> value that specifies the minor part of the server version number.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerVersion.#ctor(System.Int32,System.Int32,System.Int32)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.ServerVersion"></see> class.</summary>
+			<param name="buildNumber">An <see cref="T:System.Int32"></see> value that specifies the build number part of the server version number.</param>
+			<param name="major">An <see cref="T:System.Int32"></see> value that specifies the major part of the server version number.</param>
+			<param name="minor">An <see cref="T:System.Int32"></see> value that specifies the minor part of the server version number.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.ServerVersion.ToString">
+			<summary>Returns the object in string format. </summary>
+			<returns>An <see cref="T:System.String"></see> value that specifies the object in string format.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerVersion.BuildNumber">
+			<summary>Gets the build number part of the server version information. </summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the build number part of the server version information.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerVersion.Major">
+			<summary>Gets the build number part of the server version information. </summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the build number part of the server version information.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.ServerVersion.Minor">
+			<summary>Gets the build number part of the server version information. </summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the build number part of the server version information.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object represents information that is required to establish a connection to an instance of SQL Server. </summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.#ctor(Microsoft.SqlServer.Management.Common.SqlConnectionInfo)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> class.</summary>
+			<param name="conn">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the object on which to base the new <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> class.</summary>
+			<param name="serverName">A <see cref="T:System.String"></see> object value that specifies the instance of SQL Server.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.#ctor(Microsoft.SqlServer.Management.Common.ServerConnection,Microsoft.SqlServer.Management.Common.ConnectionType)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> class.</summary>
+			<param name="serverConnection">A <see cref="T:Microsoft.SqlServer.Management.Common.ServerConnection"></see> object value that specifies an existing connection on which to base the new <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object.</param>
+			<param name="connectionType">A <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionType"></see> object value that specifies the type of connection.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.#ctor(System.String,System.String,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> class.</summary>
+			<param name="serverName">A <see cref="T:System.String"></see> object value that specifies the instance of SQL Server.</param>
+			<param name="userName">A <see cref="T:System.String"></see> object value that specifies the user who is connected to the instance of SQL Server.</param>
+			<param name="password">A <see cref="T:System.String"></see> object value that specifies the password supplied by the user to connect to the instance of SQL Server.</param>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.DefaultNetworkProtocol">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.NetworkProtocol"></see> object that specifies the default network protocol for the connection.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.Copy">
+			<summary>Returns a copy of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the copy of the original, referenced <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.CreateConnectionObject">
+			<summary>Creates a system connection object.</summary>
+			<returns>A <see cref="T:System.Data.IDbConnection"></see> system object value that specifies the connection object.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.ToString">
+			<summary>Returns the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object in string format.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.ApplicationName">
+			<summary>Gets or sets the name of the application that is connected to the instance of SQL Server.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the application.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.ConnectionProtocol">
+			<summary>Gets or sets the network protocol used by the connection to the instance of SQL Server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.NetworkProtocol"></see> value that specifies the network protocol used by the connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.ConnectionString">
+			<summary>Gets the connection string used when the connection is established with the instance of SQL Server.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the connection string used to establish the connection to the instance of SQL Server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.EncryptConnection">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether the connection information is encrypted. </summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection information is encrypted.If True, the connection information is encrypted.If False (default), the connection information is not encrypted.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.MaxPoolSize">
+			<summary>Gets or sets the maximum number of execution threads in a thread pool that the connection will accept. </summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the maximum number of threads in a thread pool the connection will accept.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.MinPoolSize">
+			<summary>Gets or sets the minimum number of execution threads in a thread pool that the connection will accept. </summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the minimum number of threads in a thread pool the connection will accept.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.PacketSize">
+			<summary>Gets or sets the network packet size used by the connection to send and receive data in bytes. </summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the network packet sized used by the connection in bytes.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.PoolConnectionLifeTime">
+			<summary>Gets or sets the pool connection period in seconds. </summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the pool connection period in seconds.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.Pooled">
+			<summary>Gets or sets the <see cref="T:System.Data.SqlTypes.SqlBoolean"></see> property value that specifies whether the connection is pooled. </summary>
+			<returns>A <see cref="T:System.Data.SqlTypes.SqlBoolean"></see> value that specifies whether the connection is pooled.If True, the connection is pooled.If False (default), the connection is not pooled.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlConnectionInfo.WorkstationId">
+			<summary>Gets or sets the value that uniquely identifies the client workstation. </summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the value that uniquely identifies the client workstation.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.SqlExecutionModes">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.SqlExecutionModes"></see> enumeration contains values that are used to specify whether the commands sent to the referenced connection to the server are executed immediately or saved in a buffer. </summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlExecutionModes.CaptureSql">
+			<summary>Transact-SQL statements that are sent to the referenced connection to the server are saved in a buffer.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlExecutionModes.ExecuteAndCaptureSql">
+			<summary>Transact-SQL statements that are sent to the referenced connection to the server are both saved in a buffer and forwarded to the server for immediate execution. </summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlExecutionModes.ExecuteSql">
+			<summary>Transact-SQL statements that are sent to the referenced connection to the server are forwarded to the server for immediate execution. </summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class represents information used to connect to the instance of SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.#ctor(Microsoft.SqlServer.Management.Common.ConnectionType)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class.</summary>
+			<param name="serverType">A <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionType"></see> object value that specifies the type of connection.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.#ctor(Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class.</summary>
+			<param name="conn">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> object value on which to base the new object.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.#ctor(System.String,Microsoft.SqlServer.Management.Common.ConnectionType)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class.</summary>
+			<param name="serverName">A <see cref="T:System.String"></see> value that specifies the instance of SQL Server.</param>
+			<param name="serverType">A <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionType"></see> object value that specifies the type of connection.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.#ctor(System.String,System.String,System.String,Microsoft.SqlServer.Management.Common.ConnectionType)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> class.</summary>
+			<param name="serverName">A <see cref="T:System.String"></see> value that specifies the instance of SQL Server.</param>
+			<param name="userName">A <see cref="T:System.String"></see> value that specifies the user name.</param>
+			<param name="serverType">A <see cref="T:Microsoft.SqlServer.Management.Common.ConnectionType"></see> object value that specifies the type of connection.</param>
+			<param name="password">A <see cref="T:System.String"></see> value that specifies the password.</param>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.DefaultConnTimeout">
+			<summary>A <see cref="T:System.Int32"></see> that specifies the default connection time out period in seconds.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.DefaultQueryTimeout">
+			<summary>A <see cref="T:System.Int32"></see> that specifies the default query time out period in seconds.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.NoTimeOut">
+			<summary>A <see cref="T:System.Int32"></see> that specifies there is no time out.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ConnectionParmsChanged">
+			<summary>Changes the connection parameters.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.CreateConnectionObject">
+			<summary>Creates the connection object and returns the <see cref="T:System.Data.IDbConnection"></see> object value.</summary>
+			<returns>A <see cref="T:System.Data.IDbConnection"></see> value that specifies the connection object.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ToString">
+			<summary>Returns the object as a string value.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the <see cref="T:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ConnectionString">
+			<summary>Gets the connection string.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the connection string.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ConnectionStringInternal">
+			<summary>Gets or sets the internal connection string.</summary>
+			<returns>A <see cref="T:System.Text.StringBuilder"></see> value that specifies the internal connection string.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ConnectionTimeout">
+			<summary>Gets or sets the number of seconds before a connection times out.</summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the connection timeout period.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ConnectionTimeoutInternal">
+			<summary>Gets or sets the internal connection timeout period in seconds.</summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the internal connection timeout period.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.DatabaseName">
+			<summary>Gets or sets the database with which the connection is established. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the database to which the connection is established.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.DatabaseNameInternal">
+			<summary>Gets or sets the internal database name. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the internal database name.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.IntegratedSecurityInternal">
+			<summary>Gets or sets the Boolean property value that specifies whether the connection supports integrated security. </summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection supports integrated security.If True, the connection supports integrated security.If False (default), the connection does not support integrated security.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.Password">
+			<summary>Gets or sets the password used to establish a connection. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the password used to establish a connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.QueryTimeout">
+			<summary>Gets or sets the number of seconds before a query times out.</summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the query timeout period.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.QueryTimeoutInternal">
+			<summary>Gets or sets the internal query timeout period in seconds.</summary>
+			<returns>A <see cref="T:System.Int32"></see> value that specifies the internal query timeout period.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.SecurePassword">
+			<summary>Gets or sets the secure password used to establish a connection. </summary>
+			<returns>A <see cref="T:System.Security.SecureString"></see> value that specifies the password used to establish a connection.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ServerName">
+			<summary>Gets or sets the name of the instance of SQL Server. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the instance of SQL Server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.ServerNameInternal">
+			<summary>Gets or sets the internal name of the instance of SQL Server. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the internal name of the instance of SQL Server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.UseIntegratedSecurity">
+			<summary>Gets or sets the Boolean property value that specifies whether the connection uses integrated security. </summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the connection uses integrated security.If True, the connection does not use integrated security.If False (default), the connection does use integrated security.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlOlapConnectionInfoBase.UserName">
+			<summary>Gets or sets the user that is connecting to the instance of SQL Server. </summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the user that is connecting to the instance of SQL Server.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.SqlServerManagementException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.SqlServerManagementException"></see> class is an exception that is raised when a Microsoft SQL Server management error is encountered on the connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlServerManagementException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlServerManagementException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlServerManagementException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlServerManagementException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlServerManagementException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlServerManagementException"></see> class with the specified serialization information and streaming context.</summary>
+			<param name="context">A <see cref="T:System.Runtime.Serialization.StreamingContext"></see> system object value that specifies the streaming context associated with the exception.</param>
+			<param name="info">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> system object value that specifies the serialization information associated with the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.SqlServerManagementException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.SqlServerManagementException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.SqlServerManagementException.ProductName">
+			<summary>Gets the name of the product that caused the exception.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the product that caused the exception.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.StatementEventArgs">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.StatementEventArgs"></see> class represents the arguments used when a statement event is raised.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.StatementEventArgs.#ctor(System.String,System.DateTime)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.StatementEventArgs"></see> class for the specified Transact-SQL statement at the specified time and date.</summary>
+			<param name="sqlStatement">A <see cref="T:System.String"></see> value that specifies the Transact-SQL statement that caused the statement event.</param>
+			<param name="timeStamp">A <see cref="T:System.DateTime"></see> system object value that specifies the time and date of the statement event.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.StatementEventArgs.ToString">
+			<summary>Returns a <see cref="T:System.String"></see> value that represents the <see cref="T:Microsoft.SqlServer.Management.Common.StatementEventArgs"></see> object.</summary>
+			<returns>A <see cref="T:System.String"></see> value that represents the <see cref="T:Microsoft.SqlServer.Management.Common.StatementEventArgs"></see> object.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.StatementEventArgs.SqlStatement">
+			<summary>Gets the Transact-SQL statement that caused the statement event.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the Transact-SQL statement that caused the statement event.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Common.StatementEventArgs.TimeStamp">
+			<summary>Gets the time and date when the statement event occurred.</summary>
+			<returns>A <see cref="T:System.DateTime"></see> system object value that specifies the time and date when the statement event occurred.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.StatementEventHandler">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.StatementEventHandler"></see> class represents the method that handles the event raised by a statement.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Common.TransferException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Common.TransferException"></see> class is an exception that is raised when a Microsoft SQL Server transfer error is encountered on the connection to the server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.TransferException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.TransferException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.TransferException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.TransferException"></see> class with the specified message text.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text describing the event that caused the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.TransferException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.TransferException"></see> class with the specified serialization information and streaming context.</summary>
+			<param name="context">A <see cref="T:System.Runtime.Serialization.StreamingContext"></see> system object value that specifies the streaming context associated with the exception.</param>
+			<param name="info">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> system object value that specifies the serialization information associated with the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Common.TransferException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Common.TransferException"></see> class with the specified message text and inner exception.</summary>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object that contains the inner exception. This is used for situations when one exception causes another exception to be raised. </param>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message text that describes the event that caused the exception.</param>
+		</member>
+		<member name="N:Microsoft.SqlServer.Management.Trace">
+			<summary>The <see cref="N:Microsoft.SqlServer.Management.Trace"></see> namespace contains the Microsoft SQL Server Trace and Replay objects. </summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.IDataRecordChanger">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.IDataRecordChanger"></see> object is a Trace and Replay object that represents the current record.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.IDataRecordChanger.SetValue(System.Int32,System.Object)">
+			<summary>Sets a value in the specified position.</summary>
+			<param name="val">An <see cref="T:System.Object"></see> system object value that specifies the value to set the field at the specified position.</param>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the index position at which to set the value.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ITraceDataWriter">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.ITraceDataWriter"></see> object provides programmatic access to the data writer for the SQL Trace.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.ITraceDataWriter.WriteNotify">
+			<summary>Raises a write notify event.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.ITraceDataWriter.Write">
+			<summary>Writes the SQL Trace.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the write operation was successful.If True, the write operation succeeded.If False, the write operation failed.RemarksThis namespace, class, or member is supported only in version 2.0 of the Microsoft .NET Framework. </returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayEventArgs">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayEventArgs"></see> object provides programmatic access to the arguments used to report events that occur when replaying trace on an instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayEventHandler">
+			<summary>Represents the <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayEventHandler"></see> event handler.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayMode">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayMode"></see> enumeration contains values that are used to specify the type of synchronization used during the trace replay.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Trace.ReplayMode.ConnectionLevelSync">
+			<summary>The replay is synchronized at a connection level.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Trace.ReplayMode.SequentialReplay">
+			<summary>The replay is sequential.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayPauseHandler">
+			<summary>Represents the <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayPauseHandler"></see> event handler.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayResultEventHandler">
+			<summary>Represents the <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayResultEventHandler"></see> event handler.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayStartHandler">
+			<summary>Represents the <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayStartHandler"></see> event handler.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.ReplayStopHandler">
+			<summary>Represents the <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayStopHandler"></see> event handler.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.SqlTraceException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class represents the general exception raised by the SQL Server Management Objects (SMO) trace objects.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class with the specified message.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class with the specified serialization information and the specified streaming context.</summary>
+			<param name="context">A <see cref="T:System.Runtime.Serialization.StreamingContext"></see> object value that specifies the streaming context for the SQL Trace exception.</param>
+			<param name="info">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> object value that specifies the serialization information for the SQL Trace exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class with the specified message and inner exception.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace exception.</param>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object value that specifies the inner exception for the SQL Trace exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceException.#ctor(System.Type,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class with the specified source type and the specified message.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace exception.</param>
+			<param name="messageSource">A <see cref="T:System.Type"></see> system object value that specifies the source of the exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceException.#ctor(System.Type,System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceException"></see> class with the specified source type, message and inner exception.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace exception.</param>
+			<param name="messageSource">A <see cref="T:System.Type"></see> system object value that specifies the source of the exception.</param>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object value that specifies the inner exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.SqlTraceFailToInstantiateTypeException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToInstantiateTypeException"></see> class represents the exception raised when a SQL Server Management Objects (SMO) trace object operation fails to instantiate an object.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToInstantiateTypeException.#ctor">
+			<summary>Initiates a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToInstantiateTypeException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToInstantiateTypeException.#ctor(System.String)">
+			<summary>Initiates a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToInstantiateTypeException"></see> class with the specified message.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the SQL Trace Fail to Instantiate Type exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToInstantiateTypeException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToInstantiateTypeException"></see> class with the specified serialization information and the specified streaming context.</summary>
+			<param name="context">A <see cref="T:System.Runtime.Serialization.StreamingContext"></see> object value that specifies the streaming context for the SQL Trace Fail to Instantiate Type exception.</param>
+			<param name="info">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> object value that specifies the serialization information for the SQL Trace Fail to Instantiate Type exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToInstantiateTypeException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToInstantiateTypeException"></see> class with the specified message and inner exception.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace Fail to Instantiate Type exception.</param>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object value that specifies the inner exception for the SQL Trace Fail to Instantiate Type exception.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.SqlTraceFailToLoadInstAPIAssemblyException">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToLoadInstAPIAssemblyException"></see> class represents the exception raised by the SQL Server Management Objects (SMO) trace objects when an Inst API assembly fails to load.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToLoadInstAPIAssemblyException.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToLoadInstAPIAssemblyException"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToLoadInstAPIAssemblyException.#ctor(System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToLoadInstAPIAssemblyException"></see> class with the specified message.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace Fail to Load Inst API Assembly exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToLoadInstAPIAssemblyException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToLoadInstAPIAssemblyException"></see> class with the specified serialization information and the specified streaming context.</summary>
+			<param name="context">A <see cref="T:System.Runtime.Serialization.StreamingContext"></see> object value that specifies the streaming context for the SQL Trace Fail to Load Inst API Assembly exception.</param>
+			<param name="info">A <see cref="T:System.Runtime.Serialization.SerializationInfo"></see> object value that specifies the serialization information for the SQL Trace Fail to Load Inst API Assembly exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToLoadInstAPIAssemblyException.#ctor(System.String,System.Exception)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToLoadInstAPIAssemblyException"></see> class with the specified message and inner exception.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace Fail to Load Inst API Assembly exception.</param>
+			<param name="innerException">An <see cref="T:System.Exception"></see> object value that specifies the inner exception for the SQL Trace Fail to Load Inst API Assembly exception.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.SqlTraceFailToLoadInstAPIAssemblyException.#ctor(System.Type,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.SQLTraceFailToLoadInstAPIAssemblyException"></see> class with the specified message source and message.</summary>
+			<param name="message">A <see cref="T:System.String"></see> value that specifies the message associated with the general SQL Trace Fail to Load Inst API Assembly exception.</param>
+			<param name="messageSource">A <see cref="T:System.Type"></see> system object value that specifies the source of the message.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceEventArgs">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceEventArgs"></see> object provides programmatic access to the arguments used to report events that occur when collecting trace from an instance of MicrosoftSQL Server.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceEventArgs.CurrentRecord">
+			<summary>Gets the current record in the trace.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the current record.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceEventArgs.SkipRecord">
+			<summary>Gets the Boolean value that specifies whether the current record is traced or skipped.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the current record is traced or skipped.If True, the current record is skipped.If False (default), the current record is traced.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceFile">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> class is a Trace object that represents a trace log file.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceFile.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceFile.InitializeAsReader(System.String)">
+			<summary>Initializes the specified <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> object for reading data from the trace log file.</summary>
+			<param name="fileName">A <see cref="T:System.String"></see> value that specifies the trace log file in which to read the trace data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceFile.InitializeAsReplayOutputWriter(System.String)">
+			<summary>Initializes the specified <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> object for writing data to the trace log file only.</summary>
+			<param name="destinationFileName">A <see cref="T:System.String"></see> value that specifies the destination trace log file in which to write the new trace data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceFile.InitializeAsWriter(Microsoft.SqlServer.Management.Trace.TraceReader,System.String)">
+			<summary>Initializes the specified <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> object for reading trace data from a <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> object, analyzing the data, and writing data the referenced trace log file.</summary>
+			<param name="source">A <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> object that specifies the trace log file that contains trace data. This object can represent a trace table or a trace file.</param>
+			<param name="destinationFileName">A <see cref="T:System.String"></see> value that specifies the destination trace log file in which to write the new trace data.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceReader">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> class is an abstract Trace Object class that is used in the construction of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceServer"></see> class, the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> class, and the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> class. </summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> class.</summary>
+		</member>
+		<member name="F:Microsoft.SqlServer.Management.Trace.TraceReader.currentRow">
+			<summary>Specifies the current row.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.Close">
+			<summary>Closes the trace reader.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.Dispose">
+			<summary>Deletes the trace reader information.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetBoolean(System.Int32)">
+			<summary>Returns a <see cref="T:System.Boolean"></see> value from the record at the specified column position.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position at which to retrieve the value.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetByte(System.Int32)">
+			<summary>Returns a <see cref="T:System.Byte"></see> value from the record at the specified column position.</summary>
+			<returns>An <see cref="T:System.Uint8"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position at which to retrieve the value.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetBytes(System.Int32,System.Int64,System.Byte[],System.Int32,System.Int32)">
+			<summary>Gets a stream of bytes from the specified column offset into the buffer as an array, starting at the given buffer offset.</summary>
+			<returns>An <see cref="T:System.Int64"></see> value that specifies the number of bytes returned in the array.</returns>
+			<param name="buffer">A <see cref="T:System.Uint8"></see> array into which to read the stream of bytes.</param>
+			<param name="bufferoffset">An <see cref="T:System.Int32"></see> value that specifies the index at which to begin the read operation.</param>
+			<param name="fieldOffset">An <see cref="T:System.Int32"></see> value that specifies the index within the field from which to begin the read operation.</param>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position from which to retrieve the byte array value.</param>
+			<param name="length">An <see cref="T:System.Int32"></see> value that specifies the number of bytes to read.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetChar(System.Int32)">
+			<summary>Gets a character value of the specified column.</summary>
+			<returns>A <see cref="T:System.Char"></see> value of the specified column.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position from which to retrieve the by character value.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetChars(System.Int32,System.Char[],System.Int32,System.Int32,System.Int32)">
+			<summary>Gets a character array value from the record at the specified column position.</summary>
+			<returns>An int32 value that specifies the number of characters returned in the array.</returns>
+			<param name="fieldoffset">An <see cref="T:System.Int32"></see> value that specifies the index position within the record from which to begin the read operation.</param>
+			<param name="buffer">A <see cref="T:System.Uint8"></see> array that specifies the buffer into which to read the character array.</param>
+			<param name="bufferoffset">An <see cref="T:System.Int32"></see> value that specifies the index from which to start the read operation.</param>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position at which to retrieve the character array value.</param>
+			<param name="length">An <see cref="T:System.Int32"></see> value that specifies the number of characters to read.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetChars(System.Int32,System.Int64,System.Char[],System.Int32,System.Int32)">
+			<summary>Gets a character array value from the record at the specified column position.</summary>
+			<returns>An <see cref="T:System.Int64"></see> value that specifies the number of characters returned in the array.</returns>
+			<param name="buffer">A <see cref="T:System.Uint8"></see> array that specifies the buffer into which to read the character array.</param>
+			<param name="bufferoffset">An <see cref="T:System.Int32"></see> value that specifies the index from which to start the read operation.</param>
+			<param name="fieldOffset">An <see cref="T:System.Int32"></see> value that specifies the index position within the record from which to begin the read operation.</param>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position at which to retrieve the character array value.</param>
+			<param name="length">An <see cref="T:System.Int32"></see> value that specifies the number of characters to read.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetData(System.Int32)">
+			<summary>Returns <see cref="T:System.Data.IDataReader"></see> object used when the field points to a remote data structure.</summary>
+			<returns>An <see cref="T:System.Data.IDataReader"></see> system object that specifies a remote data structure.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the index of the field.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetDataTypeName(System.Int32)">
+			<summary>Gets the data type of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.String"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetDateTime(System.Int32)">
+			<summary>Gets a <see cref="T:System.DateTime"></see> value of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.DateTime"></see> system object value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetDecimal(System.Int32)">
+			<summary>Gets a <see cref="T:System.Decimal"></see> value of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.Decimal"></see> system object value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetDouble(System.Int32)">
+			<summary>Gets a floating point value of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.Float64"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetFieldType(System.Int32)">
+			<summary>Returns the field type of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.Type"></see> system object value that specifies the field type of the data value.  </returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetFloat(System.Int32)">
+			<summary>Gets a floating point value of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.Float32"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetGuid(System.Int32)">
+			<summary>Gets a <see cref="T:System.Guid"></see> system value of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.Guid"></see> system object value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetInt16(System.Int32)">
+			<summary>Gets a small integer value of the data value at the specified column position.</summary>
+			<returns>An <see cref="T:System.Int16"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetInt32(System.Int32)">
+			<summary>Gets an integer value of the data value at the specified column position.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetInt64(System.Int32)">
+			<summary>Gets a long integer value of the data value at the specified column position.</summary>
+			<returns>An <see cref="T:System.Int64"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetName(System.Int32)">
+			<summary>Gets the name of the field at the specified column position.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the name of the specified column.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetOrdinal(System.String)">
+			<summary>Gets the ordinal value of the data value at the specified column position.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the ordinal value at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetSchemaTable">
+			<summary>Gets a table that describes the schema.</summary>
+			<returns>A <see cref="T:System.Data.DataTable"></see> system object value that specifies a description of the schema.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetStream(System.Int32)">
+			<summary>Gets the stream of data.</summary>
+			<returns>A <see cref="T:System.IO.Stream"></see> system object value that specifies the data stream at the column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position at which to retrieve the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetString(System.Int32)">
+			<summary>Gets a <see cref="T:System.String"></see> value at the specified column position.</summary>
+			<returns>A <see cref="T:System.String"></see> value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position at which to retrieve the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetTimeSpan(System.Int32)">
+			<summary>Gets a <see cref="T:System.TimeSpan"></see> value of the data value at the specified column position.</summary>
+			<returns>A <see cref="T:System.TimeSpan"></see> system value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetValue(System.Int32)">
+			<summary>Gets a value of the data value at the specified column position.</summary>
+			<returns>An <see cref="T:System.Object"></see> system value that represents the data at the specified column position.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.GetValues(System.Object[])">
+			<summary>Gets an array of values from the data value at the specified column position.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the number of objects returned in the array.</returns>
+			<param name="i">An array of <see cref="T:System.Object"></see> values that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.IsDBNull(System.Int32)">
+			<summary>Specifies whether the specified column is set to null. </summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the specified column is set to null.If True, the value is null.If False, the is not null.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.IsNull(System.Int32)">
+			<summary>Gets a <see cref="T:System.Boolean"></see> value that specifies whether value of the data at the specified column position is null.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether value of the data at the specified column is null.If True, the value is null.If False, the value is not null.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the column position of the data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.NextResult">
+			<summary>Moves to the next result in the trace.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the next result exists.If True, the next result exists.If False, the next result does not exist and the method failed.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.Read">
+			<summary>Reads the trace record.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the method succeeded in reading the trace record.If True, the trace was read successfully.If False, the trace was not read.</returns>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReader.TranslateSubclass(System.String,System.String,System.Int32)">
+			<summary>Translates the sub class.</summary>
+			<returns>A <see cref="T:System.String"></see> value that specifies the sub class translation.</returns>
+			<param name="subclass">An <see cref="T:System.Int32"></see> value that specifies the sub class.</param>
+			<param name="column">A <see cref="T:System.String"></see> value that specifies the column.</param>
+			<param name="eventClass">A <see cref="T:System.String"></see> value that specifies the event class.</param>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReader.Depth">
+			<summary>Gets the depth value for the trace reader.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the depth of the trace reader.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReader.FieldCount">
+			<summary>Gets the number of columns in the data.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the field count.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReader.IsClosed">
+			<summary>Gets the <see cref="T:System.Boolean"></see> property value that specifies whether the trace reader is closed.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the trace reader is closed.If True, the trace reader is closed.If False (default), the trace reader is open.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReader.Item(System.Int32)">
+			<summary>Gets the column specified by the index position.</summary>
+			<returns>An <see cref="T:System.Object"></see> system object value that specifies the column.</returns>
+			<param name="i">An <see cref="T:System.Int32"></see> value that specifies the index position of the column in the record.</param>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReader.Item(System.String)">
+			<summary>Gets the column with the specified name.</summary>
+			<returns>An <see cref="T:System.Object"></see> system object value that specifies the column.</returns>
+			<param name="name">A <see cref="T:System.String"></see> value that specifies the name of the column.</param>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReader.RecordsAffected">
+			<summary>Gets the number of records of data.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the number of records of data.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceReaderWriter">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReaderWriter"></see> class is an abstract Trace Objects class that is used in the construction of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> class and the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> class. </summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReaderWriter.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReaderWriter"></see> class.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.TraceReaderWriter.WriteNotify">
+			<summary>Raises an event when the trace is written to the trace file or trace table.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReaderWriter.Close">
+			<summary>Closes the trace reader and writer.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReaderWriter.Write">
+			<summary>Writes the trace to the trace file or the trace table.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether the trace was written successfully to the trace file or trace table.If True, the trace was written successfully.If False, the trace was not written successfully.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceReplay">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReplay"></see> object is a Replay object that represents the replay operation for trace log files and trace tables.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplay.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReplay"></see> class.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.TraceReplay.ReplayEvent">
+			<summary>Invokes the handler before an event is replayed.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.TraceReplay.ReplayPause">
+			<summary>Invokes the handler before a replayed trace is paused.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.TraceReplay.ReplayResultEvent">
+			<summary>Invokes the handler before a result is returned from a replayed event.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.TraceReplay.ReplayStart">
+			<summary>Invokes the handler before a replayed trace is started.</summary>
+		</member>
+		<member name="E:Microsoft.SqlServer.Management.Trace.TraceReplay.ReplayStop">
+			<summary>Invokes the handler before a replayed trace is stopped.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplay.Dispose">
+			<summary>Deletes the trace information.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplay.Finalize">
+			<summary>Completes the trace replay.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplay.Pause">
+			<summary>Pauses the trace replay.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplay.Start">
+			<summary>Starts the trace replay.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplay.Stop">
+			<summary>Stops the trace replay.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplay.Connection">
+			<summary>Gets or sets the connection with an instance of Microsoft SQL Server.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the connection with an instance of SQL Server.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplay.Options">
+			<summary>Gets or sets the configuration options for replaying the trace.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReplayOptions"></see> object value that specifies the configuration options for replaying the trace.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplay.OutputFile">
+			<summary>Gets or sets the name of an optional file to which trace replay output is streamed.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Trace.TraceFile"></see> object value that specifies the output file.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplay.OutputTable">
+			<summary>Gets or sets the name of an optional table to which trace replay output is streamed.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> object value that specifies the output table.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplay.Source">
+			<summary>Gets or sets the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> object that contains the trace to be replayed.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> object value that specifies the source of the trace.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceReplayOptions">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReplayOptions"></see> object is a Replay object that represents the configuration settings required when replaying a trace.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceReplayOptions.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReplayOptions"></see> class.</summary>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplayOptions.HealthMonitorPollInterval">
+			<summary>Gets or sets the interval between checking for unused threads in seconds.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the interval between checking for unused threads in seconds.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplayOptions.HealthMonitorWaitInterval">
+			<summary>Gets or sets the maximum permitted lifetime of an unused thread.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the maximum permitted lifetime of an unused thread.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplayOptions.KeepResults">
+			<summary>Gets or sets the <see cref="T:System.Boolean"></see> property value that specifies whether to keep the replay results.</summary>
+			<returns>A <see cref="T:System.Boolean"></see> value that specifies whether to keep the results.If True, the results are kept.If False (default), the results are not kept.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplayOptions.Mode">
+			<summary>Gets or sets whether the trace replay sequential or synchronized.</summary>
+			<returns>A <see cref="T:Microsoft.SqlServer.Management.Trace.ReplayMode"></see> object value that specifies the trace mode.</returns>
+		</member>
+		<member name="P:Microsoft.SqlServer.Management.Trace.TraceReplayOptions.NumberOfReplayThreads">
+			<summary>Gets or sets the number of threads used when replaying the trace.</summary>
+			<returns>An <see cref="T:System.Int32"></see> value that specifies the number of threads used to replay the trace.</returns>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceServer">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceServer"></see> class is a Trace object that represents a new trace on an instance of Microsoft SQL Server.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceServer.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceServer"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceServer.InitializeAsReader(Microsoft.SqlServer.Management.Common.ConnectionInfoBase,System.String)">
+			<summary>Initializes the server as a trace reader.</summary>
+			<param name="serverConnInfo">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the connection information required to establish a connection with the instance of Microsoft SQL Server that is to be traced.</param>
+			<param name="profileFileName">A <see cref="T:System.String"></see> value that specifies the path and the name of the file that contains the SQL Server Profiler trace profile. For information about how to create a trace profile manually using SQL Server Profiler, see SQL Server Profiler Procedures.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceServer.Pause">
+			<summary>Pauses the trace.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceServer.Restart">
+			<summary>Restarts the trace.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceServer.Stop">
+			<summary>Stops the trace.</summary>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.TraceTable">
+			<summary>The <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> class is a Trace object that represents a table of trace information.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceTable.#ctor">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> class.</summary>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceTable.InitializeAsReader(Microsoft.SqlServer.Management.Common.ConnectionInfoBase,System.String,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> class for reading trace data.</summary>
+			<param name="serverConnInfo">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the information required to establish a connection with the instance of Microsoft SQL Server that contains the trace table.</param>
+			<param name="tableOwner">A <see cref="T:System.String"></see> value that specifies the schema to which the trace table belongs.</param>
+			<param name="tableName">A <see cref="T:System.String"></see> value that specifies the name of the trace table.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceTable.InitializeAsReplayOutputWriter(Microsoft.SqlServer.Management.Common.ConnectionInfoBase,System.String)">
+			<summary>Initializes a new instance of the <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> class for writing replay trace information.</summary>
+			<param name="serverConnInfo">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the information required to establish a connection with the instance of Microsoft SQL Server that contains the trace table.</param>
+			<param name="destinationTableName">A <see cref="T:System.String"></see> value that specifies the name of the trace table to write the replay trace output data.</param>
+		</member>
+		<member name="M:Microsoft.SqlServer.Management.Trace.TraceTable.InitializeAsWriter(Microsoft.SqlServer.Management.Trace.TraceReader,Microsoft.SqlServer.Management.Common.ConnectionInfoBase,System.String)">
+			<summary>Initializes the specified <see cref="T:Microsoft.SqlServer.Management.Trace.TraceTable"></see> object for reading trace data from a <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> object, analyzing the data, and writing data to the referenced trace table.</summary>
+			<param name="source">A <see cref="T:Microsoft.SqlServer.Management.Trace.TraceReader"></see> object value that specifies the source of the trace data. This object can represent a trace table or a trace file.</param>
+			<param name="serverConnInfo">A <see cref="T:Microsoft.SqlServer.Management.Common.SqlConnectionInfo"></see> object value that specifies the information required to establish a connection with the instance of Microsoft SQL Server that contains the trace table.</param>
+			<param name="destinationTableName">A <see cref="T:System.String"></see> value that specifies the name of the trace table to write the replay trace output data.</param>
+		</member>
+		<member name="T:Microsoft.SqlServer.Management.Trace.WriteNotifyEventHandler">
+			<summary>Represents the <see cref="T:Microsoft.SqlServer.Management.Trace.WriteNotifyEventHandler"></see> handler.</summary>
+		</member>
+	</members>
+</doc>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema' elementFormDefault='qualified'>
+    <xs:element name='DiscoveredOS'>
+        <xs:complexType>
+            <!--
+              The <all> indicator specifies that the child elements can appear
+              in any order, and that each child element must only occur 1 time.
+              Using minOccurs sets the required/optional elements.
+              -->
+            <xs:all>
+                <xs:element minOccurs='0' name='Hostname' type='xs:string'/>
+                <xs:element minOccurs='1' name='OSName' type='xs:string'/>
+                <xs:element minOccurs='0' name='OSAlias' type='xs:string'/>
+                <xs:element minOccurs='0' name='Version' type='xs:string'/>
+                <xs:element minOccurs='0' name='Arch' type='xs:string'/>
+                <xs:element minOccurs='0' name='IsLinux' type='xs:boolean'/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

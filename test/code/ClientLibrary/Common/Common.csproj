@@ -1,0 +1,160 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{596925AF-D230-4245-879D-2C6B3ED9C3EE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.SystemCenter.CrossPlatform.ClientLibrary.Common</RootNamespace>
+    <AssemblyName>Microsoft.SystemCenter.CrossPlatform.ClientLibrary.Common</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\int\scxkeypair\momtestkeys.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+    <SolutionRoot Condition="'$(SolutionRoot)'==''">$(SolutionDir)\..\..\..\</SolutionRoot>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SDKPath>..\..\..\ext\OpsMgrSDKFiles\debug</SDKPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SDKPath>..\..\..\ext\OpsMgrSDKFiles\retail</SDKPath>
+    <SDKPath Condition="$(SignBuild)=='true'">$(SolutionRoot)\source\ext\OpsMgrSDKFiles\signed</SDKPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'signed|AnyCPU'">
+    <OutputPath>bin\signed\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisLogFile>bin\Release\Microsoft.SystemCenter.CrossPlatform.ClientLibrary.Common.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.EnterpriseManagement.Core, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\..\11054_signed_dll\Microsoft.EnterpriseManagement.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.EnterpriseManagement.OperationsManager, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\..\11054_signed_dll\Microsoft.EnterpriseManagement.OperationsManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.EnterpriseManagement.Runtime, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\..\..\..\11054_signed_dll\Microsoft.EnterpriseManagement.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\..\build\ProductAssemblyInfo.cs">
+      <Link>ProductAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SDKAbstraction\ScxRunAsAccountSecureDistribution.cs" />
+    <Compile Include="SDKAbstraction\ISCXRunAsAccountFactory.cs" />
+    <Compile Include="SDKAbstraction\ScxCredentialRef.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\ManagedObjectPropertyNotFoundException.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\ManagedObjectRelationshipNotFoundException.cs" />
+    <Compile Include="SDKAbstraction\IProcess.cs" />
+    <Compile Include="SDKAbstraction\IRelationshipObject.cs" />
+    <Compile Include="SDKAbstraction\ManagedObjectFactory.cs" />
+    <Compile Include="SDKAbstraction\Process.cs" />
+    <Compile Include="SDKAbstraction\RelationshipObject.cs" />
+    <Compile Include="SDKAbstraction\RelationshipObjectFactory.cs" />
+    <Compile Include="SDKAbstraction\IManagedObjectFactory.cs" />
+    <Compile Include="SDKAbstraction\IRelationshipObjectFactory.cs" />
+    <Compile Include="SDKAbstraction\IIncrementalDiscoveryData.cs" />
+    <Compile Include="SDKAbstraction\IManagedObject.cs" />
+    <Compile Include="SDKAbstraction\IManagementGroupConnection.cs" />
+    <Compile Include="SDKAbstraction\IncrementalDiscoveryDataWrapper.cs" />
+    <Compile Include="SDKAbstraction\ITaskConfigurationFactory.cs" />
+    <Compile Include="SDKAbstraction\ITaskInvocationResult.cs" />
+    <Compile Include="SDKAbstraction\ITaskInvocationResultFactory.cs" />
+    <Compile Include="SDKAbstraction\ManagedObject.cs" />
+    <Compile Include="SDKAbstraction\ManagementGroupConnection.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\ManagementPackRelationshipTypeNotFoundException.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\ManagementPackTypeNotFoundException.cs" />
+    <Compile Include="SDKAbstraction\ScxClientActionBase.cs" />
+    <Compile Include="SDKAbstraction\SCXRunAsAccountFactory.cs" />
+    <Compile Include="SDKAbstraction\SecureStringHelper.cs" />
+    <Compile Include="SDKAbstraction\Task.cs" />
+    <Compile Include="SDKAbstraction\TaskConfigurationFactory.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\TaskInvocationException.cs" />
+    <Compile Include="SDKAbstraction\TaskInvocationResult.cs" />
+    <Compile Include="SDKAbstraction\TaskInvocationResultFactory.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\TaskNotFoundException.cs" />
+    <Compile Include="SDKAbstraction\Exceptions\ManagedObjectNotFoundException.cs" />
+    <Compile Include="SDKAbstraction\UniqueDerivedTypeNotFoundException.cs" />
+    <Compile Include="Strings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\UnixAgentVersion.cs" />
+    <Compile Include="WorkFlowExceptions\WorkFlowCancelledException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="LogFramework\" />
+    <Folder Include="WorkFlowUtilities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

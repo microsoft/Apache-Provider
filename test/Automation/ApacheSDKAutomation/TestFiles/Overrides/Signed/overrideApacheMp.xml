@@ -1,0 +1,155 @@
+﻿<?xml version="1.0" encoding="utf-8"?><ManagementPack ContentReadable="true" SchemaVersion="2.0" OriginalSchemaVersion="1.1" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+  <Manifest>
+    <Identity>
+      <ID>overrideApacheMp</ID>
+      <Version>1.0.0.0</Version>
+    </Identity>
+    <Name>overrideApacheMp</Name>
+    <References>
+      <Reference Alias="ApacheHTTPServer">
+        <ID>Microsoft.ApacheHTTPServer.Library</ID>
+        <Version>7.6.1026.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SystemCenter">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8434.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Linux">
+        <ID>Microsoft.Linux.Library</ID>
+        <Version>7.6.1026.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Unix">
+        <ID>Microsoft.Unix.Library</ID>
+        <Version>7.6.1026.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <Monitoring>
+    <Overrides>
+      <DiscoveryConfigurationOverride ID="OverrideForDiscoveryMicrosoftApacheHTTPServerCertificateDiscoveryUnixForContextMicrosoftApacheHTTPServerVirtualHostUnixfa5b5ffae32046268e4492b24bdc3794" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Discovery="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Certificate.Discovery.Unix" Parameter="Interval" Module="DS">
+        <Value>60</Value>
+      </DiscoveryConfigurationOverride>
+      <DiscoveryConfigurationOverride ID="OverrideForDiscoveryMicrosoftApacheHTTPServerInstallationScriptDiscoveryUnixForContextMicrosoftLinuxComputer4c646b7fc51e444280b38cdcf53dd7a6" Context="Linux!Microsoft.Linux.Computer" Enforced="false" Discovery="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.ScriptDiscovery.Unix" Parameter="Interval" Module="DS">
+        <Value>60</Value>
+      </DiscoveryConfigurationOverride>
+      <DiscoveryConfigurationOverride ID="OverrideForDiscoveryMicrosoftApacheHTTPServerVirtualHostDiscoveryUnixForContextMicrosoftApacheHTTPServerManagedServerUnixffa97cd7c85a47618beffea0b74332bd" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix" Enforced="false" Discovery="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Discovery.Unix" Parameter="Interval" Module="DS">
+        <Value>60</Value>
+      </DiscoveryConfigurationOverride>
+      <DiscoveryConfigurationOverride ID="OverrideForDiscoveryMicrosoftApacheHTTPServerManagedSeverDiscoveryUnixForContextMicrosoftUnixComputer7f60b1bd30404fb392513dd710de74cb" Context="Unix!Microsoft.Unix.Computer" Enforced="false" Discovery="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedSever.Discovery.Unix" Parameter="Interval" Module="DS">
+        <Value>60</Value>
+      </DiscoveryConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerCertificateUnixDaysUntilExpirationMonitorForContextMicrosoftApacheHTTPServerCertificateUnixeba4ab5d94c746ffa78c40f74a161ca8" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Certificate.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Certificate.Unix.DaysUntilExpiration.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorPropertyOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeStatusMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnixd9b2142ab1474e87b86565694514162c" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeStatus.Monitor" Property="Enabled">
+        <Value>true</Value>
+      </MonitorPropertyOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeStatusMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnixed557ba84d0d41e58f077128fc2620e0" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeStatus.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostUnixErrorsPerMinute400MonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix707969210ef24a95951a214216e37632" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute400.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostUnixErrorsPerMinute500MonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix909af1f7b3e04b539951480429187e60" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute500.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostUnixRequestsPerSecondMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix649bdc791c994891a9a8af6c9f3d8ebd" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix.RequestsPerSecond.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorPropertyOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix3faab2d14360434186b6198e665e3c75" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Property="Enabled">
+        <Value>true</Value>
+      </MonitorPropertyOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnixa69bc045e26d4760b5388d75c43915e3" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="Interval">
+        <Value>15</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixServerStatusMonitorForContextMicrosoftApacheHTTPServerManagedServerUnix81899debec9b4747afeb724ade7b1f48" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.ServerStatus.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixConfigurationCheckMonitorForContextMicrosoftApacheHTTPServerManagedServerUnix7eda397f9cb34978ae157c57472b3f2c" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.ConfigurationCheck.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixPctBusyWorkersMonitorForContextMicrosoftApacheHTTPServerManagedServerUnix60211fb43b5742ce9427d8f352c395ac" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.PctBusyWorkers.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalPctCPUMonitorForContextMicrosoftApacheHTTPServerManagedServerUnix2cae7de641584a41801b4a96ed2161b8" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalPctCPU.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerManagedServerUnix4d6ffa5bb1ea4caf86518d0a9fcd36e5" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="Interval">
+        <Value>60</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnix3a857bbe0b8f4b81808fb59d552487c1" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="ErrorThreshold">
+        <Value>2</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnix9a148076535d4bc2a234e9f89e49fdc7" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="WarningThreshold">
+        <Value>1</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnixe2d57cd251fc40c5a81f52e9d58a129f" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" ContextInstance="f63e2e2a-4246-2d10-68bd-c8fce809cca7" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="ErrorThreshold">
+        <Value>524288</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnixe687330f50ac4a3cab4553922ecf11c8" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" ContextInstance="f63e2e2a-4246-2d10-68bd-c8fce809cca7" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="WarningThreshold">
+        <Value>262144</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix8e8ceff4c1454d9a81178a02d8dd08b9" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" ContextInstance="ab8b056d-6f1e-f095-b607-162cf34a9823" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="ResponseTimeErrorThreshold">
+        <Value>2</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix5f351e7ba6d847ce8c7265dfb9af00a6" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" ContextInstance="ab8b056d-6f1e-f095-b607-162cf34a9823" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="ResponseTimeWarningThreshold">
+        <Value>1</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnix9bf351c7d8034f68b23564f6b69fb232" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" ContextInstance="4a4ebc27-3a36-2bf9-3cba-b724f39d2ca3" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="ErrorThreshold">
+        <Value>524288</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnixcbb0be9e61234158b482304af38c6f2f" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" ContextInstance="4a4ebc27-3a36-2bf9-3cba-b724f39d2ca3" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="WarningThreshold">
+        <Value>262144</Value>
+      </MonitorConfigurationOverride>
+      <RulePropertyOverride ID="OverrideForRuleMicrosoftApacheHTTPServerVirtualHostUnixTotalResponseTimeCollectionForContextMicrosoftApacheHTTPServerVirtualHostUnix4232ff0985314db78aeb968611410b26" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Rule="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix.TotalResponseTime.Collection" Property="Enabled">
+        <Value>true</Value>
+      </RulePropertyOverride>
+      <RuleConfigurationOverride ID="OverrideForRuleMicrosoftApacheHTTPServerVirtualHostUnixTotalResponseTimeCollectionForContextMicrosoftApacheHTTPServerVirtualHostUnix31f1115a8584424b961d89817b13fd53" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Rule="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix.TotalResponseTime.Collection" Parameter="Interval" Module="DataSource">
+        <Value>30</Value>
+      </RuleConfigurationOverride>
+      <RulePropertyOverride ID="OverrideForRuleMicrosoftApacheHTTPServerVirtualHostUnixErrorLogAlertForContextMicrosoftApacheHTTPServerVirtualHostUnix85c4b310cb9b49e7ab8e09e955d6a0ba" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" Enforced="false" Rule="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorLog.Alert" Property="Enabled">
+        <Value>true</Value>
+      </RulePropertyOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix534ed8629d8d40508bfee53f0ecf405f" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" ContextInstance="cbdb92e0-408c-1d5a-cbdb-468ea6669d03" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="Interval">
+        <Value>15</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnixa529fdf307b744bea9188acd6ef4a524" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" ContextInstance="cbdb92e0-408c-1d5a-cbdb-468ea6669d03" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="ResponseTimeErrorThreshold">
+        <Value>5</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnixf7876212ff174b29ad55e7472d8c9d4c" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" ContextInstance="cbdb92e0-408c-1d5a-cbdb-468ea6669d03" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="ResponseTimeWarningThreshold">
+        <Value>2</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnix8a533d10011d4076a63f3910ba2e204d" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" ContextInstance="07b04bc3-375a-db22-3c00-95fb4250e00c" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="ErrorThreshold">
+        <Value>524288</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerManagedServerUnixTotalUsedMemoryKBMonitorForContextMicrosoftApacheHTTPServerInstallationUnixbd923efbecab4b04b16f81f47ce7463b" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.Installation.Unix" ContextInstance="07b04bc3-375a-db22-3c00-95fb4250e00c" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor" Parameter="WarningThreshold">
+        <Value>262144</Value>
+      </MonitorConfigurationOverride>
+      <MonitorConfigurationOverride ID="OverrideForMonitorMicrosoftApacheHTTPServerVirtualHostURLProbeResponseTimeMonitorForContextMicrosoftApacheHTTPServerVirtualHostUnix109ec7702e904efdb98d25334b54e218" Context="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.Unix" ContextInstance="9fa0deac-a77a-c7d4-58e8-02d422798c7e" Enforced="false" Monitor="ApacheHTTPServer!Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor" Parameter="Interval">
+        <Value>300</Value>
+      </MonitorConfigurationOverride>
+    </Overrides>
+  </Monitoring>
+  <Presentation>
+    <Folders>
+      <Folder ID="Folder_67c4ad4bd39c47288afb16425dfc17ed" Accessibility="Public" ParentFolder="SystemCenter!Microsoft.SystemCenter.Monitoring.ViewFolder.Root" />
+    </Folders>
+  </Presentation>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="false">
+      <DisplayStrings>
+        <DisplayString ElementID="overrideApacheMp">
+          <Name>overrideApacheMp</Name>
+          <Description>based on MP build 7.6.1026.0</Description>
+        </DisplayString>
+        <DisplayString ElementID="Folder_67c4ad4bd39c47288afb16425dfc17ed">
+          <Name>overrideApacheMp</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

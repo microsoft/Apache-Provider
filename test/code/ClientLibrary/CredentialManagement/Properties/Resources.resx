@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CredentialSet_Add_Duplicate_credentials_error" xml:space="preserve">
+    <value>Duplicate credentials error.</value>
+  </data>
+  <data name="CredentialSet_Add_No_SSH_credential_has_been_added" xml:space="preserve">
+    <value>No SSH credential has been added.</value>
+  </data>
+  <data name="CredentialSet_Add_SSH_credential_already_exists" xml:space="preserve">
+    <value>SSH credential already exists.</value>
+  </data>
+  <data name="CredentialSet_Add_Sudo_elevation_SSH_credential_already_exists" xml:space="preserve">
+    <value>Sudo elevation SSH credential already exists.</value>
+  </data>
+  <data name="CredentialSet_Add_Supplied_credentials_are_invalid_or_empty" xml:space="preserve">
+    <value>Supplied credentials are invalid / empty.</value>
+  </data>
+  <data name="CredentialSet_GetXmlSshPassword_SshKey_value_not_initialized" xml:space="preserve">
+    <value>SshKey value has not been initialized for SSH Key credential.</value>
+  </data>
+  <data name="CredentialSet_Remove_Credentials_not_found_in_Critieria" xml:space="preserve">
+    <value>Credentials not found in Critieria.</value>
+  </data>
+  <data name="NullSshKey" xml:space="preserve">
+    <value>The SSH key could not be read because the credentials do not specify a key file.</value>
+  </data>
+  <data name="ScxRunAsAccountHelper_BadDeserialization" xml:space="preserve">
+    <value>The RunAs account cannot be updated; there is a conflict in the authentication data.</value>
+  </data>
+  <data name="ScxRunAsAccountHelper_UnknownElevationType" xml:space="preserve">
+    <value>Unknown elevation type: {0}.</value>
+  </data>
+  <data name="SshKeyValidation_UnrecognizedFormat" xml:space="preserve">
+    <value>The file provided for the SSH key is not a recognizable SSH private key format.</value>
+  </data>
+  <data name="SshKeyValidation_UnsupportedFormat_CommercialSsh" xml:space="preserve">
+    <value>The SSH key was created by an unsupported SSH implementation. The key must be converted into a supported format before it can be used.</value>
+    <comment>This should include a link that describes how to convert the key first to an OpenSSH key and then to a PuTTY key.</comment>
+  </data>
+  <data name="SshKeyValidation_UnsupportedFormat_OpenSsh" xml:space="preserve">
+    <value>The SSH key was created using the OpenSSH implementation and is not supported.  The key must be converted into a supported format before it can be used.</value>
+    <comment>This should include a link that describes how to convert the key.</comment>
+  </data>
+  <data name="SshKeyValidation_UnsupportedFormat_SshV1Rsa" xml:space="preserve">
+    <value>The SSH key was created using SSH version 1. Such keys have known vulnerabilities and are not supported.</value>
+    <comment>This should include a link that instructs the user to create and deploy a supported key.</comment>
+  </data>
+  <data name="SshKeyValidation_UnsupportedVersion" xml:space="preserve">
+    <value>The SSH key is not a supported version.</value>
+  </data>
+  <data name="SshKeyValidation_ValidationError" xml:space="preserve">
+    <value>The SSH key contains invalid data at line {0}.</value>
+  </data>
+  <data name="RunAsAccount_RunAsAccountMustHaveValidName" xml:space="preserve">
+    <value>An SCX Run As account must have a valid name.</value>
+  </data>
+  <data name="RunAsAccount_RunAsAccountMustHaveValidUsername" xml:space="preserve">
+    <value>An SCX Run As account must have a valid username.</value>
+  </data>
+  <data name="PasswordAuthenticationDataGenerator_InvalidMonitorRunAsAccountElevation" xml:space="preserve">
+    <value>An SCX Monitor Run As account cannot use 'su' elevation.</value>
+  </data>
+  <data name="PasswordAuthenticationDataGenerator_NullRunAsAccountPassword" xml:space="preserve">
+    <value>An SCX Run As account cannot have a null password.  Empty passwords are supported but may not be accepted by the UNIX/Linux host.</value>
+  </data>
+  <data name="PasswordAuthenticationDataGenerator_NullRunAsAccountSuPassword" xml:space="preserve">
+    <value>An SCX Run As account cannot have a null password for su elevation.</value>
+  </data>
+  <data name="SshKeyAuthenticationDataGenerator_NullRunAsAccountPassphrase" xml:space="preserve">
+    <value>An SCX Run As account cannot have a null passphrase.  An empty passphrase can be used if the SSH key is not encrypted.</value>
+  </data>
+  <data name="SshKeyAuthenticationDataGenerator_InvalidRunAsAccountKeyfile" xml:space="preserve">
+    <value>The SCX Run As account must specify the path to a valid SSH key.</value>
+  </data>
+  <data name="ScxRunAsPSSupport_BadScxRunAsAccountId" xml:space="preserve">
+    <value>The object ID {0} is not a valid SCX Run As account ID.</value>
+  </data>
+  <data name="ScxRunAsAccountHelper_RunAsAccountAlreadyExists" xml:space="preserve">
+    <value>The SCX Run As account '{0}' already exists.</value>
+  </data>
+  <data name="SshKeyValidation_MaxKeyLengthExceeded" xml:space="preserve">
+    <value>The SSH key is too long.</value>
+  </data>
+  <data name="IllegalAuthenticationCharacterException_DefaultMessage" xml:space="preserve">
+    <value>The authentication data in parameter {0} contains an illegal character at position {1}.  Authentication data can only contain characters from the US-ASCII character encoding.</value>
+    <comment>This should include a link to describe US-ASCII encoding.</comment>
+  </data>
+</root>
