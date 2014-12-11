@@ -92,9 +92,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\build\ProductAssemblyInfo.cs">
-      <Link>ProductAssemblyInfo.cs</Link>
-    </Compile>
+    <Compile Include="ProductAssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SDKAbstraction\ScxRunAsAccountSecureDistribution.cs" />
     <Compile Include="SDKAbstraction\ISCXRunAsAccountFactory.cs" />

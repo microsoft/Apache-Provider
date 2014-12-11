@@ -77,9 +77,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\..\build\ProductAssemblyInfo.cs">
-      <Link>ProductAssemblyInfo.cs</Link>
-    </Compile>
     <Compile Include="AgentInformation.cs" />
     <Compile Include="ChangeManagedByRelationshipResult.cs" />
     <Compile Include="DiscoveryCriteria.cs" />
@@ -100,6 +97,7 @@
     <Compile Include="IpDiscoveryScope.cs" />
     <Compile Include="IpRangeDiscoveryScope.cs" />
     <Compile Include="IUnixComputerOperatingSystem.cs" />
+    <Compile Include="ProductAssemblyInfo.cs" />
     <Compile Include="SCXIpAddress.cs" />
     <Compile Include="ISupportedAgent.cs" />
     <Compile Include="IUninstallAgent.cs" />
