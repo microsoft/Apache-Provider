@@ -151,10 +151,8 @@
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>xcopy /E /Y /I "$(SolutionRoot)\Dependency\Tools\MCF\*" "$(TargetDir)Tools\MCF"
-xcopy /E /Y /I "$(SolutionRoot)\Setup\*" "$(TargetDir)Setup"
 xcopy /Y /I "$(SolutionRoot)\Automation\ApacheSDKAutomation\TestFiles\*" "$(TargetDir)ApacheSDK"
 xcopy /E /Y /I "$(SolutionRoot)\Automation\ApacheSDKAutomation\TestFiles\Overrides\$(ConfigurationName)\*" "$(TargetDir)ApacheSDK\Overrides"
-xcopy /E /Y /I "$(SolutionRoot)\ssh-keys\*" "$(TargetDir)SSHKey"
-xcopy /E /Y /I "$(SolutionRoot)\Automation\ApacheSDKAutomation\TestFiles\Testapp\*" "$(TargetDir)ApacheSDK\Testapp"</PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
 </Project>
