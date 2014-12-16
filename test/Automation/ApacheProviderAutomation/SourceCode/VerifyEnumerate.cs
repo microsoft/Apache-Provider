@@ -202,13 +202,7 @@ namespace Scx.Test.Apache.Provider
             {
                 throw new VarAbort("cid field not specified, specify query class in cid");
             }
-
-            if (mcfContext.Records.HasKey("requiredinstance") &&
-               mcfContext.Records.GetValue("requiredinstance") == "true")
-            {
-                this.requiredInstance = true;
-            }
-
+  
             if (mcfContext.Records.HasKey("StopApcheServer") &&
                mcfContext.Records.GetValue("StopApcheServer") == "true")
             {
@@ -219,8 +213,7 @@ namespace Scx.Test.Apache.Provider
 
             if (mcfContext.Records.HasKey("RestartOmAgent") &&
                mcfContext.Records.GetValue("RestartOmAgent") == "true")
-            {
-                //this.needRestartOmAgent = true;
+            {               
                 this.restartOmAgentCmd = mcfContext.ParentContext.Records.GetValue("RestartOMAgentCmd");
                 this.apacheHelper.RestartApacheServiceStatus(restartOmAgentCmd);
             }
@@ -237,15 +230,6 @@ namespace Scx.Test.Apache.Provider
             {
                 try
                 {
-                    // Query result from provider SCX_FileSystemStatisticalInformation
-                    if (mcfContext.Records.HasKey("VerifyFileSystem") &&
-                        mcfContext.Records.HasKey("FileSystemQueryClass"))
-                    {
-                        this.fileSytemQueryXmlResult = new List<string>();
-                        string fileSytemQueryClass = mcfContext.Records.GetValue("FileSystemQueryClass");
-                        posixQuery.EnumerateScx(out this.fileSytemQueryXmlResult, fileSytemQueryClass);
-                    }
-
                     // If the recordkey haskey 'returnType' do the function EnumerateScx.
                     if (mcfContext.Records.HasKey("returnType"))
                     {
@@ -298,15 +282,6 @@ namespace Scx.Test.Apache.Provider
             string[] recordKeys = mcfContext.Records.GetKeys();
 
             // Check records for DebugXML record flag from mcf command line. For example: MCF.exe /m:%VarMap%.xml /debugxml:true
-            try
-            {
-                debugRecord = mcfContext.Framework.GetValue("debugxml");
-            }
-            catch
-            {
-                mcfContext.Trc("The value of \'debugxml\' is null.");
-            }
-
             if (string.IsNullOrEmpty(debugRecord) == false)
             {
                 printDebug = bool.Parse(debugRecord);
@@ -347,21 +322,9 @@ namespace Scx.Test.Apache.Provider
                     XmlNodeList nodes = root.GetElementsByTagName(recordKey);
 
                     // If the recordkey contains "wsman:Selector",we try to get the nodes by the tagname.
-                    if (recordKey.Contains("wsman:Selector"))
-                    {
-                        recordKeyForEPR = recordKey.Split(',');
-                        nodes = root.GetElementsByTagName(recordKeyForEPR[0]);
-                    }
-
-                    // If the recordkey contains "wsman:Selector",we try to get the nodes by the tagname.
                     if (recordKey.Contains("StopApcheServer"))
                     {
                         continue;
-                    }
-
-                    if (recordValue == "_IP_ADDRESS__")
-                    {
-                        recordValue = this.ipaddress + @"|$^";
                     }
 
                     if (nodes != null)

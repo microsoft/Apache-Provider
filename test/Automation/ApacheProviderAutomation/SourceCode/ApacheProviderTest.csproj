@@ -38,10 +38,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Interop.sshcomLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=56dc22b28e9eff5e, processorArchitecture=AMD64">
+    <Reference Include="Interop.sshcomLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
-      <HintPath>..\..\Dependency\SshcomLib\Interop.sshcomLib.dll</HintPath>
+      <HintPath>..\..\Dependency\bin\SshInteropDll\Interop.sshcomLib.dll</HintPath>
     </Reference>
     <Reference Include="Interop.WSManAutomation">
       <HintPath>..\..\Dependency\bin\WsManInteropdll\winrm2.0\Interop.WSManAutomation.dll</HintPath>
@@ -88,6 +88,7 @@
     <Compile Include="scxhelper\ScxStatistics.cs" />
     <Compile Include="scxhelper\ScxTypes.cs" />
     <Compile Include="scxhelper\SshHelper.cs" />
+    <Compile Include="VerifyCimProv\VerifyCimProvCompatibility.cs" />
     <Compile Include="VerifyCimProv\VerifyCimProvHelper.cs" />
     <Compile Include="VerifyCimProv\VerifyCimProv.cs" />
     <Compile Include="VerifyEnumerate.cs" />

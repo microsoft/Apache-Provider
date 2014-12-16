@@ -48,20 +48,6 @@ namespace Scx.Test.Apache.Provider
         /// <remarks>E.g., SCX_Agent</remarks>
         private string queryClass;
 
-        /// <summary>
-        /// The soft link name
-        /// </summary>
-        private string softLinkName;
-
-        /// <summary>
-        /// The location of the process
-        /// </summary>
-        private string processLocation;
-
-        /// <summary>
-        /// The parameters for the command to run
-        /// </summary>
-        private string parameters;
 
         /// <summary>
         /// The return type of winrm enumerate.
@@ -69,26 +55,24 @@ namespace Scx.Test.Apache.Provider
         private string returnType;
 
         /// <summary>
-        /// Class use to run posix command
+        /// All Shell scripts location.
         /// </summary>
-        private RunPosixCmd rPC;
+        private string scriptsLocation = System.Environment.CurrentDirectory;
 
         /// <summary>
-        /// Whether one or more instances of a matching object is required.  If true, then, the test
-        /// passes if a matching object is found.  Not all objects must match, but at least one must.
-        /// This allows a more specific regular expression to be used for the required instance.
+        /// Creating ports script name.
         /// </summary>
-        private bool requiredInstance = false;
+        private string PortScriptName = "createPortforApache.sh";
+
+        /// <summary>
+        /// Reverting ports script name.
+        /// </summary>
+        private string revertScriptName = "revertapacheconf.sh";
 
         /// <summary>
         /// XML fragment returned by query
         /// </summary>
         private List<string> queryXmlResult;
-
-        /// <summary>
-        /// XML fragment returned by query the SCX_FileSystemStatisticalInformation
-        /// </summary>
-        private List<string> fileSytemQueryXmlResult;
 
         /// <summary>
         /// ArrayList for cache the process check list.
@@ -100,14 +84,19 @@ namespace Scx.Test.Apache.Provider
         /// </summary>
         private TimeSpan queryRetryInterval = new TimeSpan(0, 0, 20);
 
-        private bool needStopServer = false;
+        /// <summary>
+        /// Create ports command.
+        /// </summary>
+        private string actionCmd;
 
-        private string stopServerCmd = "";
+        /// <summary>
+        /// Clean up ports command.
+        /// </summary>
+        private string postCmd;
 
-        private bool needRestartOmAgent = false;
-
-        private string restartOmAgentCmd = "";
-
+        /// <summary>
+        /// Apache helper.
+        /// </summary>
         private ApacheHelper apacheHelper;
 
         #endregion Private Fields
@@ -189,32 +178,21 @@ namespace Scx.Test.Apache.Provider
             }
 
             this.apacheHelper = new ApacheHelper(mcfContext.Trc, this.hostname, this.username, this.password);
+
+            this.actionCmd = mcfContext.Records.GetValue("ActionCmd");
+            if (!(String.IsNullOrEmpty(this.actionCmd)))
+            {
+                PosixCopy copyToHost = new PosixCopy(this.hostname, this.username, this.password);
+                copyToHost.CopyTo(scriptsLocation + "/" + PortScriptName, "/tmp/" + PortScriptName);
+                copyToHost.CopyTo(scriptsLocation + "/" + revertScriptName, "/tmp/" + revertScriptName);
+                apacheHelper.RunCmd(this.actionCmd);
+            }
+
             this.queryClass = varContext.CustomID;
+
             if (String.IsNullOrEmpty(this.queryClass))
             {
                 throw new VarAbort("cid field not specified, specify query class in cid");
-            }
-
-            if (mcfContext.Records.HasKey("requiredinstance") &&
-               mcfContext.Records.GetValue("requiredinstance") == "true")
-            {
-                this.requiredInstance = true;
-            }
-
-            if (mcfContext.Records.HasKey("StopApcheServer") &&
-               mcfContext.Records.GetValue("StopApcheServer") == "true")
-            {
-                //this.needStopServer = true;
-                this.stopServerCmd = mcfContext.ParentContext.Records.GetValue("stopApacheCmd");
-                this.apacheHelper.StopApacheServiceStatus(stopServerCmd);
-            }
-
-            if (mcfContext.Records.HasKey("RestartOmAgent") &&
-               mcfContext.Records.GetValue("RestartOmAgent") == "true")
-            {
-                //this.needRestartOmAgent = true;
-                this.restartOmAgentCmd = mcfContext.ParentContext.Records.GetValue("RestartOMAgentCmd");
-                this.apacheHelper.RestartApacheServiceStatus(restartOmAgentCmd);
             }
 
             this.ipaddress = new ClientInfo().GetHostIPv4Address(this.hostname);
@@ -229,16 +207,8 @@ namespace Scx.Test.Apache.Provider
             {
                 try
                 {
-                    // Query result from provider SCX_FileSystemStatisticalInformation
-                    if (mcfContext.Records.HasKey("VerifyFileSystem") &&
-                        mcfContext.Records.HasKey("FileSystemQueryClass"))
-                    {
-                        this.fileSytemQueryXmlResult = new List<string>();
-                        string fileSytemQueryClass = mcfContext.Records.GetValue("FileSystemQueryClass");
-                        posixQuery.EnumerateScx(out this.fileSytemQueryXmlResult, fileSytemQueryClass);
-                    }
-
                     // If the recordkey haskey 'returnType' do the function EnumerateScx.
+
                     if (mcfContext.Records.HasKey("returnType"))
                     {
                         this.returnType = mcfContext.Records.GetValue("returnType");
@@ -249,10 +219,12 @@ namespace Scx.Test.Apache.Provider
                         posixQuery.EnumerateScx(out this.queryXmlResult, this.queryClass);
                     }
 
+
                     if (this.queryXmlResult != null && this.queryXmlResult.Count > 0)
                     {
                         success = true;
                     }
+
                 }
                 catch (Exception e)
                 {
@@ -290,7 +262,7 @@ namespace Scx.Test.Apache.Provider
             string[] recordKeys = mcfContext.Records.GetKeys();
 
             // Check records for DebugXML record flag from mcf command line. For example: MCF.exe /m:%VarMap%.xml /debugxml:true
-           
+
 
             if (string.IsNullOrEmpty(debugRecord) == false)
             {
@@ -315,10 +287,19 @@ namespace Scx.Test.Apache.Provider
                     Console.WriteLine();
                 }
 
-                XmlNodeList nameNodeList = root.GetElementsByTagName("p:Name");
+                XmlNodeList nameNodeList = root.GetElementsByTagName("p:InstanceID");
                 string xmlDocumentName = nameNodeList.Count > 0 ? nameNodeList[0].InnerText : "unknown";
+
                 mcfContext.Trc("Processing new XML document: " + xmlDocumentName);
 
+                string portRecordValue = mcfContext.Records.GetValue("p:InstanceID");
+                System.Text.RegularExpressions.Regex criteriaPort = new Regex(portRecordValue);
+
+                if (!criteriaPort.IsMatch(nameNodeList[0].InnerText))
+                {
+                    continue;
+                }
+                requiredInstanceFound = true;
                 // Test entries in MCF variation map records agains fields returned by WSMAN
                 // The WSMAN fields will be start with 'p:','wsa:','wsman:'.
                 // WSMAN XML query may return 'parameter' nodes.  These are ignored.
@@ -330,24 +311,6 @@ namespace Scx.Test.Apache.Provider
                     string[] recordKeyForEPR = new string[2];
                     string recordValue = mcfContext.Records.GetValue(recordKey);
                     XmlNodeList nodes = root.GetElementsByTagName(recordKey);
-
-                    // If the recordkey contains "wsman:Selector",we try to get the nodes by the tagname.
-                    if (recordKey.Contains("wsman:Selector"))
-                    {
-                        recordKeyForEPR = recordKey.Split(',');
-                        nodes = root.GetElementsByTagName(recordKeyForEPR[0]);
-                    }
-
-                    // If the recordkey contains "wsman:Selector",we try to get the nodes by the tagname.
-                    if (recordKey.Contains("StopApcheServer"))
-                    {
-                        continue;
-                    }
-
-                    if (recordValue == "_IP_ADDRESS__")
-                    {
-                        recordValue = this.ipaddress + @"|$^";
-                    }
 
                     if (nodes != null)
                     {
@@ -404,30 +367,14 @@ namespace Scx.Test.Apache.Provider
                         mcfContext.Alw("'nodes' == null for " + recordKey);
                     }
                 }
-
-                if (this.requiredInstance)
-                {
-                    if (matchingInstance)
-                    {
-                        requiredInstanceFound = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    if (!matchingInstance)
-                    {
-                        throw new VarAbort("Values in WSMAN query failed criteria check");
-                    }
-                }
             }
 
-            if (this.requiredInstance &&
-                requiredInstanceFound == false)
+            if (requiredInstanceFound == false)
             {
                 throw new VarAbort("Required instance of WSMAN object not found");
             }
         }
+
 
         /// <summary>
         /// Implements MCF Verify interface
@@ -445,96 +392,18 @@ namespace Scx.Test.Apache.Provider
         public void Cleanup(IContext mcfContext)
         {
             mcfContext.Trc("Cleanup entered");
-            if (needStopServer)
+            this.postCmd = mcfContext.Records.GetValue("PostCmd");
+            if (!(String.IsNullOrEmpty(this.postCmd)))
             {
-                string startServerCmd = mcfContext.ParentContext.Records.GetValue("startApacheCmd");
-                this.apacheHelper.StartApacheServiceStatus(startServerCmd);
-            }
+                apacheHelper.RunCmd(this.postCmd);
+                apacheHelper.RunCmd("rm -rf /tmp/" + PortScriptName);
+                apacheHelper.RunCmd("rm -rf /tmp/" + revertScriptName);
+            }           
         }
 
         #endregion Public Methods
 
         #region Private Methods
-
-        /// <summary>
-        /// Waiting for the process is ready for query.
-        /// </summary>
-        /// <param name="ctx">MCF Context</param>
-        /// <param name="processName">Current process name</param>
-        /// <param name="hostname">Current UNIX/Linux machine name</param>
-        private static void WaitForProcessReady(IContext ctx, string processName, string hostname)
-        {
-            RunPosixCmd runPosixCmd = new RunPosixCmd(hostname, "root", "OpsMgr2007R2");
-
-            int index = 1;
-            int tryTimes = 15;
-            bool isProcessCreated = false;
-
-            while (index < tryTimes)
-            {
-                string query = "ps -ef|grep " + processName + "|grep -v \"grep\"|awk \'{print $2}\'";
-                ctx.Alw(string.Format("Executing commnad {0} to query process ids for {1}...", query, processName));
-                runPosixCmd.RunCmd(query);
-                string processIDs = runPosixCmd.StdOut.Trim();
-
-                // Kill the process if it is already running
-                if (string.IsNullOrEmpty(processIDs))
-                {
-                    ctx.Alw(string.Format("Can't find process {0} after trying {1}/{2}", processName, index, tryTimes));
-                    Thread.Sleep(1000);
-                }
-                else
-                {
-                    ctx.Alw(string.Format("Find process {0} after trying {1}/{2}.", processName, index, tryTimes));
-                    isProcessCreated = true;
-                    break;
-                }
-
-                index++;
-            }
-
-            if (!isProcessCreated)
-            {
-                throw new VarFail(string.Format("Failed to create process \"{0}\".", processName));
-            }
-        }
-
-        /// <summary>
-        /// Kill the process with its name
-        /// </summary>
-        /// <param name="ctx">MCF context</param>
-        /// <param name="processName">Current process name</param>
-        /// <param name="hostname">Current UNIX/Linux machine's hostname</param>
-        private static void KillProcess(IContext ctx, string processName, string hostname)
-        {
-            RunPosixCmd runPosixCmd = new RunPosixCmd(hostname, "root", "OpsMgr2007R2");
-            string query = "ps -ef|grep " + processName + "|grep -v \"grep\"|awk \'{print $2}\'";
-            ctx.Alw(string.Format("Executing commnad {0} to query process ids for {1}...", query, processName));
-            runPosixCmd.RunCmd(query);
-            string processIDs = runPosixCmd.StdOut.Trim();
-
-            // Kill the process if it is already running
-            if (!string.IsNullOrEmpty(processIDs))
-            {
-                string[] processIDList = processIDs.Split(new char[] { ' ', ',', '\n' });
-                foreach (string processID in processIDList)
-                {
-                    try
-                    {
-                        ctx.Alw(string.Format("Find the process ID {0} of process {1}, kill this process...", processID, processName));
-                        runPosixCmd.RunCmd(string.Format("kill {0}", processID));
-                    }
-                    catch (Exception e)
-                    {
-                        ctx.Alw(string.Format("Fail to kill process {0} with error '{1}'", processID, e.Message));
-                    }
-                }
-            }
-            else
-            {
-                ctx.Alw(string.Format("No process exists for {0}", processName));
-            }
-        }
 
         /// <summary>
         /// Generic wait method for use to allow the state of the installed agent to stabilize
@@ -544,124 +413,6 @@ namespace Scx.Test.Apache.Provider
         {
             ctx.Trc(string.Format("Waiting for {0}...", this.queryRetryInterval));
             System.Threading.Thread.Sleep(this.queryRetryInterval);
-        }
-
-        /// <summary>
-        /// Create soft linik for sleep process
-        /// </summary>
-        /// <param name="ctx">MCF context interface</param>
-        /// <param name="processLocation">The process location in UNIX/Linux machine</param>
-        /// <param name="softLinkName">The soft link name</param>
-        /// <returns>Return the command executed result</returns>
-        private string CreateSoftLink(IContext ctx, string processLocation, string softLinkName)
-        {
-            string cmd = string.Format("ln -s {0} {1}", processLocation, softLinkName);
-            string result = this.RunCommand(cmd);
-            return result;
-        }
-
-        /// <summary>
-        /// Overrride method StartProcess for calling by thread
-        /// </summary>
-        /// <param name="process">The process name</param>
-        private void StartProcess(string process)
-        {
-            string cmd = string.Format("{0} {1}", process, this.parameters);
-            this.rPC = new RunPosixCmd(this.hostname, "root", "OpsMgr2007R2");
-            this.rPC.RunCmdInBackGround(cmd);
-        }
-
-        /// <summary>
-        /// Run remote command
-        /// </summary>
-        /// <param name="cmd">The command need to be executed</param>
-        /// <returns>Command execute result</returns>
-        private string RunCommand(string cmd)
-        {
-            string result = string.Empty;
-            this.rPC = new RunPosixCmd(this.hostname, "root", "OpsMgr2007R2");
-            try
-            {
-                this.rPC.RunCmd(cmd);
-                result = string.Format("Command executed with output \"{0}\" or Error \"{1}\"", this.rPC.StdOut, this.rPC.StdErr);
-            }
-            catch (Exception e)
-            {
-                throw new Exception(string.Format("An exception \"{0}\" occured when executing command \"{1}\"", e.Message + ":" + this.rPC.StdOut + ":" + this.rPC.StdErr, cmd));
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Method to verify if the get the expected parameters
-        /// </summary>
-        /// <param name="ctx">MCF context</param>
-        /// <param name="posixQuery">Remove command execute interface</param>
-        /// <param name="process">Current process name</param>
-        /// <param name="hostname">UNIX/Linux machine name</param>
-        private void VerifyProcessAvaliable(IContext ctx, Scx.Test.WSMAN.Common.WSManQuery posixQuery, string process, string hostname)
-        {
-            int index = 1;
-
-            // Each platform has different time to get the return of the process. so we need more tries to get return.
-            int tryTimes = 30;
-            string parameter = string.Empty;
-            string processName = process.Split('/')[process.Split('/').Length - 1].Trim();
-
-            while (index < tryTimes)
-            {
-                try
-                {
-                    posixQuery.EnumerateScx(out this.queryXmlResult, this.queryClass);
-                }
-                catch (Exception e)
-                {
-                    ctx.Trc("WSMAN Query failed: " + e.Message);
-                }
-
-                foreach (string wsmanQuery in this.queryXmlResult)
-                {
-                    XmlDocument queryXmlDoc = new XmlDocument();
-                    queryXmlDoc.LoadXml(wsmanQuery);
-                    XmlElement root = queryXmlDoc.DocumentElement;
-
-                    if (root == null)
-                    {
-                        throw new VarFail("Current WSMan query should not be null.");
-                    }
-
-                    XmlNodeList nodes = root.GetElementsByTagName("p:Parameters");
-                    XmlNodeList nameNodeList = root.GetElementsByTagName("p:Name");
-                    string xmlDocumentName = nameNodeList.Count > 0 ? nameNodeList[0].InnerText : "unknown";
-
-                    if (xmlDocumentName.Equals(processName))
-                    {
-                        if (nodes.Count > 0)
-                        {
-                            parameter = nodes.Cast<XmlNode>().Aggregate(parameter, (current, node) => current + (node.InnerText + " "));
-                        }
-
-                        ctx.Trc("Parameter : " + parameter);
-                    }
-                }
-
-                parameter = parameter.Trim();
-
-                if (!string.IsNullOrEmpty(parameter))
-                {
-                    ctx.Alw(string.Format("Get the expected parameters {0} for process {1} .", parameter, processName));
-                    goto end;
-                }
-                else
-                {
-                    ctx.Alw(string.Format("Can't get correct parameters for process {0} after trying {1}/{2}, current parameter is \"{3}\"", processName, index, tryTimes, parameter));
-                    Thread.Sleep(5000);
-                }
-
-                index++;
-            }
-        end: ctx.Trc("Process is found");
         }
 
         #endregion Private Methods

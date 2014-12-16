@@ -1,24 +1,27 @@
 #!/bin/sh
-function usage {
-   echo  "Usage:"
-   echo  "-d: httpd.conf file location, default is /etc/httpd/conf/httpd.conf"
-}
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+# author: v-jeyin
 
-#Main
-confFileLocation=/etc/httpd/conf/httpd.conf
+g_defaultHTTPDConfFileLocation=/etc/httpd/conf/httpd.conf
+g_defaultSSLConfFileLocation=/etc/httpd/conf.d/ssl.conf
+isFromPackage=false
+isFromSource=false
 
-while [ $# -ne 0 ]; do
-   case "$1" in
-        -d)
-            confFileLocation=$2
-            shift 2;;
-        -?)
-            usage
-            exit 0;;
-    esac
-done
+if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
+        isFromPackage=true
+else
+   if [ -f "/usr/local/apache2/conf/httpd.conf" ]; then
+        isFromSource=true
+        g_defaultHTTPDConfFileLocation=/usr/local/apache2/conf/httpd.conf
+        g_defaultSSLConfFileLocation=/usr/local/apache2/conf/extra/httpd-ssl.conf
+   fi
+fi
 
-bakFile=$confFileLocation"_bak"
-cp $bakFile $confFileLocation
-rm $bakFile
-service httpd restart
+if [ "$isFromSource" = "true" ]; then
+        /usr/local/apache2/bin/httpd -k restart
+     else
+     if [ "$isFromPackage" = "true" ]; then
+        service httpd restart
+     fi
+fi
+

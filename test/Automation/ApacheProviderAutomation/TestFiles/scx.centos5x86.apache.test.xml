@@ -58,7 +58,7 @@
   </var>
 
   <!-- 724954-VerifyCimProvInstallationUsingOptionInstallAndForce -->
-  <var set="2" lvl="0" vid="724954" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install' option" act="true">
+  <var set="2" lvl="0" vid="724954" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install --force' option" act="true">
     <snipref id="ApacheInstallInfo" />
     <rec key="apacheCmd">sh /tmp/{0} --install --force</rec>
     <rec key="isInvalidInstall">false</rec>
@@ -77,20 +77,20 @@
   </var>
 
   <!-- 724956-VerifyCimProvInstallationUsingInvalidOptions-->
-  <var set="2" lvl="0" vid="724956" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+  <var set="2" lvl="0" vid="724956" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent failed with invalid option" act="true">
     <rec key="apacheCmd">sh /tmp/{0} --invalidinstall</rec>
     <rec key="isInvalidInstall">true</rec>
   </var>
 
   <!-- 724957-VerifyCimProvInstallationWithOutOption -->
-  <var set="2" lvl="0" vid="724957" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+  <var set="2" lvl="0" vid="724957" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent failed without options" act="true">
     <rec key="apacheCmd">sh /tmp/{0}</rec>
     <rec key="isInvalidInstall">true</rec>
     <rec key="installLogKeyWorlds">usage</rec>
   </var>
 
   <!-- 724963-VerifyCimProvUsingRemoveOption -->
-  <var set="2" lvl="0" vid="724963" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+  <var set="2" lvl="0" vid="724963" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if uninstall Apache agent successfully with '--remove' option" act="true">
     <snipref id="ApacheInstallInfo" />
     <rec key="apacheCmd">sh /tmp/{0} --remove</rec>
     <rec key="isRemoveOption">true</rec>
@@ -99,8 +99,8 @@
     <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
   </var>
 
-  <!-- 724964-VerifyCimProvUsingRemoveOption -->
-  <var set="2" lvl="0" vid="724964" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+  <!-- 724964-VerifyCimProvUsingpurgeOption -->
+  <var set="2" lvl="0" vid="724964" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if uninstalll Apache agent cleanly with '--purge' option" act="true">
     <snipref id="ApacheInstallInfo" />
     <rec key="apacheCmd">sh /tmp/{0} --purge</rec>
     <rec key="isRemoveOption">true</rec>
@@ -110,16 +110,47 @@
   </var>
 
   <!-- 724965-VerifyCimProvHelpOption -->
-  <var set="2" lvl="0" vid="724965" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+  <var set="2" lvl="0" vid="724965" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if output the usage properly when type '--help' option" act="true">
     <rec key="apacheCmd">sh /tmp/{0} --help</rec>
     <rec key="isHelpOption">true</rec>
+  </var>
+
+  <!-- 724958-VerifyCimProvUpgradeOption -->
+  <var set="2" lvl="0" vid="724958" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade</rec>
+    <rec key="isUpgrade">true</rec>
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724961-VerifyCimProvUpgradeUsingForceOption -->
+  <var set="2" lvl="0" vid="724961" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade --force</rec>
+    <rec key="isUpgrade">true</rec>
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724962-VerifyCimProvDoesNotUpgradeToLowerVersion-->
+  <var set="2" lvl="0" vid="724962" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade</rec>
+    <rec key="isUpgrade">false</rec>
   </var>
 
   <!-- Test Variables Definition -->
   <grp cls="Scx.Test.Apache.Provider.GroupHelper">
     <snipref id="LinuxInfo" />
     <rec key="hostname">%Linux.Host%</rec>
-    <rec key="omserver">osst-w12r2-02</rec>
+    <rec key="omserver">osst-w12r2-01</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>

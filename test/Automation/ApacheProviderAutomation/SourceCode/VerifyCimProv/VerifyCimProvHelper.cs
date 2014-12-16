@@ -1,6 +1,6 @@
 ﻿
 //-----------------------------------------------------------------------
-// <copyright file="VerifyCimProv.cs" company="Microsoft">
+// <copyright file="VerifyCimProvHelper.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <author>v-jeali</author>
@@ -14,7 +14,7 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
     using Infra.Frmwrk;
     using Scx.Test.Common;
     /// <summary>
-    /// VerifyCimProvBase class. get HostName, UserName... and an Apchehelper instance.
+    /// VerifyCimProvHelper class. get HostName, UserName... and an Apchehelper instance.
     /// </summary>
     public class VerifyCimProvHelper
     {
@@ -208,12 +208,19 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
         /// </summary>
         /// <param name="commandStdOut">Installation command stdOut put</param>
         /// <param name="keyWorlds"> keyworlds</param>
-        public void VerifyInstallLog(string commandStdOut, string keyWorlds)
+        /// <param name="shouldContain"> shouldContain</param>
+        public void VerifyInstallLog(string commandStdOut, string keyWorlds, bool shouldContain)
         {
-            if (!commandStdOut.ToUpper().Contains(keyWorlds.ToUpper()))
+            if (shouldContain && !commandStdOut.ToUpper().Contains(keyWorlds.ToUpper()))
             {
                 throw new VarAbort(string.Format("Verify installtion log contains {0} failed", keyWorlds));
             }
+
+            if (!shouldContain && commandStdOut.ToUpper().Contains(keyWorlds.ToUpper()))
+            {
+                throw new VarAbort(string.Format("Verify installtion log not contains {0} failed", keyWorlds));
+            }
+
         }
 
         /// <summary>

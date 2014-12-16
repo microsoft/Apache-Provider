@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="VerifyCimProvInstallationUsingOptionInstall.cs" company="Microsoft">
+// <copyright file="VerifyCimProv.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <author>v-jeali</author>
@@ -24,8 +24,6 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
         string expectedFolderCount = string.Empty;
         string installLogKeyWorlds = string.Empty;
         bool isInValidInstall = false;
-        bool isRemoveOption = false;
-        bool isHelpOption = false;
 
         /// <summary>
         /// Case setup. Get values from case suite. and Uninstall ApacheAgent.
@@ -106,7 +104,7 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
         {
             if (!this.isInValidInstall && !ctx.Records.HasKey("isHelpOption") && !ctx.Records.HasKey("isRemoveOption"))
             {
-                this.VerifyInstallLog(commandStdOut, this.installLogKeyWorlds);
+                this.VerifyInstallLog(commandStdOut, this.installLogKeyWorlds, true);
 
                 this.VerifyInstallFolders(verifyFolderExistCmd, this.expectedFolderCount, true);
 
@@ -115,7 +113,7 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
 
             if (ctx.Records.HasKey("isHelpOption"))
             {
-                this.VerifyInstallLog(commandStdOut, this.installLogKeyWorlds);
+                this.VerifyInstallLog(commandStdOut, this.installLogKeyWorlds, true);
             }
 
             if (ctx.Records.HasKey("isRemoveOption"))

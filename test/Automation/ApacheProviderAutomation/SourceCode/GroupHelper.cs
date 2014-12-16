@@ -16,7 +16,7 @@ namespace Scx.Test.Apache.Provider
     public class GroupHelper : ISetup, ICleanup
     /*ICleanup*/
     {
-        private SshHelper sshHelper;
+        //private SshHelper sshHelper;
 
         #region Private Fields
 
