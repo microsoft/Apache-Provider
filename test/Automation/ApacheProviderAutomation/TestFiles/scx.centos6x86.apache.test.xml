@@ -1245,12 +1245,401 @@
       <val>%RequestValue%</val>
     </recm>
   </var>
+
+    <!-- 724656-Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host -->
+  <var set="1" lvl="0" vid="724656" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable.-->
+    <recm key="Name">
+      <val>localhost\.crt\*\w{8}</val>
+    </recm>
+    <recm key="File">
+      <val>/etc/pki/tls/certs/(localhost|server)\.crt</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>sh /tmp/createSSLCertification.sh</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:Caption">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>[0-9].[0-9].[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementState"><val>[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+    </recm>
+    <recm key="p:IdentificationCode">
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+    </recm>
+    <recm key="p:VirtualHost">
+      <val>localhost\.%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ExpirationDate">
+      <val>true</val>
+    </recm>
+    <recm key="p:Datetime">
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+z</val>
+    </recm>
+    <recm key="p:DaysUntilExpiration">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:FileName">
+      <val>%File%</val>
+    </recm>
+ </var>
   
+  <!-- 724657- Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host. -->
+  <var set="2" lvl="0" vid="724657" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable-->
+    <recm key="Name">
+      <val>localhost\.crt\*\w{8}</val>
+    </recm>
+    <recm key="File">
+      <val>/tmp/localhost\.crt</val>
+      <val>/tmp/localhost1\.crt</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+  <recm key="ActionCmd">
+      <val> sh /tmp/createPortforApache.sh -2sslc</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%Name%</val>
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:Caption">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">
+      <val>%Name%</val>
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>[0-9].[0-9].[0-9]</val>
+      <val>[0-9].[0-9].[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>[0-9]</val>
+      <val>[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%Name%</val>
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>[0-9]+</val>
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:IdentificationCode">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:VirtualHost">
+      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ExpirationDate">
+      <val>true</val>
+      <val>true</val>
+    </recm>
+    <recm key="p:Datetime">
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+    </recm>
+    <recm key="p:DaysUntilExpiration">
+      <val>[0-9]+</val>
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:FileName">
+       <val>%File%</val>
+       <val>%File%</val>
+    </recm>
+  </var>
+
+    <!-- 724658-Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured. -->
+ <!--
+  <var set="2" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <recm key="ActionCmd">
+      <val>sh /tmp/createPortforApache.sh -nossl</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="noInstance">
+      <val>true</val>
+    </recm>
+  </var>
+  -->
+
+  <!-- 724659-Verify the value is correct if SSL certificate is expired. -->
+  <var set="2" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+  <!--set the common variable-->
+    <recm key="Name">
+      <val>localhost\.crt\*\w{8}</val>
+    </recm>
+    <recm key="File">
+      <val>/tmp/localhost\.crt</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>sh /tmp/createPortforApache.sh -expireSSL</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>  
+   <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:Caption">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>[0-9].[0-9].[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementState"><val>[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+    </recm>
+    <recm key="p:IdentificationCode">
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+    </recm>
+    <recm key="p:VirtualHost">
+      <val>localhost\.%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ExpirationDate">
+      <val>true</val>
+    </recm>
+    <recm key="p:Datetime">
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+    </recm>
+    <recm key="p:DaysUntilExpiration">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:FileName">
+      <val>%File%</val>
+    </recm>
+ </var>
+
   <!-- Test Variables Definition -->
   <grp cls="Scx.Test.Apache.Provider.GroupHelper">
     <snipref id="LinuxInfo" />
     <rec key="hostname">%Linux.Host%</rec>
-    <rec key="omserver">osst-w12r2-02</rec>
+    <rec key="omserver">osst-ws8r2-01</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>

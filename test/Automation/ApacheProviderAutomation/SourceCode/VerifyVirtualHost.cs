@@ -60,9 +60,14 @@ namespace Scx.Test.Apache.Provider
         private string scriptsLocation = System.Environment.CurrentDirectory;
 
         /// <summary>
+        /// Creating SSL Certification script name.
+        /// </summary>
+        private string sslCertificationScriptName = "createSSLCertification.sh";
+
+        /// <summary>
         /// Creating ports script name.
         /// </summary>
-        private string PortScriptName = "createPortforApache.sh";
+        private string portScriptName = "createPortforApache.sh";
 
         /// <summary>
         /// Reverting ports script name.
@@ -183,7 +188,8 @@ namespace Scx.Test.Apache.Provider
             if (!(String.IsNullOrEmpty(this.actionCmd)))
             {
                 PosixCopy copyToHost = new PosixCopy(this.hostname, this.username, this.password);
-                copyToHost.CopyTo(scriptsLocation + "/" + PortScriptName, "/tmp/" + PortScriptName);
+                copyToHost.CopyTo(scriptsLocation + "/" + sslCertificationScriptName, "/tmp/" + sslCertificationScriptName);
+                copyToHost.CopyTo(scriptsLocation + "/" + portScriptName, "/tmp/" + portScriptName);
                 copyToHost.CopyTo(scriptsLocation + "/" + revertScriptName, "/tmp/" + revertScriptName);
                 apacheHelper.RunCmd(this.actionCmd);
             }
@@ -291,7 +297,7 @@ namespace Scx.Test.Apache.Provider
                 string xmlDocumentName = nameNodeList.Count > 0 ? nameNodeList[0].InnerText : "unknown";
 
                 mcfContext.Trc("Processing new XML document: " + xmlDocumentName);
-
+                
                 string portRecordValue = mcfContext.Records.GetValue("p:InstanceID");
                 System.Text.RegularExpressions.Regex criteriaPort = new Regex(portRecordValue);
 
@@ -396,7 +402,8 @@ namespace Scx.Test.Apache.Provider
             if (!(String.IsNullOrEmpty(this.postCmd)))
             {
                 apacheHelper.RunCmd(this.postCmd);
-                apacheHelper.RunCmd("rm -rf /tmp/" + PortScriptName);
+                apacheHelper.RunCmd("rm -rf /tmp/" + sslCertificationScriptName);
+                apacheHelper.RunCmd("rm -rf /tmp/" + portScriptName);
                 apacheHelper.RunCmd("rm -rf /tmp/" + revertScriptName);
             }           
         }

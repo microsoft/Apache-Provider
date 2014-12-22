@@ -37,10 +37,10 @@ CustomLog="logs/localhost-custom_log common"
 TransferLog=logs/localhost-access_log
 SSLCertificateFile=/etc/ssl/crt/server.crt
 SSLCertificateKeyFile=/etc/ssl/crt/server.key
-CustomSSLCertificateFile=/tmp/localhost.crt
-CustomSSLCertificateKeyFile=/tmp/localhost.key
-CustomSSLCertificateFile1=/tmp/localhost1.crt
-CustomSSLCertificateKeyFile1=/tmp/localhost1.key
+CustomSSLCertificateFile=localhost.crt
+CustomSSLCertificateKeyFile=localhost.key
+CustomSSLCertificateFile1=localhost1.crt
+CustomSSLCertificateKeyFile1=localhost1.key
 
 function AddPort {
     echo "Listen $1" >> $2
@@ -91,8 +91,8 @@ function createSSLPort {
     echo "LogLevel warn" >> $1
     echo "SSLEngine on" >> $1
     echo "ServerName $hostname" >> $1
-    echo "SSLCertificateFile $3" >> $1
-    echo "SSLCertificateKeyFile $4" >> $1
+    echo "SSLCertificateFile /etc/ssl/crt/$3" >> $1
+    echo "SSLCertificateKeyFile /etc/ssl/crt/$4" >> $1
     echo "CustomLog $CustomLog" >> $1
     echo "</VirtualHost>" >> $1
 }
