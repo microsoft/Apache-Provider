@@ -19,8 +19,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientTasks", "..\..\..\cod
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{00AB4F7D-1916-4FE8-B04D-21E2DE7F840F}"
 	ProjectSection(SolutionItems) = preProject
+		..\TestFiles\breakConfFile.sh = ..\TestFiles\breakConfFile.sh
+		..\TestFiles\createPortforApache.sh = ..\TestFiles\createPortforApache.sh
+		..\TestFiles\createSSLCertification.sh = ..\TestFiles\createSSLCertification.sh
+		..\TestFiles\revertapacheconf.sh = ..\TestFiles\revertapacheconf.sh
+		..\TestFiles\revertConfFile.sh = ..\TestFiles\revertConfFile.sh
 		..\TestFiles\scx.test.apache.sdk.universalr.xml = ..\TestFiles\scx.test.apache.sdk.universalr.xml
-		..\TestFiles\scx.test.apache.sdk.universalr_bak.xml = ..\TestFiles\scx.test.apache.sdk.universalr_bak.xml
+		..\TestFiles\scx.test.apache.sdk.universalr_x64.xml = ..\TestFiles\scx.test.apache.sdk.universalr_x64.xml
 	EndProjectSection
 EndProject
 Global

@@ -51,11 +51,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         private DiscoveryHelper discoveryHelper;
 
         /// <summary>
-        /// Helper class to run task
-        /// </summary>
-        private TasksHelper tasksHelper;
-
-        /// <summary>
         /// Apache agent helper class
         /// </summary>
         private ApacheAgentHelper apacheAgentHelper;
@@ -333,7 +328,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     this.discoveryHelper.DiscoverClientWSMan();
                 }
 
-                this.WaitForClientVerification(ctx);
+                //this.WaitForClientVerification(ctx);
 
                 bool apacheAgentInstalled = this.apacheAgentHelper.VerifyApacheAgentInstalled();
 
@@ -360,7 +355,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.computerObject = this.monitorHelper.GetComputerObject(this.clientInfo.HostName);
 
-                this.VerifyHostIsCompletelyDiscoveried(ctx);
+                //this.VerifyHostIsCompletelyDiscoveried(ctx);
 
 
             }

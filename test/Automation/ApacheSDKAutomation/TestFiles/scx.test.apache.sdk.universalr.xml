@@ -17,14 +17,103 @@
       <val>OK</val>
     </recm>
   </var>
+  <!-- Performance Health -->
+  <var set="0" lvl="0" vid="725209" cid="ApacheHTTPServerPerformanceHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceHealth" dsc="This test will test ApacheHTTPServer performance health 725208,725209" permutation="rows">
+    <recm key="entityname">
+      <val>ApacheHTTPServerTotalPctCPU</val>
+      <val>ApacheHTTPServerTotalPctBusyWorkers</val>
+    </recm>
+    <recm key="action">
+      <val>ab -n 50000 http://localhost/</val>
+      <val>ab -n 50000 -c 100 http://localhost/</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalPctCPU.Monitor</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.PctBusyWorkers.Monitor</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+    </recm>
+    <!-- Target of the monitor -->
+    <recm key="monitortarget">
+      <val></val>
+      <val></val>
+    </recm>
+    <!-- The default threshold for the monitor, to make an error condition hard to generate. -->
+    <recm key="defaultmonitorthreshold">
+      <val>80</val>
+      <val>80</val>
+    </recm>
+    <!-- Threshold value to use in monitor override, to make an error condition easy to generate. -->
+    <recm key="monitorthreshold">
+      <val>10</val>
+      <val>10</val>
+    </recm>
+    <!-- For those monitors where diagnostics exist, run and verify what was expected. 
+    If the particular monitor does not have diagnostic, then leave this empty -->
+    <recm key="diagnostics">
+      <val></val>
+      <val></val>
+    </recm>
+    <!-- Shell command to run to bring the monitor to a healthy state -->
+    <recm key="recoverycmd">
+      <val></val>
+      <val></val>
+    </recm>
+  </var>
+
+  <!-- Performance Health -->
+  <var set="0" lvl="0" vid="725205" cid="ApacheVirtualHostPerformanceHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceHealth" dsc="This test will test ApacheVisualHost performance health 725205,725207" permutation="rows">
+    <recm key="entityname">
+      <val>ApacheVirtualHostTotalRequestsPerSecond</val>
+      <val>ApacheVirtualHostWebErrorsPerMinuteforClient</val>
+    </recm>
+    <recm key="action">
+      <val>ab -n 1000 http://localhost/</val>
+      <val>ab -n 50000 -c 100 http://localhost/</val>
+    </recm>
+    <!-- Name of the monitor that will have its state changed due to the action taken -->
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.RequestsPerSecond.Monitor</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute400.Monitorr</val>
+    </recm>
+    <!-- Monitor context used to search for the MonitoringClass instance -->
+    <recm key="monitorcontext">
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+      <val>Microsoft.Linux.Universal.OperatingSystem</val>
+    </recm>
+    <recm key="monitortarget">
+      <val></val>
+      <val></val>
+    </recm>
+    <recm key="defaultmonitorthreshold">
+      <val>100</val>
+      <val>80</val>
+    </recm>
+    <recm key="monitorthreshold">
+      <val>10</val>
+      <val>10</val>
+    </recm>
+    <recm key="diagnostics">
+      <val></val>
+      <val></val>
+    </recm>
+    <recm key="recoverycmd">
+      <val></val>
+      <val></val>
+    </recm>
+  </var>
+
   <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
-    <!-- <rec key="hostname">scxomd-cent5-01.scx.com</rec>-->
-    <rec key="hostname">a22p-ora6-01.scx.com</rec>
+    <rec key="hostname">a22p-ora6-01</rec>
     <rec key="superuser">root</rec>
     <rec key="superuserpwd">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
     <rec key="nonsuperuserpwd">scxuser</rec>
-    <rec key="testingoverride">overrideApacheMp.xml</rec>
+    <rec key="testingoverride">SCXTestOverrideUniversalMP</rec>
     <rec key="cleanupcommand"><![CDATA[rpm -e scx;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.0.*;rm -rf /var/opt/microsoft]]></rec>
     <rec key="platformtag">universalr.1.x86</rec>
     <rec key="apacheTag">universal.1.x86</rec>
@@ -35,13 +124,13 @@
     <rec key="targetcomputerclass">Microsoft.Linux.Computer</rec>
     <rec key="targetosclass">Microsoft.Linux.Universal.OperatingSystem</rec>
     <rec key="managementpack">Microsoft.Linux.UniversalR.1</rec>
-    <rec key="deploytestapp">true</rec>
+    <rec key="deploytestapp">false</rec>
     <rec key="omserver"></rec>
     <rec key="omusername">scxsvc</rec>
     <rec key="omdomain">scx</rec>
     <rec key="ompassword">OpsMgr2007R2</rec>
     <rec key="defaultresourcepool">All Management Servers Resource Pool</rec>
-    <rec key="localagents"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents\DownloadedKits]]></rec>
+    <rec key="localagents"><![CDATA[C:\Program Files\System Center 2012\Operations Manager\Server\AgentManagement\UnixAgents]]></rec>
     <rec key="remoteagents"><![CDATA[\\scxrel02\ScxCore\MAIN]]></rec>
     <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'localagents' -->
     <rec key="uselocalagents">true</rec>
