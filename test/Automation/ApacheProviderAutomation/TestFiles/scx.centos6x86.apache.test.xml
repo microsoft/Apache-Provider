@@ -1256,13 +1256,13 @@
       <val>localhost\.crt\*\w{8}</val>
     </recm>
     <recm key="File">
-      <val>/etc/pki/tls/certs/(localhost|server)\.crt</val>
+      <val>/etc/ssl/crt/localhost\.crt</val>
     </recm>
     <recm key="HTTPSPort">
       <val>443</val>
     </recm>
     <recm key="ActionCmd">
-      <val>sh /tmp/createSSLCertification.sh</val>
+      <val>sh /tmp/createPortforApache.sh -1sslc</val>
     </recm>
     <recm key="PostCmd">
       <val>sh /tmp/revertapacheconf.sh</val>
@@ -1369,8 +1369,8 @@
       <val>localhost\.crt\*\w{8}</val>
     </recm>
     <recm key="File">
-      <val>/tmp/localhost\.crt</val>
-      <val>/tmp/localhost1\.crt</val>
+      <val>/etc/ssl/crt/localhost\.crt</val>
+      <val>/etc/ssl/crt/localhost1\.crt</val>
     </recm>
     <recm key="HTTPSPort">
       <val>443</val>
@@ -1504,8 +1504,7 @@
     </recm>
   </var>
 
-    <!-- 724658-Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured. -->
- <!--
+   <!-- 724658-Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured. -->
   <var set="2" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
@@ -1516,11 +1515,11 @@
     <recm key="PostCmd">
       <val>sh /tmp/revertapacheconf.sh</val>
     </recm>
-    <recm key="noInstance">
+    <recm key="NoInstance">
       <val>true</val>
     </recm>
   </var>
-  -->
+
 
   <!-- 724659-Verify the value is correct if SSL certificate is expired. -->
   <var set="2" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
@@ -1532,7 +1531,7 @@
       <val>localhost\.crt\*\w{8}</val>
     </recm>
     <recm key="File">
-      <val>/tmp/localhost\.crt</val>
+      <val>/etc/ssl/crt/localhost\.crt</val>
     </recm>
     <recm key="HTTPSPort">
       <val>443</val>
@@ -1619,7 +1618,7 @@
       <val>^$</val>
     </recm>
     <recm key="p:VirtualHost">
-      <val>localhost\.%IpAddress%:%HTTPSPort%</val>
+      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
     </recm>
     <recm key="p:ExpirationDate">
       <val>true</val>

@@ -11,6 +11,7 @@ function usage {
    echo  "-expireSSL: create a expire ssl port"
    echo  "-nossl: Disable all ssl port"
    echo  "-2sslc: create 2 SSL ports with different certificate"
+   echo  "-1sslc: create 1 ssl port with custom certificate"
    echo  "example:"
    echo  "1. create a http port : sh createPortforApache.sh -p 80"
    echo  "2. create a ssl port : sh createPortforApache.sh -s 443"
@@ -114,6 +115,13 @@ function create2SSLAndCertificate {
    createSSLPort $1 444 $CustomSSLCertificateFile1 $CustomSSLCertificateKeyFile1
 
 }  
+
+function create1SSLAndCertificate {
+   sh ./createSSLCertification.sh
+   createSSLPort $1 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+
+}  
+
 	
 function cleanSSLBakFile {
     bakFile=$g_defaultSSLConfFileLocation"_bak"
@@ -147,6 +155,7 @@ isFromPackage=false
 isFromSource=false
 isNoSSL=false;
 isTwoSSLCertificate=false;
+isOneSSLCertificate=false;
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
 	isFromPackage=true
@@ -184,6 +193,9 @@ while [ $# -ne 0 ]; do
 	    shift 1;;
 	-2sslc)
 	    isTwoSSLCertificate=true;
+	    shift 1;;
+	-1sslc)
+	    isOneSSLCertificate=true;
 	    shift 1;;
 	-?)
 	    usage
@@ -233,6 +245,22 @@ if [ "$isTwoSSLCertificate" = "true" ]; then
 
     removeOldPorts $g_defaultSSLConfFileLocation
     create2SSLAndCertificate $g_defaultSSLConfFileLocation
+    restartApacheService
+    cleanSSLBakFile
+    exit 0
+fi
+
+if [ "$isOneSSLCertificate" = "true" ]; then
+    if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
+        echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
+        exit 1
+    fi
+    bakFile=$g_defaultSSLConfFileLocation"_bak"
+
+    cp $g_defaultSSLConfFileLocation $bakFile
+
+    removeOldPorts $g_defaultSSLConfFileLocation
+    create1SSLAndCertificate $g_defaultSSLConfFileLocation
     restartApacheService
     cleanSSLBakFile
     exit 0

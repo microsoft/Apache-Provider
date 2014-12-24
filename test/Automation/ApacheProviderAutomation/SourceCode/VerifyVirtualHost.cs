@@ -99,6 +99,8 @@ namespace Scx.Test.Apache.Provider
         /// </summary>
         private string postCmd;
 
+        private bool isNoInstance;
+
         /// <summary>
         /// Apache helper.
         /// </summary>
@@ -203,6 +205,11 @@ namespace Scx.Test.Apache.Provider
 
             this.ipaddress = new ClientInfo().GetHostIPv4Address(this.hostname);
 
+            if (mcfContext.Records.HasKey("NoInstance"))
+            {
+                this.isNoInstance = Boolean.Parse(mcfContext.Records.GetValue("NoInstance"));
+            }
+
             mcfContext.Trc(string.Format("Initialized enumeration test against {0}, ipaddr={1} for enumeration query {2}", this.hostname, this.ipaddress, this.queryClass));
             Scx.Test.WSMAN.Common.WSManQuery posixQuery = new Scx.Test.WSMAN.Common.WSManQuery(mcfContext, this.hostname, this.username, this.password);
 
@@ -226,9 +233,16 @@ namespace Scx.Test.Apache.Provider
                     }
 
 
-                    if (this.queryXmlResult != null && this.queryXmlResult.Count > 0)
+                    if (this.queryXmlResult != null)
                     {
-                        success = true;
+                        if (this.isNoInstance && this.queryXmlResult.Count == 0)
+                        {
+                            success = true;
+                        }
+                        if(this.queryXmlResult.Count > 0)
+                        { 
+                            success = true;
+                        }
                     }
 
                 }
@@ -266,13 +280,18 @@ namespace Scx.Test.Apache.Provider
             bool requiredInstanceFound = false;
             bool printDebug = false;
             string[] recordKeys = mcfContext.Records.GetKeys();
-
+            
             // Check records for DebugXML record flag from mcf command line. For example: MCF.exe /m:%VarMap%.xml /debugxml:true
 
 
             if (string.IsNullOrEmpty(debugRecord) == false)
             {
                 printDebug = bool.Parse(debugRecord);
+            }
+
+            if (this.isNoInstance && this.queryXmlResult.Count == 0)
+            {
+                return;
             }
 
             // Enumerate through context variation records and execute record values as regular expressions
