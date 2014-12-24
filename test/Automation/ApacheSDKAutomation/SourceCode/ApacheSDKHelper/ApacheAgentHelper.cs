@@ -113,6 +113,28 @@ namespace Scx.Test.Apache.SDK.ApacheSDKHelper
         }
 
         /// <summary>
+        /// Verify Apache agent is installed on client (IsManaged? is true or false)
+        /// </summary>
+        /// <returns>Whether apache agent is insalled on client</returns>
+        public MonitoringObject GetVirtualHostMonitor(string instanceID)
+        {
+            MonitoringObject apacheServerInstance;
+
+            try
+            {
+                //IPHostEntry hostList = Dns.GetHostEntry(this.clientInfo.HostName);
+                apacheServerInstance = this.monitorHelper.GetMonitoringObject("Microsoft.ApacheHTTPServer.VirtualHost.Unix", instanceID);
+            }
+            catch (Exception e)
+            {
+                this.logger("Unable to find computer object with name: " + instanceID);
+                throw e;
+            }
+
+            return apacheServerInstance;
+        }
+
+        /// <summary>
         /// Install an agent on Posix host. Set AgentArchitecture and DirectoryTag properties.
         /// </summary>
         /// <remarks>WaitForNewAgent is optional.  If it is not run, then FullApachePath must be set.</remarks>
