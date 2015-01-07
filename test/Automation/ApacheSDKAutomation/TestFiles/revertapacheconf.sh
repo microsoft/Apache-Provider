@@ -6,6 +6,7 @@ g_defaultHTTPDConfFileLocation=/etc/httpd/conf/httpd.conf
 g_defaultSSLConfFileLocation=/etc/httpd/conf.d/ssl.conf
 isFromPackage=false
 isFromSource=false
+isDEB=false
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
         isFromPackage=true
@@ -14,8 +15,16 @@ else
         isFromSource=true
         g_defaultHTTPDConfFileLocation=/usr/local/apache2/conf/httpd.conf
         g_defaultSSLConfFileLocation=/usr/local/apache2/conf/extra/httpd-ssl.conf
+else
+   if [ -f "/etc/apache2/apache2.conf" ]; then
+        isFromPackage=true
+        g_defaultHTTPConfFileLocation=/etc/apache2/sites-enabled
+        g_defaultSSLConfFileLocation=/etc/apache2/sites-enabled
+        isDEB=true
+   fi
    fi
 fi
+
 
 if [ "$isFromSource" = "true" ]; then
         /usr/local/apache2/bin/httpd -k restart
@@ -25,3 +34,6 @@ if [ "$isFromSource" = "true" ]; then
      fi
 fi
 
+if [ "$isDEB" = "true" ]; then
+	service apache2 restart
+fi

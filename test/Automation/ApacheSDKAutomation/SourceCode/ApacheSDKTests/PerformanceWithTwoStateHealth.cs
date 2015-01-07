@@ -1,9 +1,16 @@
-﻿//v-litin
+﻿//-----------------------------------------------------------------------
+// <copyright file="PerformanceWithTwoStateHealth.cs" company="Microsoft">
+//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// </copyright>
+// <author>v-litin</author>
+// <description>PerformanceWithTwoStateHealth</description>
+//-----------------------------------------------------------------------
 
 namespace Scx.Test.Apache.SDK.ApacheSDKTests
 {
     using System;
     using System.Threading;
+    using System.IO;
     using Infra.Frmwrk;
     using Microsoft.EnterpriseManagement.Configuration;
     using Microsoft.EnterpriseManagement.Monitoring;
@@ -19,6 +26,21 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         }
 
         #region Test Framework Methods
+
+        /// <summary>
+        /// All Shell scripts location.
+        /// </summary>
+        private string scriptsLocation = System.Environment.CurrentDirectory;
+
+        /// <summary>
+        /// Creating ports script name.
+        /// </summary>
+        private string breakScriptName = "breakWebRequestTotalResponseConf.sh";
+
+        /// <summary>
+        /// Where to run action cmd.
+        /// </summary>
+        private string actionCmdType = "Client";
 
         /// <summary>
         /// Framework setup method
@@ -61,6 +83,24 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 ctx.Trc("ClientInfo: " + Environment.NewLine + this.ClientInfo.ToString());
 
+                if (ctx.Records.HasKey("ActionType"))
+                {
+                    this.actionCmdType = ctx.Records.GetValue("ActionType");
+                    if (this.actionCmdType.Equals("Server"))
+                    {
+                        if(ctx.ParentContext.Records.HasKey("apacheHelperABPath"))
+                        {
+                            string abPath = ctx.ParentContext.Records.GetValue("apacheHelperABPath");
+                            if(!Directory.Exists(abPath))
+                                throw new VarAbort("Could not find the ab.exe under " + abPath);
+                        }
+                        else
+                        {
+                            throw new VarAbort("Please set apacheHelperABPath in VarMap");
+                        }
+                    }
+                }
+
                 this.MonitorHelper = new MonitorHelper(this.Info);
 
                 this.AlertHelper = new AlertsHelper(this.Info);
@@ -71,13 +111,10 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.RecoverMonitorIfFailed(ctx);
 
-                // If Free Space monitor is enabled, the corresponding Logical Disk % Free Space monitor should be disabled with an override
                 this.OverridePerformanceMonitor(ctx, true);
 
-                // Delete the monitor override information from override MP 
                 this.DeleteMonitorOverride(ctx);
 
-                // Override the monitor threshold back to default values                
                 this.ApplyMonitorOverride(ctx, OverrideState.Default);
 
                 this.CloseMatchingAlerts(ctx);
@@ -85,6 +122,11 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 this.VerifyMonitor(ctx, HealthState.Success);
 
                 this.VerifyAlert(ctx, false);
+
+                //copy all ssl certificate script to '/tmp/'
+                PosixCopy copyToHost = new PosixCopy(this.ClientInfo.HostName, this.ClientInfo.SuperUser, this.ClientInfo.SuperUserPassword);
+                copyToHost.CopyTo(scriptsLocation + "/" + breakScriptName, "/tmp/" + breakScriptName);
+            
             }
             catch (Exception ex)
             {
@@ -118,21 +160,38 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             {
                 // Apply the monitor Override and wait for it take effect
                 this.ApplyMonitorOverride(ctx, OverrideState.Override);
-                if (ctx.Records.GetValue("expectedmonitorstate").Equals("success", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    this.Wait(ctx, 120);
-                }
 
                 ctx.Alw("Running command synchronously (may take a while): " + actionCmd);
-                //this.PosixCmd(ctx, actionCmd);
-                RunCmd(actionCmd);
+                if (this.actionCmdType.Equals("Server"))
+                {
+                    try
+                    {
+                        /*RunWinCmd winCmd = new RunWinCmd();
+                        string abPath = ctx.ParentContext.Records.GetValue("apacheHelperABPath");
+                        winCmd.WorkingDirectory = abPath;
+                        string[] cmds = actionCmd.Split(' ');
+                        winCmd.FileName = cmds[0];
+                        string arguments = actionCmd.Substring(cmds[0].Length);
+                        winCmd.Arguments = arguments;
+                        winCmd.RunCmd();*/
+                        this.RunWinCMDWithThread(ctx);
+                }
+                    catch (Exception)
+                    {
 
-                string expectedMonitorState = ctx.Records.GetValue("expectedmonitorstate");
-                HealthState requiredState = this.GetRequiredState(expectedMonitorState);
+                    }
+                }
+                else 
+                {
+                RunCmd(actionCmd);
+                }
+
+                string ExpectedState = ctx.Records.GetValue("ExpectedState");
+                HealthState requiredState = this.GetRequiredState(ExpectedState);
  
                 //// Waiting for 5 minutes directly to make sure that OM can get the latest monitor state
                 //// because the latest monitor state might be the same as the initial state
-                if (ctx.Records.GetValue("expectedmonitorstate").Equals("success",  StringComparison.CurrentCultureIgnoreCase))
+                if (ctx.Records.GetValue("ExpectedState").Equals("success",  StringComparison.CurrentCultureIgnoreCase))
                 {
                     this.Wait(ctx, 300);
 
@@ -145,45 +204,16 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     this.VerifyMonitor(ctx, requiredState);
 
                     this.VerifyAlert(ctx, true);
-
-                    if (string.IsNullOrEmpty(diagnosticName))
-                    {
-                        ctx.Trc("No diagnostic defined!");
-                    }
-                    else
-                    {
-                        ctx.Trc("Verifying diagnostic state: checking " + diagnosticName);
-                        DiagnosticHelper diagnosticHelper = new DiagnosticHelper(this.Info, diagnosticName);
-
-                        DiagnosticResult diagnosticResult = diagnosticHelper.SubmitDiagnosticOn(
-                            this.ComputerObject,
-                            "Microsoft.Unix.OperatingSystem",
-                            targetOSClassName + ":" + this.ClientInfo.HostName,
-                            monitorName);
-
-                        // note: diagnostic output not verified (TODO)
-                        if (diagnosticResult.Status != TaskStatus.Succeeded)
-                        {
-                            this.Fail(ctx, "Diagnostic FAILED: " + diagnosticName);
-                        }
-                        else
-                        {
-                            ctx.Alw("Diagnostic successful: " + diagnosticName);
-                            ctx.Trc("Diagnostic output: " + diagnosticResult.Output);
-                        }
-                    }
                 }
 
                 // Run the recovery command
-                if (string.IsNullOrEmpty(recoveryCmd))
+                if (!(string.IsNullOrEmpty(recoveryCmd)))
                 {
-                    recoveryCmd = "/tmp/scxtestapp.pl -stop";
-                }
-
                 ctx.Trc("Running recovery command: " + recoveryCmd);
                 this.PosixCmd(ctx, recoveryCmd);
 
                 this.VerifyAlert(ctx, false);
+            }
             }
             catch (Exception ex)
             {
@@ -205,17 +235,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             }
 
             ctx.Trc("SDKTests.PerformanceWithTwoStateHealth.Verify");
-
-            try
-            {
-                this.VerifyMonitor(ctx, HealthState.Success);
-            }
-            catch (Exception ex)
-            {
-                this.Fail(ctx, ex.ToString());
-            }
-
-            ctx.Trc("SDKTests.PerformanceWithTwoStateHealth.Verify complete");
         }
 
         /// <summary>
@@ -232,23 +251,33 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             this.DeleteMonitorOverride(ctx);
             this.OverridePerformanceMonitor(ctx, true);
 
-            string recoveryCmd = ctx.Records.GetValue("recoverycmd");
+            this.VerifyMonitor(ctx, HealthState.Success);
 
-            // run the recovery command
-            if (string.IsNullOrEmpty(recoveryCmd))
-            {
-                recoveryCmd = "/tmp/scxtestapp.pl -stop";
-            }
-
-            ctx.Trc("Running recovery command: " + recoveryCmd);
-            this.PosixCmd(ctx, recoveryCmd);
-
-            ctx.Trc("SDKTests.PerformanceWithTwoStateHealth.Cleanup finished");
         }
 
         #endregion Test Framework Methods
 
         #region Private Methods
+
+        private void RunWinCMDWithThread(IContext ctx)
+        {
+            Thread t = new Thread(new ParameterizedThreadStart(RunWinCMD));
+            t.Start(ctx);
+        }
+
+        private void RunWinCMD(object parObject)
+        {
+            IContext ctx = (IContext)parObject;
+            RunWinCmd winCmd = new RunWinCmd();
+            string abPath = ctx.ParentContext.Records.GetValue("apacheHelperABPath");
+            string actionCmd = ctx.Records.GetValue("ActionCmd");
+            winCmd.WorkingDirectory = abPath;
+            string[] cmds = actionCmd.Split(' ');
+            winCmd.FileName = cmds[0];
+            string arguments = actionCmd.Substring(cmds[0].Length);
+            winCmd.Arguments = arguments;
+            winCmd.RunCmd();
+        }
 
         /// <summary>
         /// Apply the override to the monitor
@@ -294,8 +323,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             }
             else
             {
-                //double monitorWarningThreshold = System.Convert.ToDouble(monitorWarningThresholdStr);
-                //double monitorErrorThreshold = System.Convert.ToDouble(monitorErrorThresholdStr);
                 // Override warningThreshold
                 this.OverrideHelper.SetClientMonitorParameter(this.ComputerObject, monitorName, monitorContext, monitorTarget, warningThresholdName, monitorWarningThreshold);
 
@@ -332,12 +359,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// <param name="monitorEnabled">enable monitor or disable monitor</param>
         private void OverridePerformanceMonitor(IContext ctx, bool monitorEnabled)
         {
-            //string managementPack = ctx.ParentContext.Records.GetValue("managementpack");
-            //managementPack = (managementPack.Equals("Microsoft.Linux.UniversalR.1")|| managementPack.Equals("Microsoft.Linux.UniversalD.1")) ? "Microsoft.Linux.Universal" : managementPack;
-
-            //string monitorName = managementPack + ".LogicalDisk.PercentFreeSpace.Monitor";
-            //string monitorContext = managementPack + ".LogicalDisk";
-            //string monitortarget = ctx.Records.GetValue("monitortarget");
             string monitorName = ctx.Records.GetValue("monitorname");
             string monitorContext = ctx.Records.GetValue("monitorcontext");
             string monitorTarget = ctx.Records.GetValue("monitortarget");

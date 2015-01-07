@@ -530,8 +530,8 @@ namespace Scx.Test.Apache.SDK.ApacheSDKHelper
 
             try
             {
-                IPHostEntry hostList = Dns.GetHostEntry(this.clientInfo.HostName);
-                computerObject = this.monitorHelper.GetComputerObject(hostList.HostName);
+                //IPHostEntry hostList = Dns.GetHostEntry(this.clientInfo.HostName);
+                computerObject = this.monitorHelper.GetComputerObject(this.clientInfo.HostName);
             }
             catch (Exception)
             {

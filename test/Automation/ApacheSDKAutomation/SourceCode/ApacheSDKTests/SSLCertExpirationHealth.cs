@@ -1,4 +1,10 @@
-﻿//v-litin
+﻿//-----------------------------------------------------------------------
+// <copyright file="SSLCertExpirationHealth.cs" company="Microsoft">
+//     Copyright (c) Microsoft Corporation.  All rights reserved.
+// </copyright>
+// <author>v-litin</author>
+// <description>SSLCertExpirationHealth</description>
+//-----------------------------------------------------------------------
 
 namespace Scx.Test.Apache.SDK.ApacheSDKTests
 {
@@ -168,7 +174,13 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                     this.VerifyAlert(ctx, true);
                 }
-
+            }
+            catch (Exception ex)
+            {
+                this.Fail(ctx, ex.ToString());
+            }
+            finally 
+            {
                 // Run the recovery command
                 if (!(string.IsNullOrEmpty(recoveryCmd)))
                 {
@@ -176,10 +188,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     RunCmd(recoveryCmd);
                     this.VerifyAlert(ctx, false);
                 }
-            }
-            catch (Exception ex)
-            {
-                this.Fail(ctx, ex.ToString());
             }
 
             ctx.Trc("SDKTests.SSLCertExpirationHealth.Run complete");

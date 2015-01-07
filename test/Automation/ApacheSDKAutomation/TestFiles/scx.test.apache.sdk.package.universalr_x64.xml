@@ -1,0 +1,744 @@
+<varmap assembly="..\Scx.Test.Apache.SDK.ApacheSDKTests.dll" contact="v-litin" dsc="Apache SDK-based BVT" owner="v-litin" xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap">
+  <!--SDk Test Cases-->
+  
+  <!--Tasks[9]-->
+  <var set="0" lvl="0" vid="724163" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify deploy Apache CIM module by PowerShell command successful." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>OK</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="779558" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if upgade Apache CIM Module works by running task Install/Upgrade Apache CIM Module with valid root account." permutation="rows">
+    <recm key="EntityName">
+      <val>upgrade Apache CIM Module with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>OK</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725217" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Reload Apache HTTP Server (Graceful) task works." permutation="rows">
+    <recm key="EntityName">
+      <val>Reload Apache HTTP Server(Graceful) with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.ReloadApache.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>TRUE</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725218" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Restart Apache HTTP Server task works." permutation="rows">
+    <recm key="EntityName">
+      <val>Restart Apache HTTP Server with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.RestartApache.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>OK</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725219" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Update Discovered Properties task works." permutation="rows">
+    <recm key="EntityName">
+      <val>Update Discovered Properties with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DiscoverServer.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>SUCCESS</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725226" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify that it doesn't upgrade Apache CIM Module to a lower version by running task Install/Upgrade Apache CIM Module." permutation="rows">
+    <recm key="EntityName">
+      <val>Doesn't upgrade Apache CIM Module to a lower version by running task "Install/Upgrade Apache CIM Module"</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Fail</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>already installed</val>
+    </recm>
+  </var>
+  
+  <var set="0" lvl="0" vid="725842" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with root account which password is incorrect." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with incorrect password of root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="agentCredentialSettings">
+      <val>1,0,0,0</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Fail</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>Bug:null</val>
+    </recm>  
+  </var>
+  
+  <var set="0" lvl="0" vid="725856" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if Install/Upgrade Apache CIM Module with valid scxuser account with sudo works." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with valid scxuser account with sudo.</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="agentCredentialSettings">
+      <val>1,1,0,2</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>OK</val>
+    </recm>
+  </var>
+  
+  <var set="0" lvl="0" vid="725868" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access.</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="agentCredentialSettings">
+      <val>1,1,0,2</val>
+    </recm >
+    <recm key="CommentSudoers">
+        <val>sed -i 's/scxuser/#scxuser/g' /etc/sudoers</val>
+    </recm>
+    <recm key="UnCommentSudoers">
+      <val>sed -i 's/#scxuser/scxuser/g' /etc/sudoers</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Fail</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>no tty present</val>
+    </recm>
+  </var>
+  
+  
+  <!--Monitor[15]-->
+  <var set="1" lvl="0" vid="725203" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="This case if for 725203 and 725204, Verify SSL Certificate Expiration monitor can change to Warning/Error when the expiration time reach to Warning/Error state." permutation="rows">
+    <recm key="ActionCmd">
+      <val>sh /tmp/createPortforApache.sh -1sslc</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.Certificate.Unix.DaysUntilExpiration.Monitor</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Warning</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725204" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="This case if for 725203 and 725204, Verify SSL Certificate Expiration monitor can change to Warning/Error when the expiration time reach to Warning/Error state." permutation="rows">
+    <recm key="ActionCmd">
+      <val>sh /tmp/createPortforApache.sh -expireSSL</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.Certificate.Unix.DaysUntilExpiration.Monitor</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Error</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725205" cid="ApacheVirtualHostPerformanceHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceHealth" dsc="Verify if Apache Virtual Host Error per Minute-Client changed Unhealthy when amount bad requests from client exceeding the limit set for Apache server." permutation="rows">
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 10 http://localhost/index/xxxx/ </val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="InstanceID">
+      <val>0.0.0.0:80</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute400.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+    </recm>
+    <recm key="defaultmonitorthreshold">
+      <val>10</val>
+    </recm>
+    <recm key="monitorthreshold">
+      <val>20</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Warning</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725207" cid="ApacheVirtualHostPerformanceHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceHealth" dsc="Verify if Apache Virtual Host Total Requests per Second changed Unhealthy when requests per second become currently High for Apache server." permutation="rows">
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 10 http://localhost/ </val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="InstanceID">
+      <val>0.0.0.0:80</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.RequestsPerSecond.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+    </recm>
+    <recm key="defaultmonitorthreshold">
+      <val>100</val>
+    </recm>
+    <recm key="monitorthreshold">
+      <val>5</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Warning</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725208" cid="ApacheHTTPServerHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ApacheHTTPServerHealth" dsc="Verify if Apache HTTP Server Pct Busy Workers changed Unhealthy when excessive number of HTTP request made on  Apache http server." permutation="rows">
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 10 http://localhost/ </val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.PctBusyWorkers.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <!--Actual default threshold is 80, but it's too low which lead to the health state turn to Error, so set to 200.-->
+    <recm key="defaultmonitorthreshold">
+      <val>200</val>
+    </recm>
+    <recm key="monitorthreshold">
+      <val>20</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Error</val>
+    </recm>
+  </var>
+  
+  <!--Didn't simulate the scenario by manual, need confirm with Allen.-->
+  <var set="1" lvl="0" vid="725209" cid="ApacheHTTPServerHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ApacheHTTPServerHealth" dsc="Verify if Apache HTTP Server Total Pct CPU changed Unhealthy when number of request utilization currently high for Apache HTTP server." permutation="rows">
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 10 http://localhost/ </val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalPctCPU.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="defaultmonitorthreshold">
+      <val>80</val>
+    </recm>
+    <recm key="monitorthreshold">
+      <val>10</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Error</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725210" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="Verify Apache HTTP Server Configuration Check status indicate Unhealthy when http.conf file error." permutation="rows">
+    <recm key="ActionCmd">
+      <val>sh /tmp/breakConfFile.sh</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertConfFile.sh</val>
+    </recm>
+      <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ConfigurationCheck.Monitor</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Error</val>
+    </recm>
+  </var>
+
+  <var set="1" lvl="0" vid="725213" cid="AvailabilityHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.AvailabilityHealth" dsc="Verify Apache Virtual Host Web Request status Code become Unhealthy when stop Apache HTTP server or Virtual Host." permutation="rows">
+    <recm key="ActionCmd">
+      <val>%stopApacheCmd%</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>%startApacheCmd%</val>
+    </recm>
+      <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.URLProbeStatus.Monitor</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Uninitialized</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725214" cid="AvailabilityHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.AvailabilityHealth" dsc="Verify Apache HTTP Server status Monitor become Unhealthy when stop Apache HTTP Server." permutation="rows">
+    <recm key="ActionCmd">
+      <val>%stopApacheCmd%</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>%startApacheCmd%</val>
+    </recm>
+      <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ServerStatus.Monitor</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Uninitialized</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="725215" cid="AvailabilityHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.AvailabilityHealth" dsc="Verify Apache HTTP Server status Monitor become Unhealthy when remove apache-cimprove package." permutation="rows">
+    <recm key="needUninstallApache">
+      <val>true</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ServerStatus.Monitor</val>
+    </recm>
+    <recm key="ExpectedState">              
+      <val>Uninitialized</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="726104" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the Apache HTTPD Server Used Kbytes Memory Monitor state become Error  while the total memory used by Apache HTTP Server processes was reached the server Error Threshold value." permutation="rows">
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 100 http://localhost/ </val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="warningThresholdName">
+      <val>WarningThreshold</val>
+    </recm>
+    <recm key="errorThresholdName">
+      <val>ErrorThreshold</val>
+    </recm>
+    <recm key="defaultWarningThreshold">
+      <val>262144</val>
+    </recm>
+    <recm key="defaultErrorThreshold">
+      <val>524288</val>
+    </recm>
+    <recm key="overrideWarningThreshold">
+      <val>100</val>
+    </recm>
+    <recm key="overrideErrorThreshold">
+      <val>200</val>
+    </recm>
+    <recm key="ExpectedState">              
+      <val>Error</val>
+    </recm>
+  </var> 
+  
+  <var set="1" lvl="0" vid="726090" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the Apache HTTPD Server Used Kbytes Memory Monitor state become Warning  while the total memory used by Apache HTTP Server processes was reached the server Warning Threshold value." permutation="rows">
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 100 http://localhost/ </val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="warningThresholdName">
+      <val>WarningThreshold</val>
+    </recm>
+    <recm key="errorThresholdName">
+      <val>ErrorThreshold</val>
+    </recm>
+    <recm key="defaultWarningThreshold">
+      <val>262144</val>
+    </recm>
+    <recm key="defaultErrorThreshold">
+      <val>524288</val>
+    </recm>
+    <recm key="overrideWarningThreshold">
+      <val>20000</val>
+    </recm>
+    <recm key="overrideErrorThreshold">
+      <val>80000</val>
+    </recm>
+    <recm key="ExpectedState">              
+      <val>Warning</val>
+    </recm>
+  </var> 
+  
+  <var set="1" lvl="0" vid="726119" cid="ApacheVirtualHostPerformanceHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceHealth" dsc="Verify if the Apache Virtual Host Errors per Minuts-Server Monitor state indicate Unhealy while setting invalid directives in configuration file and generate amount of '500 Internal Server Error'." permutation="rows">
+    <recm key="RunScript">
+      <val>sh /tmp/breakPerMinutsServerMonitor.sh</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>ab -n 1000 -c 10 http://localhost/ </val> 
+    </recm>
+    <recm key="PostCmd">
+      <val>sh /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="InstanceID">
+      <val>0.0.0.0:80</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute500.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+    </recm>
+    <!--The default threshold value is 1, but it's too low and will lead to the health state to error, so set to 400.-->
+    <recm key="defaultmonitorthreshold">
+      <val>1</val>
+    </recm>
+    <recm key="monitorthreshold">
+      <val>10</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Error</val>
+    </recm>
+  </var>
+
+  <var set="1" lvl="0" vid="726528" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the monitor Apache Virtual Host Web Request Total Response Time indicate Warning when server response the remote HTTP request time reached ResponseTimeWarningThreshold." permutation="rows">
+    <recm key="ActionCmd">
+      <val>.\ab.exe -n 20000 -c 100 http://%hostname%/</val>
+    </recm>
+    <recm key="ActionType">
+      <val>Server</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+    </recm>
+    <recm key="warningThresholdName">
+      <val>ResponseTimeWarningThreshold</val>
+    </recm>
+    <recm key="errorThresholdName">
+      <val>ResponseTimeErrorThreshold</val>
+    </recm>
+    <recm key="defaultWarningThreshold">
+      <val>5</val>
+    </recm>
+    <recm key="defaultErrorThreshold">
+      <val>10</val>
+    </recm>
+    <recm key="overrideWarningThreshold">
+      <val>0.2</val>
+    </recm>
+    <recm key="overrideErrorThreshold">
+      <val>20</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Warning</val>
+    </recm>
+  </var>
+
+  <var set="1" lvl="0" vid="726529" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the monitor Apache Virtual Host Web Request Total Response Time indicate Error when server response the remote HTTP request time reached ResponseTimeErrorThreshold." permutation="rows">
+    <recm key="ActionCmd">
+      <val>.\ab.exe -n 20000 -c 100 http://%hostname%/</val>
+    </recm>
+    <recm key="ActionType">
+      <val>Server</val>
+    </recm>
+    <recm key="monitorname">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+    </recm>
+    <recm key="warningThresholdName">
+      <val>ResponseTimeWarningThreshold</val>
+    </recm>
+    <recm key="errorThresholdName">
+      <val>ResponseTimeErrorThreshold</val>
+    </recm>
+    <recm key="defaultWarningThreshold">
+      <val>5</val>
+    </recm>
+    <recm key="defaultErrorThreshold">
+      <val>10</val>
+    </recm>
+    <recm key="overrideWarningThreshold">
+      <val>10</val>
+    </recm>
+    <recm key="overrideErrorThreshold">
+      <val>0.2</val>
+    </recm>
+    <recm key="ExpectedState">
+      <val>Error</val>
+    </recm>
+  </var>
+  
+  
+  <!--Performance[22]-->
+  <!--This case will test Performance Collection Rule 724772,724777,724778,724782,724933,724935,724937,724936,724940-->
+  <var set="2" lvl="1" vid="724772" cid="performancecollectionHealth-HTTPDServer" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceCollectionHealth" dsc="This test will test Performance Collection Rule 724772,724777,724778,724782,724933,724935,724937,724936,724940" permutation="rows">
+    <recm key="entityname">
+      <val>TotalPctCPU</val>
+      <val>RequestsPerSecond</val>
+      <val>PctBusyWorkers</val>
+      <val>BusyWorkers</val>
+      <val>KBPerSecond</val>
+      <val>KBPerRequest</val>
+      <val>Apache HTTP Server Errors per Minute (Server) Collection</val>
+      <val>Apache HTTP Server Errors per Minute (Client) Collection</val>
+      <val>Apache HTTP Server Idle Workers Collection</val>
+      <val>Apache HTTP Server Total Used Memory KBytes Collection</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="monitortarget">
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+      <val></val>
+    </recm>
+    <recm key="ruleName">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalPctCPU.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.RequestsPerSecond.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.PctBusyWorkers.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.BusyWorkers.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.KBPerSecond.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.KBPerRequest.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ErrorsPerMinute500.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ErrorsPerMinute400.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.IdleWorkers.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalUsedMemoryKB.Collection</val>
+    </recm>
+    <recm key="pattern">
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+    </recm>
+  </var>
+
+  <!--This case will test Performance Collection Rule 724776,724783,724784,724938,724939,724941,724942,724944,724946,724948,724943,724945-->
+  <var set="2" lvl="1" vid="724776" cid="performancecollectionHealth-HTTPDVirtualHosts" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceCollectionHealth" dsc="This test will test Performance Collection Rule 724776,724783,724784,724938,724939,724941,724942,724944,724946,724948,724943,724945." permutation="rows">
+    <recm key="entityname">
+      <val>RequestsPerSecond</val>
+      <val>Apache Virtual Host KB per Second Collection</val>
+      <val>Apache Virtual Host KB per Request Collection</val>
+      <val>Apache Virtual Host Errors per Minute (Client) Collection</val>
+      <val>Apache Virtual Host Errors per Minute (Server) Collection</val>
+      <val>Apache Virtual Host Total Web Response Time Collection</val>
+    </recm>
+    <recm key="monitorcontext">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
+    </recm>
+    <recm key="monitortarget">
+      <val>VirtualHost</val>
+      <val>VirtualHost</val>
+      <val>VirtualHost</val>
+      <val>VirtualHost</val>
+      <val>VirtualHost</val>
+      <val>VirtualHost</val>
+    </recm>
+    <recm key="InstanceID">
+      <val>0.0.0.0:80</val>
+      <val>0.0.0.0:80</val>
+      <val>0.0.0.0:80</val>
+      <val>0.0.0.0:80</val>
+      <val>0.0.0.0:80</val>
+      <val>0.0.0.0:80</val>
+      <val>255.255.255.255:443</val>
+      <val>255.255.255.255:443</val>
+      <val>255.255.255.255:443</val>
+      <val>255.255.255.255:443</val>
+      <val>255.255.255.255:443</val>
+      <val>255.255.255.255:443</val>
+    </recm>
+    <recm key="ruleName">
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.RequestsPerSecond.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.KBPerSecond.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.KBPerRequest.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute400.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.ErrorsPerMinute500.Collection</val>
+      <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix.TotalResponseTime.Collection</val>
+    </recm>
+    <recm key="pattern">
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+      <val>^[-]?([0-9]*\.[0-9]+|[0-9]+)$</val>
+    </recm>
+  </var>
+
+  
+  <!--PowerShell[1]-->
+  <var set="3" lvl="1" vid="726047" cid="DeployModuleTaskWithPS" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTaskWithPS" dsc=" Verify deploy Apache CIM module by PowerShell command successful.." permutation="rows">
+    <rec key="scripts">
+      $MgmtServerName = "localhost";ipmo "C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Powershell\OperationsManager\OperationsManager.psd1";New-SCOMManagementGroupConnection $MgmtServerName;
+      $InstallTask = Get-SCOMTask -Name:"Microsoft.ApacheHTTPServer.DeployModule.Task";$DiscoverTask = Get-SCOMTask -Name:"Microsoft.ApacheHTTPServer.DiscoverServer.Task";
+      $InstallationClass = Get-SCOMClass -Name:"Microsoft.ApacheHTTPServer.Installation";$Instance = Get-SCOMClassInstance -class:$InstallationClass;
+      $TaskOut = Start-SCOMTask -Task:$InstallTask -Instance:$Instance;sleep 30;$MyBatch = $Taskout.batchid;$MyResult = Get-SCOMTaskResult -BatchID:$MyBatch -EA SilentlyContinue;
+      echo $MyResult
+    </rec>
+    <rec key="expectedOutputKey">Status</rec>
+    <rec key="expectedOutputKeyWord">Succeeded</rec>
+  </var>
+
+  
+  <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
+    <rec key="hostname">a24p64-ora7-01</rec>
+    <rec key="superuser">root</rec>
+    <rec key="superuserpwd">OpsMgr2007R2</rec>
+    <rec key="nonsuperuser">scxuser</rec>
+    <rec key="nonsuperuserpwd">scxuser</rec>
+    <rec key="omserver"></rec>
+    <rec key="omusername">scxsvc</rec>
+    <rec key="omdomain">scx</rec>
+    <rec key="ompassword">OpsMgr2007R2</rec>
+    <!--<rec key="testingoverride">overrideApacheMp.xml</rec>-->
+    <rec key="testingoverride">SCXTestOverrideUniversalMP</rec>
+    <rec key="cleanupcommand"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.0.*;rm -rf /var/opt/microsoft]]></rec>
+    <rec key="platformtag">universalr.1.x64</rec>
+    <rec key="apacheTag">universal.1.x86_64</rec>
+    <rec key="architecture">x64</rec>
+    <rec key="logicalprocessors">[0-9]{1}</rec>
+    <rec key="isvirtualmachine">Virtual</rec>
+    <rec key="physicalprocessors">\s{0}</rec>
+    <rec key="targetcomputerclass">Microsoft.Linux.Computer</rec>
+    <rec key="targetosclass">Microsoft.Linux.Universal.OperatingSystem</rec>
+    <rec key="managementpack">Microsoft.Linux.UniversalR.1</rec>
+    <rec key="deploytestapp">false</rec>
+    <rec key="defaultresourcepool">All Management Servers Resource Pool</rec>
+    <rec key="localagents"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents\DownloadedKits]]></rec>
+    <rec key="remoteagents"><![CDATA[\\scxrel02\ScxCore\MAIN]]></rec>
+    <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'localagents' -->
+    <rec key="uselocalagents">true</rec>
+    <!-- If this is true, Use "Install/Upgrade Apache CIM Module" task to install apache CIM module, it false, use command to install apache agent. -->
+    <rec key="useTaskInstallApacheAgent">false</rec>
+    <rec key="apacheAgentPath"><![CDATA[C:\Apache\cimprov]]></rec>
+    <rec key="apacheHelperABPath"><![CDATA[C:\Apache\bin]]></rec>
+    <rec key="AgentPkgExt">rpm</rec>
+    <rec key="DirectoryTag">CENTOS5.0_X64</rec>
+    <rec key="latestonly">true</rec>
+    <rec key="installonly">false</rec>
+    <!--
+      Agent maintenance account settings
+      1. credentials type: 
+         SSHKey = 0, BasicAuth = 1,;
+     
+      2. type of account: 
+         priviledged = 0, unpriviledged = 1  
+  
+      3. sshkey credential type
+         withPassphrase = 0, withoutPassphrase = 1
+  
+      4. elevated credential type
+         None = 0, su = 1, sudo = 2 
+     -->
+    <rec key="UseAgentMaintenanceAccount">true</rec>
+    <rec key="agentcredentialSettings">1,0,0,0</rec>
+    <!--
+    Performanace Data Collection test Setting
+    -->
+    <rec key="basetime"></rec>
+    <rec key="startrange">-23:59:59</rec>
+    <rec key="endrange">23:59:59</rec>
+    
+    <!--check apache status-->
+    <rec key="startApacheCmd">service httpd start</rec>
+    <rec key="stopApacheCmd">service httpd stop</rec>
+    <rec key="restartApacheCmd">service httpd restart</rec>
+    <rec key="checkServiceCmd">service httpd status</rec>
+    <varref />
+  </grp>
+
+</varmap>

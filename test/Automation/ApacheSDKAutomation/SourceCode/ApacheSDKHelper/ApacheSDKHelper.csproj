@@ -76,19 +76,19 @@
   <ItemGroup>
     <Reference Include="Microsoft.EnterpriseManagement.Core, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.Core.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.EnterpriseManagement.OperationsManager, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.OperationsManager.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.OperationsManager.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.EnterpriseManagement.Packaging, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.Packaging.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.Packaging.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.EnterpriseManagement.Runtime, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.Runtime.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -127,16 +127,6 @@
     <Compile Include="ThreadLogObject.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\code\ClientLibrary\Common\Common.csproj">
-      <Project>{596925AF-D230-4245-879D-2C6B3ED9C3EE}</Project>
-      <Name>Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\ScxCommon\ScxCommon.csproj">
-      <Project>{B7BA6A62-C3E5-49F4-A2AF-F8C989ED1EFB}</Project>
-      <Name>ScxCommon</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -157,6 +147,16 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\code\ClientLibrary\Common\Common.csproj">
+      <Project>{596925af-d230-4245-879d-2c6b3ed9c3ee}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\ScxCommon\ScxCommon.csproj">
+      <Project>{b7ba6a62-c3e5-49f4-a2af-f8c989ed1efb}</Project>
+      <Name>ScxCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

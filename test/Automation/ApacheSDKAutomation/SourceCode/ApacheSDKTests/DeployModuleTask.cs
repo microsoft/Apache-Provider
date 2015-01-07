@@ -50,6 +50,11 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         private TasksHelper tasksHelper;
 
         /// <summary>
+        /// Discovery helper class
+        /// </summary>
+        private DiscoveryHelper discoveryHelper;
+
+        /// <summary>
         /// Apache agent helper class
         /// </summary>
         private ApacheAgentHelper apacheAgentHelper;
@@ -123,6 +128,19 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 string monitorInstanceClass = ctx.Records.GetValue("InstanceClass");
 
                 this.apacheInstance = this.monitorHelper.GetMonitoringObject(monitorInstanceClass,this.clientInfo.HostName);
+                // Configure the agent maintenance account according to the cases. using root account by default.
+                if (ctx.Records.HasKey("UseAgentMaintenanceAccount") && ctx.Records.GetValue("UseAgentMaintenanceAccount").Equals("true"))
+                {
+                    this.discoveryHelper.UseAgentMaintenanceAccount = true;
+                    this.ConfigureAgentMaintenceAccount(ctx);
+                }
+
+                // Configure the agent maintenance account according to the cases. using root account by default.
+                string agentCredentialSettings = ctx.Records.GetValue("agentCredentialSettings");
+                if (!string.IsNullOrEmpty(agentCredentialSettings))
+                {
+                    this.ConfigureSpecialAgentMaintenceAccount(ctx);
+                }
 
                 //Uninstall Apache CIm Module
                 this.apacheAgentHelper = new ApacheAgentHelper(this.info, this.clientInfo) { Logger = ctx.Trc };
@@ -133,7 +151,17 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     fullApacheAgentPath = ctx.ParentContext.Records.GetValue("apacheAgentPath");
                 }
                 string tag = ctx.ParentContext.Records.GetValue("apacheTag");
+                if (!ctx.Records.GetValue("entityname").Contains("upgrade Apache CIM Module"))
+                {
                 this.apacheAgentHelper.UninstallApacheAgentWihCommand(fullApacheAgentPath, tag);
+             }
+                string commentSudoers = ctx.Records.GetValue("CommentSudoers");
+                if (commentSudoers != null)
+                {
+                    RunPosixCmd execCmd = new RunPosixCmd(this.clientInfo.HostName, this.clientInfo.SuperUser, this.clientInfo.SuperUserPassword);
+                    ctx.Trc("Running commentSudoers command: " + commentSudoers);
+                    execCmd.RunCmd(commentSudoers);
+                }
              }
             catch (Exception ex)
             {
@@ -153,12 +181,20 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
             string entity = ctx.Records.GetValue("entityname");
             string consumerTask = ctx.Records.GetValue("taskname");
+            string expectedResult = ctx.Records.GetValue("ExpectedTaskStatus");
 
             ctx.Trc("SDKTests.ConsumerTaskHealth.Run: ConsumerTaskHealth test: " + entity);
             
             try
             {
+                if (expectedResult.Equals("Fail"))
+                {
+                    this.taskResult = this.tasksHelper.RunFailedTask(this.apacheInstance, consumerTask);
+                }
+                else
+                {
                 this.taskResult = this.tasksHelper.RunConsumerTask(this.apacheInstance, consumerTask);
+            }
             }
             catch (Exception ex)
             {
@@ -207,11 +243,14 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     this.Fail(ctx, string.Format("Fail: expectedOutputKeyWord: {0}, actualOutputKeyWord: {1}", expectedOutputKeyWord, this.taskResult[0].Output));
                 }
 
+                if (!(expectedTaskStatus == Microsoft.EnterpriseManagement.Runtime.TaskStatus.Failed))
+                {
                 bool apacheAgentInstalled = this.apacheAgentHelper.VerifyApacheAgentInstalled();
-                if (!apacheAgentInstalled)
+                    if (!apacheAgentInstalled & ctx.Records.GetValue("ExpectedTaskStatus").Contains("Success"))
                 {
                     this.Fail(ctx, "Fail: didn't find CIM prov installed on client");
                 }
+            }
             }
             catch (Exception ex)
             {
@@ -228,6 +267,8 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         void ICleanup.Cleanup(IContext ctx)
         {
             ctx.Trc("ApacheSDKTests.DeployModuleTask.Cleanup");
+
+            this.ConfigureSpecialAgentMaintenceAccount(ctx, true);
 
             bool useTaskInstallApacheAgent = false;
             if (ctx.Records.HasKey("useTaskInstallApacheAgent") &&
@@ -249,13 +290,20 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             {
                 string fullApacheAgentPath = tempApacheCIMModuleLocation;
                 string tag = ctx.ParentContext.Records.GetValue("apacheTag");
-                if (!apacheAgentInstalled)
+                if (apacheAgentInstalled)
                 {
                     this.apacheAgentHelper.UninstallApacheAgentWihCommand(fullApacheAgentPath, tag);              
                 }
 
                 fullApacheAgentPath = ctx.ParentContext.Records.GetValue("apacheAgentPath");
                 this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
+            }
+            string unCommentSudoers = ctx.Records.GetValue("UnCommentSudoers");
+            if (unCommentSudoers!=null)
+            {
+                RunPosixCmd execCmd = new RunPosixCmd(this.clientInfo.HostName, this.clientInfo.SuperUser, this.clientInfo.SuperUserPassword);
+                ctx.Trc("Running commentSudoers command: " + unCommentSudoers);
+                execCmd.RunCmd(unCommentSudoers);
             }
 
             ctx.Trc("ApacheSDKTests.DeployModuleTask.Cleanup finished");
@@ -311,6 +359,109 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         {
             ctx.Trc("SecurityHealth ABORT: " + msg);
             throw new VarAbort(msg);
+        }
+
+        /// <summary>
+        /// Delete the exist agent maintenance account and create a new one 
+        /// </summary>
+        /// <param name="ctx">IContext ctx</param>
+        private void ConfigureAgentMaintenceAccount(IContext ctx)
+        {
+            ManageAccountHelper manageAccountHelper = new ManageAccountHelper(this.info, ctx.Trc);
+
+            string credentialSettings = ctx.Records.GetValue("agentcredentialSettings");
+
+            string[] settings = credentialSettings.Split(new[] { ',' });
+            if (settings.Length < 4)
+            {
+                throw new Exception("Agent credential setting is not correct");
+            }
+
+            ScxCredentialSettings.CredentialType credentialType = (ScxCredentialSettings.CredentialType)int.Parse(settings[0]);
+            ScxCredentialSettings.AccountType accountType = (ScxCredentialSettings.AccountType)int.Parse(settings[1]);
+            ScxCredentialSettings.SSHCredentialType sshCredentialType = (ScxCredentialSettings.SSHCredentialType)int.Parse(settings[2]);
+            ScxCredentialSettings.ElevationType elevationType = (ScxCredentialSettings.ElevationType)int.Parse(settings[3]);
+
+            string username;
+            string password;
+            if (accountType == ScxCredentialSettings.AccountType.Priviledged)
+            {
+                username = ctx.Records.GetValue("superuser");
+                password = ctx.Records.GetValue("superuserpwd");
+            }
+            else
+            {
+                username = ctx.Records.GetValue("nonsuperuser");
+                password = ctx.Records.GetValue("nonsuperuserpwd");
+            }
+        }
+
+        /// <summary>
+        /// Delete the exist agent maintenance account and create a new one 
+        /// </summary>
+        /// <param name="ctx">IContext ctx</param>
+        private void ConfigureSpecialAgentMaintenceAccount(IContext ctx, bool useDefault = false)
+        {
+
+            ManageAccountHelper manageAccountHelper = new ManageAccountHelper(this.info, ctx.Trc);
+
+            string credentialSettings = "";
+            if (!useDefault)
+            {
+                credentialSettings = ctx.Records.GetValue("agentCredentialSettings");
+            }
+            else
+            {
+                credentialSettings = ctx.ParentContext.Records.GetValue("agentCredentialSettings");
+            }
+
+            string[] settings = credentialSettings.Split(new[] { ',' });
+            if (settings.Length < 4)
+            {
+                throw new Exception("Agent credential setting is not correct");
+            }
+
+            ScxCredentialSettings.CredentialType credentialType = (ScxCredentialSettings.CredentialType)int.Parse(settings[0]);
+            ScxCredentialSettings.AccountType accountType = (ScxCredentialSettings.AccountType)int.Parse(settings[1]);
+            ScxCredentialSettings.SSHCredentialType sshCredentialType = (ScxCredentialSettings.SSHCredentialType)int.Parse(settings[2]);
+            ScxCredentialSettings.ElevationType elevationType = (ScxCredentialSettings.ElevationType)int.Parse(settings[3]);
+
+            string username;
+            string password;
+            if (accountType == ScxCredentialSettings.AccountType.Priviledged)
+            {
+                username = ctx.ParentContext.Records.GetValue("superuser");
+                if (ctx.Records.GetValue("entityname").Contains("incorrect password of root account") && !useDefault)
+                {
+                    password = ctx.ParentContext.Records.GetValue("superuserpwd") + "11";
+                }
+                else
+                {
+                    password = ctx.ParentContext.Records.GetValue("superuserpwd");
+                }
+
+            }
+            else
+            {
+                username = ctx.ParentContext.Records.GetValue("nonsuperuser");
+                password = ctx.ParentContext.Records.GetValue("nonsuperuserpwd");
+            }
+
+            // Get Agent maintenance account.
+            Credential credential = manageAccountHelper.GetAgentAccountCredential(credentialType, accountType, sshCredentialType, elevationType, username, password);
+
+            // If Agent maintenance account not exists, create it.
+            // if (credential == null)
+            //{
+            // If the account with the same display name exists but different configuration, delete it
+            if (manageAccountHelper.IsUserAccountExists(ScxCredentialSettings.UnixAccountType.ScxAgentMaintenance))
+            {
+                manageAccountHelper.DeleteAccount(ScxCredentialSettings.UnixAccountType.ScxAgentMaintenance, ScxCredentialSettings.ProfileType.AgentMaintenanceAccount);
+            }
+
+            credential = manageAccountHelper.CreateAgentMaintenanceAccount(credentialType, accountType, sshCredentialType, elevationType, username, password);
+            //}
+
         }
 
         #endregion Private Methods

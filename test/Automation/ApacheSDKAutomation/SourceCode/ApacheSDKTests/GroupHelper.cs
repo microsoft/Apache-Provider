@@ -316,19 +316,19 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     }
 
                     ctx.Trc("Cleaning up remote system using SSH");
-                    this.CleanupAgent(ctx);
+                    //this.CleanupAgent(ctx);
 
                     ctx.Trc("Deploying/installing agent on client machine");
-                    this.discoveryHelper.InstallClient(this.fullNewAgentPath);
+                    //this.discoveryHelper.InstallClient(this.fullNewAgentPath);
 
                     ctx.Trc("Signing agent");
-                    this.discoveryHelper.CreateSignedCert();
+                    //this.discoveryHelper.CreateSignedCert();
 
                     ctx.Trc("Adding client to OM");
-                    this.discoveryHelper.DiscoverClientWSMan();
+                    //this.discoveryHelper.DiscoverClientWSMan();
                 }
 
-                //this.WaitForClientVerification(ctx);
+                this.WaitForClientVerification(ctx);
 
                 bool apacheAgentInstalled = this.apacheAgentHelper.VerifyApacheAgentInstalled();
 
@@ -349,14 +349,13 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                      { 
                          this.fullApacheAgentPath = ctx.Records.GetValue("apacheAgentPath");
                          string tag = ctx.Records.GetValue("apacheTag");
-                         this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
+                         //this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
                      }
                 }
 
                 this.computerObject = this.monitorHelper.GetComputerObject(this.clientInfo.HostName);
 
                 //this.VerifyHostIsCompletelyDiscoveried(ctx);
-
 
             }
             catch (Exception ex)
@@ -377,26 +376,26 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 ctx.Trc("ApacheSDKTests.GroupHelper.Cleanup");
 
                 // Check for Warnings in SCX logs
-                this.agentHelper.ScxLogHelper("sdk", "Warning", true, ctx.Records.GetValue("platformtag"), ctx.Records.GetValue("zonename"));
+                //this.agentHelper.ScxLogHelper("sdk", "Warning", true, ctx.Records.GetValue("platformtag"), ctx.Records.GetValue("zonename"));
 
                 // Check for Errors in SCX logs
-                this.agentHelper.ScxLogHelper("sdk", "Error", false, ctx.Records.GetValue("platformtag"), ctx.Records.GetValue("zonename"));
+                //this.agentHelper.ScxLogHelper("sdk", "Error", false, ctx.Records.GetValue("platformtag"), ctx.Records.GetValue("zonename"));
 
                 if (this.installOnly != true)
                 {
-                    ctx.Trc("Deleting System from OM...");
-                    this.discoveryHelper.DeleteSystemFromOM();
-                    this.UninstallAgent(ctx);
-
                     //Uninstall Apache CIm Module
                     string fullApacheAgentPath = tempApacheCIMModuleLocation;
-                    if (ctx.ParentContext.Records.HasKey("useTaskInstallApacheAgent") &&
-                        ctx.ParentContext.Records.GetValue("useTaskInstallApacheAgent").ToLower() == "false")
+                    if (ctx.Records.HasKey("useTaskInstallApacheAgent") &&
+                        ctx.Records.GetValue("useTaskInstallApacheAgent").ToLower() == "false")
                     {
-                        fullApacheAgentPath = ctx.ParentContext.Records.GetValue("apacheAgentPath");
+                        fullApacheAgentPath = ctx.Records.GetValue("apacheAgentPath");
                     }
-                    string tag = ctx.ParentContext.Records.GetValue("apacheTag");
+                    string tag = ctx.Records.GetValue("apacheTag");
                     this.apacheAgentHelper.UninstallApacheAgentWihCommand(fullApacheAgentPath, tag);
+
+                    this.UninstallAgent(ctx);
+                    ctx.Trc("Deleting System from OM...");
+                    this.discoveryHelper.DeleteSystemFromOM();
                 }
              
                 TimeSpan testDuration = DateTime.Now - this.testGroupStart;

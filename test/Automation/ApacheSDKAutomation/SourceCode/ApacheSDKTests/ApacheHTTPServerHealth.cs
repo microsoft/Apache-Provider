@@ -1,34 +1,30 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="AvailabilityHealth.cs" company="Microsoft">
+// <copyright file="ApacheHTTPServerHealth.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
 // <author>v-litin</author>
-// <description>AvailabilityHealth</description>
+// <description>ApacheHTTPServerHealth</description>
 //-----------------------------------------------------------------------
 
 namespace Scx.Test.Apache.SDK.ApacheSDKTests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using Infra.Frmwrk;
     using Microsoft.EnterpriseManagement.Configuration;
     using Microsoft.EnterpriseManagement.Monitoring;
     using Scx.Test.Common;
     using Scx.Test.Apache.SDK.ApacheSDKHelper;
-
-    public class AvailabilityHealth : PerformanceHealthBase, ISetup, IRun, IVerify, ICleanup
+    class ApacheHTTPServerHealth : PerformanceHealthBase, ISetup, IRun, IVerify, ICleanup
     {
-        /// <summary>
-        /// Initializes a new instance of the HTTPServerHealth class
+         /// <summary>
+        /// Initializes a new instance of the PerformanceHealth class
         /// </summary>
-        public AvailabilityHealth()
+        public ApacheHTTPServerHealth()
         {
         }
-
-        /// <summary>
-        /// Apache agent helper class
-        /// </summary>
-        private ApacheAgentHelper apacheAgentHelper;
 
         #region Test Framework Methods
 
@@ -38,13 +34,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// <param name="ctx">Current context</param>
         void ISetup.Setup(IContext ctx)
         {
-            if (this.SkipThisTest(ctx))
-            {
-                ctx.Trc("BYPASSING TEST CASE (ISetup.Setup): " + ctx.Records.GetValue("entityname"));
-                return;
-            }
-
-            ctx.Trc("SDKTests.HTTPServerHealth.Setup");
+            ctx.Trc("Apache.SDKTests.PerformanceHealth.Setup");
 
             try
             {
@@ -72,9 +62,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 ctx.Trc("OMInfo: " + Environment.NewLine + this.Info.ToString());
 
                 ctx.Trc("ClientInfo: " + Environment.NewLine + this.ClientInfo.ToString());
-
-                this.apacheAgentHelper = new ApacheAgentHelper(this.Info, this.ClientInfo);
-
                 this.MonitorHelper = new MonitorHelper(this.Info);
 
                 this.AlertHelper = new AlertsHelper(this.Info);
@@ -83,30 +70,23 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.ComputerObject = this.MonitorHelper.GetComputerObject(this.ClientInfo.HostName);
 
-                this.RecoverMonitorIfFailed(ctx);
+                this.DeleteMonitorOverride(ctx);
+
+                this.ApplyDefaultMonitorOverride(ctx, 30);
 
                 this.CloseMatchingAlerts(ctx);
 
-                //Because of there is a active bug 727207, so disable the steps
-                //this.VerifyMonitor(ctx, HealthState.Success);
+                this.VerifyMonitor(ctx, HealthState.Success);
 
-                //this.VerifyAlert(ctx, false);
-
-                if (ctx.Records.HasKey("needUninstallApache") &&
-                    ctx.Records.GetValue("needUninstallApache") == "true")
-                {
-                    string fullApacheAgentPath = ctx.ParentContext.Records.GetValue("apacheAgentPath");
-                    string tag = ctx.ParentContext.Records.GetValue("apacheTag");
-                    this.apacheAgentHelper.UninstallApacheAgentWihCommand(fullApacheAgentPath, tag);
-                }
+                this.VerifyAlert(ctx, false);
 
             }
             catch (Exception ex)
             {
-                this.Abort(ctx, ex.ToString());
+                Abort(ctx, ex.ToString());
             }
 
-            ctx.Trc("SDKTests.HTTPServerHealth.Setup complete");
+            ctx.Trc("Apache.SDKTests.PerformanceHealth.Setup complete");
         }
 
         /// <summary>
@@ -116,26 +96,25 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         void IRun.Run(IContext ctx)
         {
             string entity = ctx.Records.GetValue("entityname");
-            string action = ctx.Records.GetValue("ActionCmd");
+            string actionCmd = ctx.Records.GetValue("ActionCmd");
             string monitorName = ctx.Records.GetValue("monitorname");
             string diagnosticName = ctx.Records.GetValue("diagnostics");
-            string recoveryCmd = ctx.Records.GetValue("PostCmd");
+            string recoveryCmd = ctx.Records.GetValue("recoverycmd");
             string targetOSClassName = ctx.ParentContext.Records.GetValue("targetosclass");
 
-            if (this.SkipThisTest(ctx))
+            if (SkipThisTest(ctx))
             {
                 return;
             }
 
-            ctx.Trc("SDKTests.HTTPServerHealth.Run with entity " + entity);
+            ctx.Trc("Apache.SDKTests.PerformanceHealth.Run with entity " + entity);
 
             try
             {
-                if (!(string.IsNullOrEmpty(action)))
-                { 
-                    ctx.Alw("Running command synchronously (may take a while): " + action);
-                    RunCmd(action);
-                }
+                ApplyMonitorOverride(ctx, 30);
+
+                ctx.Alw("Running command: " + actionCmd);
+                RunCmd(actionCmd);
 
                 string expectedMonitorState = ctx.Records.GetValue("ExpectedState");
                 HealthState requiredState = this.GetRequiredState(expectedMonitorState);
@@ -154,7 +133,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 {
                     this.VerifyMonitor(ctx, requiredState);
 
-                    this.VerifyAlert(ctx, false);
+                    this.VerifyAlert(ctx, true);
                 }
 
                 // Run the recovery command
@@ -162,16 +141,15 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 {
                     ctx.Trc("Running recovery command: " + recoveryCmd);
                     RunCmd(recoveryCmd);
-                    //Because of there is a active bug 727207, so disable the steps
-                    //this.VerifyAlert(ctx, false);
+                    this.VerifyAlert(ctx, false);
                 }
             }
             catch (Exception ex)
             {
-                this.Fail(ctx, ex.ToString());
+                Fail(ctx, ex.ToString());
             }
 
-            ctx.Trc("SDKTests.HTTPServerHealth.Run complete");
+            ctx.Trc("Apache.SDKTests.PerformanceHealth.Run complete");
         }
 
         /// <summary>
@@ -180,24 +158,12 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// <param name="ctx">current context</param>
         void IVerify.Verify(IContext ctx)
         {
-            if (this.SkipThisTest(ctx))
+            if (SkipThisTest(ctx))
             {
                 return;
             }
 
-            ctx.Trc("SDKTests.HTTPServerHealth.Verify");
-
-            try
-            {
-                //Because of there is a active bug 727207, so disable the steps
-                //this.VerifyMonitor(ctx, HealthState.Success);
-            }
-            catch (Exception ex)
-            {
-                this.Fail(ctx, ex.ToString());
-            }
-
-            ctx.Trc("SDKTests.HTTPServerHealth.Verify complete");
+            ctx.Trc("Apache.SDKTests.PerformanceHealth.Verify complete");
         }
 
         /// <summary>
@@ -206,27 +172,91 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// <param name="ctx">Current context</param>
         void ICleanup.Cleanup(IContext ctx)
         {
-            if (this.SkipThisTest(ctx))
+            if (SkipThisTest(ctx))
             {
                 return;
             }
 
-            if (ctx.Records.HasKey("needUninstallApache") &&
-                ctx.Records.GetValue("needUninstallApache") == "true")
-            {
-                string fullApacheAgentPath = ctx.ParentContext.Records.GetValue("apacheAgentPath");
-                string tag = ctx.ParentContext.Records.GetValue("apacheTag");
-                this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
-            }
-            //remove all scripts
-            RunCmd("rm -rf /tmp/*.sh");
-
-            ctx.Trc("SDKTests.HTTPServerHealth.Cleanup finished");
+            this.DeleteMonitorOverride(ctx);
+            this.ApplyDefaultMonitorOverride(ctx, 30);
+           
+            ctx.Trc("Apache.SDKTests.PerformanceHealth.Cleanup finished");
         }
 
         #endregion Test Framework Methods
 
         #region Private Methods
+
+        /// <summary>
+        /// Apply the monitor override in the varmap such that the monitor under test can easily be put in an error condition
+        /// </summary>
+        ///// <param name="ctx">Current context</param>
+        ///// <param name="interval">Value to override monitor's Interval parameter to.  
+        ///// This controls number of seconds the health service waits between polls of the monitor state.</param>
+        private void ApplyMonitorOverride(IContext ctx, int interval)
+        {
+            string monitorName = ctx.Records.GetValue("monitorname");
+            string monitorContext = ctx.Records.GetValue("monitorcontext");
+            string monitorTarget = ctx.Records.GetValue("monitortarget");
+            string monitorThreshold = ctx.Records.GetValue("monitorthreshold");
+            string thresholdName = "Threshold";
+
+            if (!string.IsNullOrEmpty(monitorThreshold))
+            {
+                this.OverrideHelper.SetClientMonitorParameter(this.ComputerObject, monitorName, monitorContext, monitorTarget, thresholdName, monitorThreshold);
+
+                this.OverrideHelper.SetClientMonitorInterval(this.ComputerObject, monitorName, monitorContext, monitorTarget, interval);
+                
+            }
+        }
+
+        ///// <summary>
+        ///// Apply a monitor override to put the monitor threshold back to in the default value, as defined in the varmap
+        ///// </summary>
+        ///// <param name="ctx">Current context</param>
+        ///// <param name="interval">Value to override monitor's Interval parameter to.  
+        ///// This controls number of seconds the health service waits between polls of the monitor state.</param>
+        private void ApplyDefaultMonitorOverride(IContext ctx, int interval)
+        {
+            string monitorName = ctx.Records.GetValue("monitorname");
+            string monitorContext = ctx.Records.GetValue("monitorcontext");
+            string monitorTarget = ctx.Records.GetValue("monitortarget");
+            string monitorThreshold = ctx.Records.GetValue("defaultmonitorthreshold");
+            string thresholdName = "Threshold";
+
+            if (!string.IsNullOrEmpty(monitorThreshold))
+            {
+                this.OverrideHelper.SetClientMonitorParameter(this.ComputerObject, monitorName, monitorContext, monitorTarget, thresholdName, monitorThreshold);
+
+                this.OverrideHelper.SetClientMonitorInterval(this.ComputerObject, monitorName, monitorContext, monitorTarget, interval);
+                
+            }
+        }
+
+        ///// <summary>
+        ///// Apply a monitor override to put the monitor threshold back to in the default value, as defined in the varmap
+        ///// </summary>
+        ///// <param name="ctx">Current context</param>
+        private void DeleteMonitorOverride(IContext ctx)
+        {
+            string monitorName = ctx.Records.GetValue("monitorname");
+            string monitorContext = ctx.Records.GetValue("monitorcontext");
+            string monitorTarget = ctx.Records.GetValue("monitortarget");
+            string monitorThresholdStr = ctx.Records.GetValue("defaultmonitorthreshold");
+
+            this.OverrideHelper.DeleteClientMonitorThreshold(
+                this.ComputerObject,
+                monitorName,
+                monitorContext,
+                monitorTarget);
+
+            this.OverrideHelper.DeleteClientMonitorInterval(
+                this.ComputerObject,
+                monitorName,
+                monitorContext,
+                monitorTarget);
+        }
+
 
         private RunPosixCmd RunCmd(string cmd, string arguments = "")
         {
@@ -239,7 +269,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             execCmd.RunCmd();
             return execCmd;
         }
-
 
         #endregion
     }

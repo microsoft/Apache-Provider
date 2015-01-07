@@ -247,6 +247,74 @@ namespace Scx.Test.Apache.SDK.ApacheSDKHelper
         }
 
         /// <summary>
+        /// Execute a monitoring task which should failed
+        /// This method be used to run some specified task, when there no task result output, e.g. output be null, you can use this method
+        /// </summary>
+        /// <param name="targetList">List of target MonitoringObject, for example the computer object representing the remote client</param>
+        /// <param name="task">The MonitoringTask, for example Microsoft.Linux.RHEL.5.Agent.Install.Task</param>
+        /// <param name="config">The MonitoringTaskConfiguration object, containing any task overrides</param>
+        /// <param name="failedTask">Expected that the task failed.</param>
+        /// <returns>A collection of monitoring task results</returns>
+        public IList<Microsoft.EnterpriseManagement.Runtime.TaskResult> RunFailedTask(
+            MonitoringObject computerObject,
+            string taskName,
+            bool failedTask = true)
+        {
+            ManagementPackTask task = this.GetMonitoringTask(taskName);
+            // Use the default task configuration.
+            Microsoft.EnterpriseManagement.Runtime.TaskConfiguration config = new Microsoft.EnterpriseManagement.Runtime.TaskConfiguration();
+
+            // Set the target
+            List<MonitoringObject> targets = new List<MonitoringObject>();
+            targets.Add(computerObject);
+
+            // 30 seconds.
+            int threadSleepTime = 30 * 1000;
+            int maxTries = 3;
+            bool success = false;
+
+            // Run the task.
+            this.logger(string.Format("Starting task {0} on the following target: {1}", task.Name, targets[0].DisplayName));
+
+            IList<Microsoft.EnterpriseManagement.Runtime.TaskResult> results = new List<Microsoft.EnterpriseManagement.Runtime.TaskResult>();
+
+            for (int tries = 0; !success && tries < maxTries; tries++)
+            {
+                System.Threading.Thread.Sleep(threadSleepTime);
+
+                results = this.info.LocalManagementGroup.TaskRuntime.ExecuteTask<MonitoringObject>(targets, task, config);
+
+                if (results.Count == 1)
+                {
+                    if (failedTask)
+                    {
+                        if (results[0].Status == Microsoft.EnterpriseManagement.Runtime.TaskStatus.Failed)
+                        {
+                            success = true;
+                            return results;
+                        }
+                    }
+                    else
+                    { 
+                        if (results[0].Status == Microsoft.EnterpriseManagement.Runtime.TaskStatus.Succeeded)
+                        {
+                            return results;
+                        } 
+                    }
+                }
+
+                this.logger(string.Format("RunTask: tries={0}, success={1}", tries, success));
+            }
+
+            if (results.Count == 0)
+            {
+                throw new InvalidOperationException("Failed to return any results from task: " + task.Name);
+            }
+
+            return results;
+        }
+
+        /// <summary>
         /// Runs a given task name, for example Microsoft.Linux.RHEL.5.Agent.Install.Task
         /// </summary>
         /// <param name="computerObject">The computer object to run the task against</param>

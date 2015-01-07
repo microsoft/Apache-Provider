@@ -298,7 +298,23 @@ namespace Scx.Test.Apache.SDK.ApacheSDKHelper
             };
             
             // Save the changes into the management pack.
-            this.managementPack.AcceptChanges();
+            try
+            {
+                this.managementPack.AcceptChanges();
+            }
+            catch (Exception)
+            {
+                ruleOverride = new ManagementPackRuleConfigurationOverride(this.managementPack, overrideName)
+                {
+                    Rule = rule,
+                    Parameter = parameterName,
+                    Value = parameterValue,
+                    Context = monitoringClass,
+                    DisplayName = overrideName,
+                    Module = "DataSource"
+                };
+                this.managementPack.AcceptChanges();
+            }
         }
 
         /// <summary>

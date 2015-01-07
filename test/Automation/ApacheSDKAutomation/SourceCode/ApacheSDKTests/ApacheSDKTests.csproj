@@ -81,15 +81,15 @@
     </Reference>
     <Reference Include="Microsoft.EnterpriseManagement.Core, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.Core.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.EnterpriseManagement.OperationsManager, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.OperationsManager.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.OperationsManager.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.EnterpriseManagement.Runtime, Version=7.0.5000.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\..\..\..\..\Tina\11020_signed_sdk_dll\Microsoft.EnterpriseManagement.Runtime.dll</HintPath>
+      <HintPath>..\..\..\Dependency\bin\OMDll\signed\Microsoft.EnterpriseManagement.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -102,13 +102,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApacheHTTPServerHealth.cs" />
     <Compile Include="DeployModuleTask.cs" />
+    <Compile Include="DeployModuleTaskWithPS.cs" />
     <Compile Include="GroupHelper.cs" />
+    <Compile Include="PerformanceCollectionHealth.cs" />
     <Compile Include="PerformanceHealth.cs" />
     <Compile Include="PerformanceHealthBase.cs" />
     <Compile Include="PerformanceWithTwoStateHealth.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AvailabilityHealth.cs" />
+    <Compile Include="ManageApacheServiceTask.cs" />
     <Compile Include="SSLCertExpirationHealth.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -116,12 +120,12 @@
       <Project>{0E72C11D-D2A7-462C-B129-F368C32A0989}</Project>
       <Name>MPAbstractions</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\ScxCommon\ScxCommon.csproj">
-      <Project>{B7BA6A62-C3E5-49F4-A2AF-F8C989ED1EFB}</Project>
-      <Name>ScxCommon</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\ScxCommon\ScxCommon.csproj">
+      <Project>{b7ba6a62-c3e5-49f4-a2af-f8c989ed1efb}</Project>
+      <Name>ScxCommon</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ApacheSDKHelper\ApacheSDKHelper.csproj">
       <Project>{80405EEB-CD80-4131-BB83-CD8C8516EC48}</Project>
       <Name>ApacheSDKHelper</Name>
@@ -155,9 +159,9 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>xcopy /E /Y /I "$(SolutionRoot)\Dependency\Tools\MCF\*" "$(TargetDir)Tools\MCF"
-xcopy /Y /I "$(SolutionRoot)\Automation\ApacheSDKAutomation\TestFiles\*" "$(TargetDir)ApacheSDK"
-xcopy /E /Y /I "$(SolutionRoot)\Automation\ApacheSDKAutomation\TestFiles\Overrides\$(ConfigurationName)\*" "$(TargetDir)ApacheSDK\Overrides"
+    <PostBuildEvent>xcopy /E /Y /I "$(SolutionDir)\..\..\Dependency\Tools\MCF\*" "$(TargetDir)Tools\MCF"
+xcopy /Y /I "$(SolutionDir)\TestFiles\*" "$(TargetDir)ApacheSDK"
+xcopy /E /Y /I "$(SolutionDir)\TestFiles\Overrides\$(ConfigurationName)\*" "$(TargetDir)ApacheSDK\Overrides"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

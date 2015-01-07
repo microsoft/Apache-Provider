@@ -75,12 +75,12 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// <summary>
         /// Period of time to wait for OM Server to update its internal state to match changes on the agent.
         /// </summary>
-        private TimeSpan serverWaitTime = new TimeSpan(0, 0, 15);
+        private TimeSpan serverWaitTime = new TimeSpan(0, 0, 30);
 
         /// <summary>
         /// Maximum number of times to wait for server state change
         /// </summary>
-        private int maxServerWaitCount = 20;
+        private int maxServerWaitCount = 15;
 
         /// <summary>
         /// Holds any unexpected exception generated from within this.ExecuteActionCommand();
@@ -199,10 +199,10 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 while (numTries < this.maxServerWaitCount && monitorHealth != requiredState)
                 {
-                    if (numTries > 0)
-                    {
+                    //if (numTries > 0)
+                    //{
                         this.Wait(ctx);
-                    }
+                    //}
 
                     monitorHealth = string.IsNullOrEmpty(monitorTarget)
                         ? this.monitorHelper.GetMonitorHealthState(this.computerObject, monitorName)
@@ -240,14 +240,15 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
             bool alertExists = !shouldExist;
 
+   
             int numTries = 0;
 
             while (numTries < this.maxServerWaitCount && alertExists != shouldExist)
             {
-                if (numTries > 0)
-                {
+                //if (numTries > 0)
+                //{
                     this.Wait(ctx);
-                }
+                //}
 
                 numTries++;
 
