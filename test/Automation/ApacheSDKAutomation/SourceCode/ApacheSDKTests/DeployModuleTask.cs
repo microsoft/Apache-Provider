@@ -15,6 +15,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
     using Microsoft.EnterpriseManagement.Monitoring;
     using Scx.Test.Common;
     using Scx.Test.Apache.SDK.ApacheSDKHelper;
+    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Description for DeployModuleTask.
@@ -234,7 +235,9 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     this.Fail(ctx, string.Format("Fail: expectedTaskStatus: {0}, actualTaskStatus: {1}", expectedTaskStatus, this.taskResult[0].Status));
                 }
 
-                if (this.taskResult[0].Output.Contains(expectedOutputKeyWord))
+                Regex re = new Regex(expectedOutputKeyWord);
+                if (re.IsMatch(this.taskResult[0].Output))
+                //if (this.taskResult[0].Output.Contains(expectedOutputKeyWord))
                 {
                     ctx.Trc(string.Format("Pass: expectedOutputKeyWord: {0}, actualOutputKeyWord: {1}", expectedOutputKeyWord, this.taskResult[0].Output));
                 }

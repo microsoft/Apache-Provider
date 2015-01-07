@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{
 		TestFiles\scx.test.apache.sdk.package.universald_x64.xml = TestFiles\scx.test.apache.sdk.package.universald_x64.xml
 		TestFiles\scx.test.apache.sdk.package.universalr_x64.xml = TestFiles\scx.test.apache.sdk.package.universalr_x64.xml
 		TestFiles\scx.test.apache.sdk.package.universalr_x86.xml = TestFiles\scx.test.apache.sdk.package.universalr_x86.xml
+		TestFiles\scx.test.apache.sdk.source.universald_x86.xml = TestFiles\scx.test.apache.sdk.source.universald_x86.xml
 		TestFiles\scx.test.apache.sdk.source.universalr_x64.xml = TestFiles\scx.test.apache.sdk.source.universalr_x64.xml
 	EndProjectSection
 EndProject

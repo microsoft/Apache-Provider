@@ -16,7 +16,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>OK</val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
 
@@ -34,7 +34,94 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>OK</val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725226" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify that it doesn't upgrade Apache CIM Module to a lower version by running task Install/Upgrade Apache CIM Module." permutation="rows">
+    <recm key="EntityName">
+      <val>Doesn't upgrade Apache CIM Module to a lower version by running task "Install/Upgrade Apache CIM Module"</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725842" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with root account which password is incorrect." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with incorrect password of root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="agentCredentialSettings">
+      <val>1,0,0,0</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725856" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if Install/Upgrade Apache CIM Module with valid scxuser account with sudo works." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with valid scxuser account with sudo.</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="agentCredentialSettings">
+      <val>1,1,0,2</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725868" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access." permutation="rows">
+    <recm key="EntityName">
+      <val>Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access.</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.Installation</val>
+    </recm>
+    <recm key="agentCredentialSettings">
+      <val>1,1,0,2</val>
+    </recm >
+    <recm key="CommentSudoers">
+      <val>sed -i 's/scxuser/#scxuser/g' /etc/sudoers</val>
+    </recm>
+    <recm key="UnCommentSudoers">
+      <val>sed -i 's/#scxuser/scxuser/g' /etc/sudoers</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
     </recm>
   </var>
 
@@ -52,7 +139,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>TRUE</val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
 
@@ -70,7 +157,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>OK</val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
 
@@ -92,94 +179,7 @@
     </recm>
   </var>
 
-  <var set="0" lvl="0" vid="725226" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify that it doesn't upgrade Apache CIM Module to a lower version by running task Install/Upgrade Apache CIM Module." permutation="rows">
-    <recm key="EntityName">
-      <val>Doesn't upgrade Apache CIM Module to a lower version by running task "Install/Upgrade Apache CIM Module"</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.Installation</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Fail</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>already installed</val>
-    </recm>
-  </var>
-  
-  <var set="0" lvl="0" vid="725842" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with root account which password is incorrect." permutation="rows">
-    <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with incorrect password of root account</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.Installation</val>
-    </recm>
-    <recm key="agentCredentialSettings">
-      <val>1,0,0,0</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Fail</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>Bug:null</val>
-    </recm>  
-  </var>
-  
-  <var set="0" lvl="0" vid="725856" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if Install/Upgrade Apache CIM Module with valid scxuser account with sudo works." permutation="rows">
-    <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with valid scxuser account with sudo.</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.Installation</val>
-    </recm>
-    <recm key="agentCredentialSettings">
-      <val>1,1,0,2</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Success</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>OK</val>
-    </recm>
-  </var>
-  
-  <var set="0" lvl="0" vid="725868" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access." permutation="rows">
-    <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access.</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.Installation</val>
-    </recm>
-    <recm key="agentCredentialSettings">
-      <val>1,1,0,2</val>
-    </recm >
-    <recm key="CommentSudoers">
-        <val>sed -i 's/scxuser/#scxuser/g' /etc/sudoers</val>
-    </recm>
-    <recm key="UnCommentSudoers">
-      <val>sed -i 's/#scxuser/scxuser/g' /etc/sudoers</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Fail</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>no tty present</val>
-    </recm>
-  </var>
-  
-  
+
   <!--Monitor[15]-->
   <var set="1" lvl="0" vid="725203" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="This case if for 725203 and 725204, Verify SSL Certificate Expiration monitor can change to Warning/Error when the expiration time reach to Warning/Error state." permutation="rows">
     <recm key="ActionCmd">

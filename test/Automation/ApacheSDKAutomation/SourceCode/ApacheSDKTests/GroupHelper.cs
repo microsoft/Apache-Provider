@@ -316,16 +316,16 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                     }
 
                     ctx.Trc("Cleaning up remote system using SSH");
-                    //this.CleanupAgent(ctx);
+                    this.CleanupAgent(ctx);
 
                     ctx.Trc("Deploying/installing agent on client machine");
-                    //this.discoveryHelper.InstallClient(this.fullNewAgentPath);
+                    this.discoveryHelper.InstallClient(this.fullNewAgentPath);
 
                     ctx.Trc("Signing agent");
-                    //this.discoveryHelper.CreateSignedCert();
+                    this.discoveryHelper.CreateSignedCert();
 
                     ctx.Trc("Adding client to OM");
-                    //this.discoveryHelper.DiscoverClientWSMan();
+                    this.discoveryHelper.DiscoverClientWSMan();
                 }
 
                 this.WaitForClientVerification(ctx);
@@ -349,7 +349,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                      { 
                          this.fullApacheAgentPath = ctx.Records.GetValue("apacheAgentPath");
                          string tag = ctx.Records.GetValue("apacheTag");
-                         //this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
+                         this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
                      }
                 }
 

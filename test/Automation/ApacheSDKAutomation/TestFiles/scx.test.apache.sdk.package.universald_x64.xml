@@ -2,7 +2,7 @@
   <!--SDk Test Cases-->
 
    <!--Tasks[9]-->
-  <var set="0" lvl="0" vid="724163" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify deploy Apache CIM module by PowerShell command successful." permutation="rows">
+ <var set="0" lvl="0" vid="724163" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify deploy Apache CIM module by PowerShell command successful." permutation="rows">
     <recm key="EntityName">
       <val>Install/Upgrade Apache CIM Module with valid root account</val>
     </recm>
@@ -16,10 +16,10 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val></val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
-
+  
   <var set="0" lvl="0" vid="779558" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if upgade Apache CIM Module works by running task Install/Upgrade Apache CIM Module with valid root account." permutation="rows">
     <recm key="EntityName">
       <val>upgrade Apache CIM Module with valid root account</val>
@@ -34,64 +34,10 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val></val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
-
-  <var set="0" lvl="0" vid="725217" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Reload Apache HTTP Server (Graceful) task works." permutation="rows">
-    <recm key="EntityName">
-      <val>Reload Apache HTTP Server(Graceful) with valid root account</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.ReloadApache.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Success</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>TRUE</val>
-    </recm>
-  </var>
-
-  <var set="0" lvl="0" vid="725218" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Restart Apache HTTP Server task works." permutation="rows">
-    <recm key="EntityName">
-      <val>Restart Apache HTTP Server with valid root account</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.RestartApache.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Success</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>TRUE</val>
-    </recm>
-  </var>
-
-  <var set="0" lvl="0" vid="725219" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Update Discovered Properties task works." permutation="rows">
-    <recm key="EntityName">
-      <val>Update Discovered Properties with valid root account</val>
-    </recm>
-    <recm key="TaskName">
-      <val>Microsoft.ApacheHTTPServer.DiscoverServer.Task</val>
-    </recm>
-    <recm key="InstanceClass">
-      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
-    </recm>
-    <recm key="ExpectedTaskStatus">
-      <val>Success</val>
-    </recm>
-    <recm key="expectedOutputKeyWord">
-      <val>SUCCESS</val>
-    </recm>
-  </var>
-
+  
   <var set="0" lvl="0" vid="725226" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify that it doesn't upgrade Apache CIM Module to a lower version by running task Install/Upgrade Apache CIM Module." permutation="rows">
     <recm key="EntityName">
       <val>Doesn't upgrade Apache CIM Module to a lower version by running task "Install/Upgrade Apache CIM Module"</val>
@@ -103,10 +49,10 @@
       <val>Microsoft.ApacheHTTPServer.Installation</val>
     </recm>
     <recm key="ExpectedTaskStatus">
-      <val>Fail</val>
+      <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>already installed</val>
+      <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
     </recm>
   </var>
   
@@ -124,10 +70,10 @@
       <val>1,0,0,0</val>
     </recm>
     <recm key="ExpectedTaskStatus">
-      <val>Fail</val>
+      <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>Bug:null</val>
+      <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
     </recm>  
   </var>
   
@@ -148,7 +94,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>OK</val>
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
   
@@ -172,13 +118,67 @@
       <val>sed -i 's/#scxuser/scxuser/g' /etc/sudoers</val>
     </recm>
     <recm key="ExpectedTaskStatus">
-      <val>Fail</val>
+      <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>no tty present</val>
+      <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
     </recm>
   </var>
-  
+
+  <var set="0" lvl="0" vid="725217" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Reload Apache HTTP Server (Graceful) task works." permutation="rows">
+    <recm key="EntityName">
+      <val>Reload Apache HTTP Server(Graceful) with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.ReloadApache.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725218" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Restart Apache HTTP Server task works." permutation="rows">
+    <recm key="EntityName">
+      <val>Restart Apache HTTP Server with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.RestartApache.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+    </recm>
+  </var>
+
+  <var set="0" lvl="0" vid="725219" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Update Discovered Properties task works." permutation="rows">
+    <recm key="EntityName">
+      <val>Update Discovered Properties with valid root account</val>
+    </recm>
+    <recm key="TaskName">
+      <val>Microsoft.ApacheHTTPServer.DiscoverServer.Task</val>
+    </recm>
+    <recm key="InstanceClass">
+      <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix</val>
+    </recm>
+    <recm key="ExpectedTaskStatus">
+      <val>Success</val>
+    </recm>
+    <recm key="expectedOutputKeyWord">
+      <val>SUCCESS</val>
+    </recm>
+  </var>
+
   
   <!--Monitor[15]-->
   <var set="1" lvl="0" vid="725203" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="This case if for 725203 and 725204, Verify SSL Certificate Expiration monitor can change to Warning/Error when the expiration time reach to Warning/Error state." permutation="rows">

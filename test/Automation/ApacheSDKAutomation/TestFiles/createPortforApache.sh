@@ -86,6 +86,7 @@ function restartApacheService {
     if [ "$isDEB" = "true" ]; then
 	service apache2 restart
     fi
+	sleep 2
 }
 
 function createSSLPort {
