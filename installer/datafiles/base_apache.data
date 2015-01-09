@@ -86,25 +86,40 @@ fi
 %FindApacheConfigurationFile
 FindApacheConfigFile()
 {
-    if [ -z "${APACHE_CONF}" ]; then
-	# Source code installation w/default directories
+    if [ -z "${APACHE_CONF}" -o -z "${CONF_STYLE}" ]; then
+        # Source code installation w/default directories
         APACHE_CONF=/usr/local/apache2/conf/httpd.conf
+        CONF_STYLE=f
         [ -e "${APACHE_CONF}" ] && return
+
+        # Favor the conf.d-style directories
+        APACHE_CONF=/etc/httpd/conf.d
+        CONF_STYLE=d
+        [ -d "${APACHE_CONF}" ] && return
+
+        # Favor the conf.d-style directories
+        APACHE_CONF=/etc/apache2/conf.d
+        CONF_STYLE=d
+        [ -d "${APACHE_CONF}" ] && return
 
         # Redhat-type installation
         APACHE_CONF=/etc/httpd/conf/httpd.conf
+        CONF_STYLE=f
         [ -e "${APACHE_CONF}" ] && return
 
-	# SuSE-type installation
+        # SuSE-type installation
         APACHE_CONF=/etc/apache2/default-server.conf
+        CONF_STYLE=f
         [ -e "${APACHE_CONF}" ] && return
 
-	# Ubuntu-type installation
+        # Ubuntu-type installation
         APACHE_CONF=/etc/apache2/apache2.conf
+        CONF_STYLE=f
         [ -e "${APACHE_CONF}" ] && return
 
         # Unable to find it, so indicate so
         APACHE_CONF=
+        CONF_STYLE=
     fi
 }
 FindApacheConfigFile
@@ -113,50 +128,61 @@ FindApacheConfigFile
 #include FindApacheConfigurationFile
 UnconfigureApacheConf_File()
 {
-    #
-    # Prefer to use /etc/httpd/conf.d or /etc/apache2/conf.d, if these exist
-    #
-    if [ -L /etc/httpd/conf.d/mod_cimprov.conf ]; then
-        rm /etc/httpd/conf.d/mod_cimprov.conf
+    # Find anything?
+    if [ -z "${APACHE_CONF}" -o -z "${CONF_STYLE}" ]; then
+        echo "Failure unconfiguring Apache: Apache configuration file was not found" 1>&2
+        return 1;
+    fi
+
+    if [ "${CONF_STYLE}" = "d" ]; then
+        #
+    	# Support for conf.d style setups
+    	#
+
+        if [ -L ${APACHE_CONF}/mod_cimprov.conf ]; then
+            rm ${APACHE_CONF}/mod_cimprov.conf
+            return 0
+        fi
+
+        # Looks like Apache wasn't previously configured
+        echo "Apache not previously configured; nothing to unconfigure" 1>&2
+        return 1
+    elif [ "${CONF_STYLE}" = "f" ]; then
+        #
+    	# Support for httpd.conf-style setups
+    	#
+
+        apache_config_data=`grep -v "${{INCLUDE_DIRECTIVE}}" ${APACHE_CONF}`
+        if [ $? -ne 0 ]; then
+            # mod_cimprov not configured in Apache
+            return 0
+    	fi
+        #
+        # Write it back (to the copy first, but leave backup "just in case")
+        #
+        cp -p ${APACHE_CONF} ${APACHE_CONF}.bak
+        if [ $? -ne 0 ]; then
+	   echo "Can't create backup of ${APACHE_CONF}"
+	   return 1
+        fi
+        cp -p ${APACHE_CONF} ${APACHE_CONF}.tmp
+        echo "${apache_config_data}" > ${APACHE_CONF}.tmp
+        if [ $? -ne 0 ]; then
+            echo "Can't write to ${APACHE_CONF}.tmp"
+            return 1
+        fi
+        mv ${APACHE_CONF}.tmp ${APACHE_CONF}
+        if [ $? -ne 0 ]; then
+            echo "Can't replace file ${APACHE_CONF}"
+            return 1
+        fi
+	# Unconfiguraiton complete
         return 0
-    fi
-    if [ -L /etc/apache2/conf.d/mod_cimprov.conf ]; then
-        rm /etc/apache2/conf.d/mod_cimprov.conf
-        return 0
-    fi
-
-    #
-    # Fall back to using Apache configuration file
-    #
-
-    if [ ! -e "${APACHE_CONF}" ]; then
-	echo "Failure unconfiguring Apache: Apache configuration file was not found" 1>&2
-	return 1;
-    fi
-
-    apache_config_data=`grep -v "${{INCLUDE_DIRECTIVE}}" ${APACHE_CONF}`
-    if [ $? -ne 0 ]; then
-	# mod_cimprov not configured in Apache
-	return 0
-    fi
-    #
-    # Write it back (to the copy first, but leave backup "just in case")
-    #
-    cp -p ${APACHE_CONF} ${APACHE_CONF}.bak
-    if [ $? -ne 0 ]; then
-	echo "Can't create backup of ${APACHE_CONF}"
-	return 1
-    fi
-    cp -p ${APACHE_CONF} ${APACHE_CONF}.tmp
-    echo "${apache_config_data}" > ${APACHE_CONF}.tmp
-    if [ $? -ne 0 ]; then
-	echo "Can't write to ${APACHE_CONF}.tmp"
-	return 1
-    fi
-    mv ${APACHE_CONF}.tmp ${APACHE_CONF}
-    if [ $? -ne 0 ]; then
-	echo "Can't replace file ${APACHE_CONF}"
-	return 1
+    else
+        echo "Internal error unconfiguring Apache; please report this problem to support services" 1>&2
+        echo "    Conf file:  ${APACHE_CONF}" 1>&2
+        echo "    Conf style: ${CONF_STYLE}" 1>&2
+        return 1;
     fi
 }
 
@@ -164,42 +190,46 @@ UnconfigureApacheConf_File()
 #include FindApacheConfigurationFile
 ConfigureApacheConf_File()
 {
-    #
-    # Prefer to use /etc/httpd/conf.d or /etc/apache2/conf.d, if these exist
-    #
-    if [ -d /etc/httpd/conf.d ]; then
-        [ -e /etc/httpd/conf.d/mod_cimprov.conf ] && rm /etc/httpd/conf.d/mod_cimprov.conf
-        ln -s ${{INCLUDE_FILE}} /etc/httpd/conf.d/mod_cimprov.conf
-        return 0
-    fi
-    if [ -d /etc/apache2/conf.d ]; then
-        [ -e /etc/apache2/conf.d/mod_cimprov.conf ] && rm /etc/apache2/conf.d/mod_cimprov.conf
-        ln -s ${{INCLUDE_FILE}} /etc/apache2/conf.d/mod_cimprov.conf
-        return 0
+    # Find anything?
+    if [ -z "${APACHE_CONF}" -o -z "${CONF_STYLE}" ]; then
+        echo "Failure configuring Apache: Apache configuration file was not found" 1>&2
+        return 1;
     fi
 
-    #
-    # Fall back to using Apache configuration file
-    #
+    if [ "${CONF_STYLE}" = "d" ]; then
+        #
+    	# Support for conf.d style setups
+    	#
 
-    if [ ! -e "${APACHE_CONF}" ]; then
-	echo "Failure configuring Apache: Apache configuration file was not found" 1>&2
-	return 1;
+        [ -e ${APACHE_CONF}/mod_cimprov.conf ] && rm ${APACHE_CONF}/mod_cimprov.conf
+        ln -s ${{INCLUDE_FILE}} ${APACHE_CONF}/mod_cimprov.conf
+    elif [ "${CONF_STYLE}" = "f" ]; then
+        #
+    	# Support for httpd.conf-style setups
+    	#
+
+        grep -q "${{INCLUDE_DIRECTIVE}}" ${APACHE_CONF}
+        if [ $? -eq 0 ]; then
+            # mod_cimprov is already configured in Apache
+            return 0
+        fi
+        #
+        # Append the include directive to the Apache configuraiton file
+        #
+        echo "${{INCLUDE_DIRECTIVE}}" >> ${APACHE_CONF}
+        if [ $? -ne 0 ]; then
+            echo "Can't append include directive to file ${APACHE_CONF}"
+            return 1
+        fi
+    else
+        echo "Internal error configuring Apache; please report this problem to support services" 1>&2
+        echo "    Conf file:  ${APACHE_CONF}" 1>&2
+        echo "    Conf style: ${CONF_STYLE}" 1>&2
+        return 1;
     fi
 
-    grep -q "${{INCLUDE_DIRECTIVE}}" ${APACHE_CONF}
-    if [ $? -eq 0 ]; then
-	# mod_cimprov is already configured in Apache
-	return 0
-    fi
-    #
-    # Append the include directive to the Apache configuraiton file
-    #
-    echo "${{INCLUDE_DIRECTIVE}}" >> ${APACHE_CONF}
-    if [ $? -ne 0 ]; then
-	echo "Can't append include directive to file ${APACHE_CONF}"
-	return 1
-    fi
+    # Configuration complete
+    return 0
 }
 
 %Postinstall_10
@@ -237,7 +267,7 @@ if ${{PERFORMING_UPGRADE_NOT}}; then
    rmdir /etc/opt/microsoft 2> /dev/null
    rmdir /etc/opt 2> /dev/null
 
-   #include UnconfigureApacheConf
+#include UnconfigureApacheConf
    UnconfigureApacheConf_File
 fi
 
