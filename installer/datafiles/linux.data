@@ -3,12 +3,34 @@ PF:	'Linux'
 
 %ApacheService_funcs
 FindApacheService() {
-    if [ -x /etc/init.d/httpd ]; then
+    if [ -x /bin/systemctl ]; then
+        # Will match either "active" or "inactive", but not "unknown"
+       	systemctl is-active httpd | egrep "active|failed" > /dev/null 2>&1
+       	if [ $? -eq 0 ]; then 
+       	    APACHE_SERVICE="httpd"
+            SERVICE_TYPE="systemd"
+   	else
+            # Try for apache2; if not found, last ditch effort for a local install
+            systemctl is-active apache2 | egrep "active|failed" > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                APACHE_SERVICE="apache2"
+                SERVICE_TYPE="systemd"
+            elif [ -x  /usr/local/apache2/bin/httpd ]; then
+                APACHE_SERVICE="none" 
+                SERVICE_TYPE="legacy"
+            else
+                echo "Unable to determine Apache service name under systemd; Apache must be restarted manually" 1>&2
+            fi
+        fi
+    elif [ -x /etc/init.d/httpd ]; then
         APACHE_SERVICE="httpd"
+        SERVICE_TYPE="legacy"
     elif [ -x /etc/init.d/apache2 ]; then
         APACHE_SERVICE="apache2"
+        SERVICE_TYPE="legacy"
     elif [ -x  /usr/local/apache2/bin/httpd ]; then
-        APACHE_SERVICE="none"
+        APACHE_SERVICE="none" 
+        SERVICE_TYPE="legacy"
     else
         echo "Unable to determine Apache service name; Apache must be restarted manually" 1>&2
     fi
@@ -21,7 +43,10 @@ StopApacheServer() {
         return 0;
     fi
 
-    if [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
+    if [ "${SERVICE_TYPE}" = "systemd" -a -n "${APACHE_SERVICE}" ]; then
+        echo "Stopping Apache server ..."
+        /bin/systemctl stop ${APACHE_SERVICE}
+    elif [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
         echo "Stopping Apache server ..."
         /usr/local/apache2/bin/httpd -k stop
     elif [ -x /usr/sbin/invoke-rc.d ]; then
@@ -40,7 +65,10 @@ StartApacheServer() {
         return 0;
     fi
 
-    if [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
+    if [ "${SERVICE_TYPE}" = "systemd" -a -n "${APACHE_SERVICE}" ]; then
+        echo "Starting Apache server ..."
+        /bin/systemctl start ${APACHE_SERVICE}
+    elif [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
         echo "Starting Apache server ..."
         /usr/local/apache2/bin/httpd -k start
     elif [ -x /usr/sbin/invoke-rc.d ]; then
@@ -112,7 +140,7 @@ StartOmiServer
 #include CheckIfOmiIsRunning
 
 # If we're called for upgrade, don't do anything
-if [ "$1" != "upgrade" ]; then 
+if ${{PERFORMING_UPGRADE_NOT}}; then 
     RestartApacheServer
     RestartOmiServer
 fi

@@ -213,6 +213,7 @@ WriteInstallInfo
 if [ -e /usr/local/apache2/bin/httpd ]; then
     TARGET_LOCATION=`ldd /usr/local/apache2/bin/httpd | grep libapr-1.so | awk '{print $3}'`
 
+    [ -e /opt/microsoft/apache-cimprov/lib/libapr-1.so.0 ] && rm /opt/microsoft/apache-cimprov/lib/libapr-1.so.0
     ln -s $TARGET_LOCATION /opt/microsoft/apache-cimprov/lib/libapr-1.so.0
 fi
 
@@ -220,22 +221,25 @@ fi
 ConfigureApacheConf_File
 
 %Postuninstall_10
-# Clean up libapr-1.so.0 linkage
-rm -f /opt/microsoft/apache-cimprov/lib/libapr-1.so*
-rmdir /opt/microsoft/apache-cimprov/lib 2> /dev/null
-rmdir /opt/microsoft/apache-cimprov 2> /dev/null
-rmdir /opt/microsoft 2> /dev/null
-rmdir /opt 2> /dev/null
+# If we're an upgrade, skip all of this cleanup
+if ${{PERFORMING_UPGRADE_NOT}}; then 
+   # Clean up libapr-1.so.0 linkage
+   rm -f /opt/microsoft/apache-cimprov/lib/libapr-1.so*
+   rmdir /opt/microsoft/apache-cimprov/lib 2> /dev/null
+   rmdir /opt/microsoft/apache-cimprov 2> /dev/null
+   rmdir /opt/microsoft 2> /dev/null
+   rmdir /opt 2> /dev/null
 
-# Clean up installinfo.txt file (registered as "conf" file to pass rpmcheck)
-rm -f /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt*
-rmdir /etc/opt/microsoft/apache-cimprov/conf 2> /dev/null
-rmdir /etc/opt/microsoft/apache-cimprov 2> /dev/null
-rmdir /etc/opt/microsoft 2> /dev/null
-rmdir /etc/opt 2> /dev/null
+   # Clean up installinfo.txt file (registered as "conf" file to pass rpmcheck)
+   rm -f /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt*
+   rmdir /etc/opt/microsoft/apache-cimprov/conf 2> /dev/null
+   rmdir /etc/opt/microsoft/apache-cimprov 2> /dev/null
+   rmdir /etc/opt/microsoft 2> /dev/null
+   rmdir /etc/opt 2> /dev/null
 
-#include UnconfigureApacheConf
-UnconfigureApacheConf_File
+   #include UnconfigureApacheConf
+   UnconfigureApacheConf_File
+fi
 
 %Preinstall_0
 ${{SHELL_HEADER}}
