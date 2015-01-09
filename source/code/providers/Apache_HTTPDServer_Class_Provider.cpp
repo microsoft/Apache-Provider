@@ -5,7 +5,11 @@
 // Provider include definitions
 #include <stdlib.h>
 #include <sstream>
+#include <string.h>
 #include <vector>
+
+#include <apr_file_io.h>
+
 #include "apachebinding.h"
 #include "cimconstants.h"
 #include "utils.h"
@@ -23,6 +27,120 @@ const char *OperatingStatusValues[] =
 
 
 MI_BEGIN_NAMESPACE
+
+/* Check if native systemd services are supported, and if service exists under systemd */
+static int CheckServiceSystemd(apr_pool_t* pool, const char* serviceName)
+{
+    // Return codes:
+    //    0 : systemd supported, service exists
+    //    1 : systemd supported, services does not exist
+    //    2 : systemd supported, but an internal error occurred
+    //   -1 : systemd not supported
+
+#if defined(linux)
+    int exitStatus;
+
+    // The new systemd capability (via systemctl) will be automatically used if
+    // /etc/init.d script doesn't exist. However, systemctl will return error 3
+    // if the service is down OR if the service doesn't exist. This is problematic
+    // for us to determine the service name, since init.d-style scripts return
+    // error code 3 if the service exists but is down.
+    //
+    // Check if /bin/systemctl exists and, if so, only use that. This has the
+    // restriction where, on new systems, we'll only get the service name if the
+    // service is defined in systemd.
+
+    apr_status_t status;
+    apr_finfo_t fileinfo;
+    if (APR_SUCCESS != apr_stat(&fileinfo, "/bin/systemctl", 0, pool))
+    {
+        return -1;
+    }
+
+    // We don't have SCXProcess::Run to run things and capture the output, and error
+    // codes from systemctl aren't good enough for us - we need to see the output.
+    // The easiest way, without a ton of code, is to send systemctl output to a file,
+    // read that, and then delete it. Ugh.
+
+    // First let's get a temporary filename that we can use
+    const char* tempDir;
+    pid_t pid = getpid();
+
+    if ( APR_SUCCESS != (status = apr_temp_dir_get(&tempDir, pool)) )
+    {
+        DisplayError(status, "Apache_HTTPDServer_Class_Provider::CheckSystemServiceD apr_temp_dir_get failed");
+        return 2;
+    }
+
+    char *filename = apr_psprintf(pool, "%s/apache_cimprov_%d", tempDir, pid);
+
+    // Now run the program and generate the result file
+    // (don't care about result; we'll just look for file)
+    char *command = apr_pstrcat(pool, "/bin/systemctl status ", serviceName, " > ", filename, NULL);
+
+    system(command);
+
+    /* When run, systemctl will return something like this:
+     *
+     *   httpd.service - The Apache HTTP Server
+     *      Loaded: loaded (/usr/lib/systemd/system/httpd.service; enabled)
+     *      Active: active (running) since Thu 2015-01-08 07:46:43 PST; 3h 18min ago
+     *      <more stuff we don't care about>
+     *
+     * We only care about the second line, looking for "Loaded: loaded"
+     *
+     * Note: Once file is open, we must continue to close the file ...
+     */
+    apr_file_t* fh;
+    char buffer[256];
+    exitStatus = -1;
+
+    if ( APR_SUCCESS != (status = apr_file_open(&fh, filename, APR_FOPEN_READ, 0, pool)) )
+    {
+        char *errorText = apr_pstrcat(pool, "Apache_HTTPDServer_Class_Provider::CheckSystemServiceD"
+                                      "apr_file_open failed with filename: '", filename, "'", NULL);
+        DisplayError(status, errorText);
+        return 2;
+    }
+
+    if ( APR_SUCCESS != (status = apr_file_remove(filename, pool)) )
+    {
+        DisplayError(status, "Apache_HTTPDServer_Class_Provider::CheckSystemServiceD apr_file_remove failed");
+        /* Unfortunate, but continue processing ... */
+    }
+
+    // We want the second line, so read twice
+    for ( size_t i = 1; i <= 2; ++i )
+    {
+        if ( APR_SUCCESS != (status = apr_file_gets(buffer, sizeof(buffer), fh)) )
+        {
+            DisplayError(status, "Apache_HTTPDServer_Class_Provider::CheckSystemServiceD apr_file_gets failed");
+            exitStatus = 2;
+        }
+    }
+
+    // Okay, see if second line contains "<whitespace>Loaded: loaded"
+    if ( NULL != strstr(buffer, "Loaded: loaded") )
+    {
+        /* Only set exitStatus if some failure did not occur already */
+        if ( exitStatus < 0 )
+            exitStatus = 0;
+    }
+
+    if ( APR_SUCCESS != (status = apr_file_close(fh)) )
+    {
+        DisplayError(status, "Apache_HTTPDServer_Class_Provider::CheckSystemServiceD apr_file_close failed");
+        return 2;
+    }
+
+    return exitStatus;
+
+#else
+
+    return -1;
+
+#endif // defined(linux)
+}
 
 Apache_HTTPDServer_Class_Provider::Apache_HTTPDServer_Class_Provider(
     Module* module) :
@@ -91,6 +209,7 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
     CIM_PEX_BEGIN
     {
         ApacheDataCollector data = g_pFactory->DataCollectorFactory();
+        apr_pool_t* pool = data.GetPool();
         Apache_HTTPDServer_Class inst;
 
         std::stringstream ss;
@@ -108,19 +227,38 @@ void Apache_HTTPDServer_Class_Provider::EnumerateInstances(
                << " (" << CIMPROV_BUILDVERSION_DATE << ")";
 
 #if defined(linux)
-            int status = system("service httpd status > /dev/null 2>&1");
-            status = WEXITSTATUS( status );
-            if (status == 0 || status == 3)
+            int status;
+            status = CheckServiceSystemd(pool, "httpd");
+            if ( status >= 0 )
             {
-                serviceName = "httpd";
+                if ( 0 == status )
+                {
+                    serviceName = "httpd";
+                }
+                else
+                {
+                    if ( 0 == CheckServiceSystemd(pool, "apache2") )
+                    {
+                        serviceName = "apache2";
+                    }
+                }
             }
             else
             {
-                status = system("service apache2 status > /dev/null 2>&1");
+                status = system("service httpd status > /dev/null 2>&1");
                 status = WEXITSTATUS( status );
                 if (status == 0 || status == 3)
                 {
-                    serviceName = "apache2";
+                    serviceName = "httpd";
+                }
+                else
+                {
+                    status = system("service apache2 status > /dev/null 2>&1");
+                    status = WEXITSTATUS( status );
+                    if (status == 0 || status == 3)
+                    {
+                        serviceName = "apache2";
+                    }
                 }
             }
 #endif
