@@ -5,13 +5,13 @@ PF:	'Linux'
 FindApacheService() {
     if [ -x /bin/systemctl ]; then
         # Will match either "active" or "inactive", but not "unknown"
-       	systemctl is-active httpd | egrep "active|failed" > /dev/null 2>&1
+       	/bin/systemctl status httpd | head -2 | tail -1 | grep "Loaded: loaded" > /dev/null 2>&1
        	if [ $? -eq 0 ]; then 
        	    APACHE_SERVICE="httpd"
             SERVICE_TYPE="systemd"
    	else
             # Try for apache2; if not found, last ditch effort for a local install
-            systemctl is-active apache2 | egrep "active|failed" > /dev/null 2>&1
+            /bin/systemctl is-active apache2 | head -2 | tail -1 | grep "Loaded: loaded" > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 APACHE_SERVICE="apache2"
                 SERVICE_TYPE="systemd"
@@ -40,7 +40,7 @@ StopApacheServer() {
     FindApacheService
     if [ -z "${APACHE_SERVICE}" ]; then
         echo "No service defined for Apache; please stop Apache manually"
-        return 0;
+        return 0
     fi
 
     if [ "${SERVICE_TYPE}" = "systemd" -a -n "${APACHE_SERVICE}" ]; then
@@ -55,7 +55,19 @@ StopApacheServer() {
         service ${APACHE_SERVICE} stop
     else
         echo "Unrecognized Service Controller to stop Apache Service" 1>&2
+	return 0
     fi
+
+    # Apache may begin to shut down, but may not complete before we try to start up again
+    COUNTER=5
+    while [ $COUNTER -gt 0 ]; do
+        PROCESSES=`ps -ef | egrep "apache2|httpd" | grep -v grep | wc -l`
+        [ $PROCESSES -eq 0 ] && break
+
+        echo "Waiting for Apache to shut down (${COUNTER}) ..."
+        COUNTER=$(( ${COUNTER} - 1 ))
+        sleep 1
+    done	
 }
 
 StartApacheServer() {
@@ -83,18 +95,6 @@ StartApacheServer() {
 
 RestartApacheServer() {
     StopApacheServer
-
-    # Apache may begin to shut down, but may not complete before we try to start up again
-    COUNTER=5
-    while [ $COUNTER -gt 0 ]; do
-        PROCESSES=`ps -ef | egrep "apache2|httpd" | grep -v grep | wc -l`
-        [ $PROCESSES -eq 0 ] && break
-
-        echo "Waiting for Apache to shut down (${COUNTER}) ..."
-        COUNTER=$(( ${COUNTER} - 1 ))
-        sleep 1
-    done	
-
     StartApacheServer
 }
 
