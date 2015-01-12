@@ -12,6 +12,7 @@ function usage {
    echo  "-nossl: Disable all ssl port"
    echo  "-2sslc: create 2 SSL ports with different certificate"
    echo  "-1sslc: create 1 ssl port with custom certificate"
+   echo  "-breakConf" break conf file. Please use -revertConf after the operate.
    echo  "example:"
    echo  "1. create a http port : sh createPortforApache.sh -p 80"
    echo  "2. create a ssl port : sh createPortforApache.sh -s 443"
@@ -26,7 +27,7 @@ function usage {
 function removeOldPorts {
     sed -i '/^<VirtualHost/i\<Ifmodule test\>' $1
     sed -i '/^<\/VirtualHost/a\<\/Ifmodule\>' $1
-    sed -i 's/^Listen/#&/' $1
+#    sed -i 's/^Listen/#&/' $1
 
 }
 
@@ -86,7 +87,7 @@ function restartApacheService {
     if [ "$isDEB" = "true" ]; then
 	service apache2 restart
     fi
-	sleep 2
+    sleep 2
 }
 
 function createSSLPort {
@@ -350,6 +351,55 @@ function create2SSLAndCertificate {
     fi
 }  
 
+function breakConfFile {
+   if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultHTTPDConfFileLocation" ]; then
+           echo "Could not fild conf file under $g_defaultHTTPDConfFileLocation"
+           exit 1
+        fi
+
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultHTTPDConfFileLocation/* $DebTempDir/
+        rm $g_defaultHTTPDConfFileLocation/*
+        touch $g_defaultHTTPDConfFileLocation/my.conf
+	echo "ErrorSign" >> $g_defaultHTTPDConfFileLocation/my.conf
+    else
+        if [ ! -f "$g_defaultHTTPDConfFileLocation" ]; then
+            echo "Could not find conf under $g_defaultHTTPDConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultHTTPDConfFileLocation"_bak"
+        cp $g_defaultHTTPDConfFileLocation $bakFile
+	echo "ErrorSign" >> $g_defaultHTTPDConfFileLocation
+    fi
+
+}
+
+function revertConfFile {
+   if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultHTTPDConfFileLocation" ]; then
+           echo "Could not fild conf file under $g_defaultHTTPDConfFileLocation"
+           exit 1
+        fi
+
+	rm $g_defaultHTTPDConfFileLocation/*
+	cp $DebTempDir/* $g_defaultHTTPDConfFileLocation/
+	rm $DebTempDir/*
+    else
+        if [ ! -f "$g_defaultHTTPDConfFileLocation" ]; then
+            echo "Could not find conf under $g_defaultHTTPDConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultHTTPDConfFileLocation"_bak"
+        cp $bakFile $g_defaultHTTPDConfFileLocation
+	rm $bakFile
+    fi
+	
+}
+
 function create1SSLAndCertificate {
    if [ "$isDEB" = "true" ]; then
         if [ ! -d "$g_defaultSSLConfFileLocation" ]; then
@@ -426,6 +476,9 @@ isDEB=false
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
 	isFromPackage=true
+   	if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
+	    g_defaultSSLConfFileLocation=/etc/httpd/conf/extra/httpd-ssl.conf
+	fi
 else 
    if [ -f "/usr/local/apache2/conf/httpd.conf" ]; then
 	isFromSource=true
@@ -477,10 +530,18 @@ while [ $# -ne 0 ]; do
 	    exit 0
 	    shift 1;;
 	-1sslc)
-	    isOneSSLCertificate=true;
+	    isOneSSLCertificate=true
 	    create1SSLAndCertificate
 	    exit 0
 	    shift 1;;
+	-breakConf)
+	    breakConfFile
+	    exit 0
+	    shift 1;;
+	-revertConf)
+	   revertConfFile
+	   exit 0
+	   shift 1;;
 	-?)
 	    usage
 	    exit 0;;

@@ -315,10 +315,10 @@
 
   <var set="1" lvl="0" vid="725210" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="Verify Apache HTTP Server Configuration Check status indicate Unhealthy when http.conf file error." permutation="rows">
     <recm key="ActionCmd">
-      <val>sh /tmp/breakConfFile.sh</val>
+      <val>sh /tmp/createPortforApache.sh -breakConf</val>
     </recm>
     <recm key="PostCmd">
-      <val>sh /tmp/revertConfFile.sh</val>
+      <val>sh /tmp/createPortforApache.sh -revertConf</val>
     </recm>
     <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ConfigurationCheck.Monitor</val>

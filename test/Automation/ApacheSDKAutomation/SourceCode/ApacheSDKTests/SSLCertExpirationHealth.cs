@@ -45,16 +45,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// </summary>
         private string SslScriptName = "createSSLCertification.sh";
 
-        /// <summary>
-        /// Break Conf File script name.
-        /// </summary>
-        private string breakConfScriptName = "breakConfFile.sh";
-
-        /// <summary>
-        /// Reverting conf file script name.
-        /// </summary>
-        private string revertConfScriptName = "revertConfFile.sh";
-
         #region Test Framework Methods
 
         /// <summary>
@@ -119,8 +109,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 copyToHost.CopyTo(scriptsLocation + "/" + PortScriptName, "/tmp/" + PortScriptName);
                 copyToHost.CopyTo(scriptsLocation + "/" + revertScriptName, "/tmp/" + revertScriptName);
                 copyToHost.CopyTo(scriptsLocation + "/" + SslScriptName, "/tmp/" + SslScriptName);
-                copyToHost.CopyTo(scriptsLocation + "/" + revertConfScriptName, "/tmp/" + revertConfScriptName);
-                copyToHost.CopyTo(scriptsLocation + "/" + breakConfScriptName, "/tmp/" + breakConfScriptName);
             }
             catch (Exception ex)
             {

@@ -139,7 +139,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+      <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
   </var>
 
@@ -157,7 +157,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+      <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
   </var>
 
@@ -311,10 +311,10 @@
   
   <var set="1" lvl="0" vid="725210" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="Verify Apache HTTP Server Configuration Check status indicate Unhealthy when http.conf file error." permutation="rows">
     <recm key="ActionCmd">
-      <val>sh /tmp/breakConfFile.sh</val>
+      <val>sh /tmp/createPortforApache.sh -breakConf</val>
     </recm>
     <recm key="PostCmd">
-      <val>sh /tmp/revertConfFile.sh</val>
+      <val>sh /tmp/createPortforApache.sh -revertConf</val>
     </recm>
       <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ConfigurationCheck.Monitor</val>
@@ -675,7 +675,7 @@
 
   
   <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
-    <rec key="hostname">a24p64-cent6-01</rec>
+    <rec key="hostname">a24p64-ora7-02</rec>
     <rec key="superuser">root</rec>
     <rec key="superuserpwd">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
@@ -684,8 +684,8 @@
     <rec key="omusername">scxsvc</rec>
     <rec key="omdomain">scx</rec>
     <rec key="ompassword">OpsMgr2007R2</rec>
-    <!--<rec key="testingoverride">overrideApacheMp.xml</rec>-->
-    <rec key="testingoverride">SCXTestOverrideUniversalMP</rec>
+    <rec key="testingoverride">overrideApacheMp</rec>
+    <!--<rec key="testingoverride">SCXTestOverrideUniversalMP</rec>-->
     <rec key="cleanupcommand"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.0.*;rm -rf /var/opt/microsoft]]></rec>
     <rec key="platformtag">universalr.1.x64</rec>
     <rec key="apacheTag">universal.1.x86_64</rec>

@@ -139,7 +139,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+      <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
   </var>
 
@@ -157,7 +157,7 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+      <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
   </var>
 
@@ -317,10 +317,10 @@
   
   <var set="1" lvl="0" vid="725210" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="Verify Apache HTTP Server Configuration Check status indicate Unhealthy when http.conf file error." permutation="rows">
     <recm key="ActionCmd">
-      <val>bash /tmp/breakConfFile.sh</val>
+      <val>bash /tmp/createPortforApache.sh -breakConf</val>
     </recm>
     <recm key="PostCmd">
-      <val>bash /tmp/revertConfFile.sh</val>
+      <val>bash /tmp/createPortforApache.sh -revertConf</val>
     </recm>
       <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.ConfigurationCheck.Monitor</val>
@@ -681,7 +681,7 @@
 
 
   <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
-    <rec key="hostname">a24p64-ub12-01</rec>
+    <rec key="hostname">a22p64-deb6-01</rec>
     <rec key="superuser">root</rec>
     <rec key="superuserpwd">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
