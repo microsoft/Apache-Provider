@@ -220,7 +220,7 @@ function createHTTPAndHTTPSPort {
 	sslbakFile=$g_defaultSSLConfFileLocation"_bak"
         cp $g_defaultSSLConfFileLocation $sslbakFile
         removeOldPorts $g_defaultSSLConfFileLocation
-	echo "Listen ${sport[0]}" >> $g_defaultSSLConfFileLocation
+	#echo "Listen ${sport[0]}" >> $g_defaultSSLConfFileLocation
         AddSSLPort ${sport[0]} $g_defaultSSLConfFileLocation
 
         httpbakFile=$g_defaultHTTPDConfFileLocation"_bak"

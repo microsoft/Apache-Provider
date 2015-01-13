@@ -25,11 +25,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
     public class PerformanceHealth : PerformanceHealthBase, ISetup, IRun, IVerify, ICleanup
     {
         /// <summary>
-        /// Apache agent helper class
-        /// </summary>
-        private ApacheAgentHelper apacheAgentHelper;
-
-        /// <summary>
         /// All Shell scripts location.
         /// </summary>
         private string scriptsLocation = System.Environment.CurrentDirectory;
@@ -97,7 +92,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.OverrideHelper = new OverrideHelper(ctx.Trc, this.Info, ctx.ParentContext.Records.GetValue("testingoverride"));
 
-                this.apacheAgentHelper = new ApacheAgentHelper(this.Info, this.ClientInfo) {Logger = ctx.Trc};
+                this.ApacheAgentHelper = new ApacheAgentHelper(this.Info, this.ClientInfo) {Logger = ctx.Trc};
 
                 string instanceID = ctx.Records.GetValue("InstanceID");
 
@@ -235,30 +230,6 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         #endregion Test Framework Methods
 
         #region Private Methods
-
-        /// <summary>
-        /// GetVirtualHost monitor.
-        /// </summary>
-        /// <param name="ctx">Current context</param>
-        private MonitoringObject GetVitualHostMonitor(string hostname, string instanceID)
-        {
-            MonitoringObject monitor = null;
-            try
-            {
-                monitor = this.apacheAgentHelper.GetVirtualHostMonitor(hostname + "," + instanceID);
-            }
-            catch (Exception)
-            {
-                if (hostname.Contains(".scx.com"))
-                {
-                    int index = hostname.IndexOf(".scx.com");
-                    string tempHost = hostname.Substring(0, index);
-                    monitor = this.apacheAgentHelper.GetVirtualHostMonitor(tempHost + "," + instanceID);
-                }
-            }
-
-            return monitor;
-        }
 
         /// <summary>
         /// Apply the monitor override in the varmap such that the monitor under test can easily be put in an error condition

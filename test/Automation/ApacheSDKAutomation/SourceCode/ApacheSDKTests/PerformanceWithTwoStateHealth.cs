@@ -105,11 +105,22 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.AlertHelper = new AlertsHelper(this.Info);
 
+                this.ApacheAgentHelper = new ApacheAgentHelper(this.Info, this.ClientInfo) { Logger = ctx.Trc };
+
                 this.OverrideHelper = new OverrideHelper(ctx.Trc, this.Info, ctx.ParentContext.Records.GetValue("testingoverride"));
 
-                this.ComputerObject = this.MonitorHelper.GetComputerObject(this.ClientInfo.HostName);
+                string instanceID = ctx.Records.GetValue("InstanceID");
 
-                this.RecoverMonitorIfFailed(ctx);
+                if (instanceID == null)
+                {
+                    this.ComputerObject = this.MonitorHelper.GetComputerObject(this.ClientInfo.HostName);
+                }
+                else
+                {
+                    this.ComputerObject = this.GetVitualHostMonitor(this.ClientInfo.HostName, instanceID);
+                }
+
+                //this.RecoverMonitorIfFailed(ctx);
 
                 this.OverridePerformanceMonitor(ctx, true);
 

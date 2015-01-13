@@ -18,6 +18,12 @@ function restartApacheService {
         service httpd restart
      fi
      fi
+
+    if [ "$isDEB" = "true" ]; then
+        service apache2 restart
+    fi
+    sleep 2
+
 }
 
 
@@ -26,14 +32,20 @@ g_defaultHTTPDConfFileLocation=/etc/httpd/conf/httpd.conf
 DocumentRoot=/var/www/html/
 isFromPackage=false
 isFromSource=false
+isDEB=false
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
-	isFromPackage=true
-else 
+        isFromPackage=true
+else
    if [ -f "/usr/local/apache2/conf/httpd.conf" ]; then
-	isFromSource=true
-	g_defaultHTTPDConfFileLocation=/usr/local/apache2/conf/httpd.conf
-	g_defaultSSLConfFileLocation=/usr/local/apache2/conf/extra/httpd-ssl.conf
+        isFromSource=true
+        g_defaultHTTPDConfFileLocation=/usr/local/apache2/conf/httpd.conf
+else
+   if [ -f "/etc/apache2/apache2.conf" ]; then
+        isFromPackage=true
+        g_defaultHTTPDConfFileLocation=/etc/apache2/apache2.conf
+        isDEB=true
+   fi
    fi
 fi
 
@@ -46,7 +58,7 @@ while [ $# -ne 0 ]; do
    esac
 done
 
-if [ ! -f "$g_defaultHTTPDConfFileLocation" ] && [ "$needCreateHTTPPorts" = "true" ]; then
+if [ ! -f "$g_defaultHTTPDConfFileLocation" ]; then
         echo "The httpd.conf file $g_defaultHTTPDConfFileLocation didn't exist"
         exit 1
 fi

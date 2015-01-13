@@ -87,6 +87,11 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         /// </summary>
         private Exception executeActionCommandException = null;
 
+        /// <summary>
+        /// Apache agent helper class
+        /// </summary>
+        private ApacheAgentHelper apacheAgentHelper;
+
         #endregion
 
         #region Properties
@@ -146,8 +151,15 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         }
 
         /// <summary>
-        /// Gets or sets the server wait time
+        /// Gets or sets the ApacheAgentHelper
         /// </summary>
+        public ApacheAgentHelper ApacheAgentHelper
+        {
+            get { return apacheAgentHelper; }
+            set { apacheAgentHelper = value; }
+        }
+
+
         protected TimeSpan ServerWaitTime
         {
             get { return this.serverWaitTime; }
@@ -589,6 +601,30 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
             };
 
             return entities.Any(entity => ctx.Records.GetValue("entityname") == entity);
+        }
+
+        /// <summary>
+        /// GetVirtualHost monitor.
+        /// </summary>
+        /// <param name="ctx">Current context</param>
+        protected MonitoringObject GetVitualHostMonitor(string hostname, string instanceID)
+        {
+            MonitoringObject monitor = null;
+            try
+            {
+                monitor = this.apacheAgentHelper.GetVirtualHostMonitor(hostname + "," + instanceID);
+            }
+            catch (Exception)
+            {
+                if (hostname.Contains(".scx.com"))
+                {
+                    int index = hostname.IndexOf(".scx.com");
+                    string tempHost = hostname.Substring(0, index);
+                    monitor = this.apacheAgentHelper.GetVirtualHostMonitor(tempHost + "," + instanceID);
+                }
+            }
+
+            return monitor;
         }
     }
 }

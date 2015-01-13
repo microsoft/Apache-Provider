@@ -286,7 +286,7 @@
       <val>200</val>
     </recm>
     <recm key="monitorthreshold">
-      <val>20</val>
+      <val>1</val>
     </recm>
     <recm key="ExpectedState">
       <val>Error</val>
@@ -428,7 +428,7 @@
       <val>524288</val>
     </recm>
     <recm key="overrideWarningThreshold">
-      <val>20000</val>
+      <val>100</val>
     </recm>
     <recm key="overrideErrorThreshold">
       <val>80000</val>
@@ -471,10 +471,13 @@
 
   <var set="1" lvl="0" vid="726528" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the monitor Apache Virtual Host Web Request Total Response Time indicate Warning when server response the remote HTTP request time reached ResponseTimeWarningThreshold." permutation="rows">
     <recm key="ActionCmd">
-      <val>.\ab.exe -n 20000 -c 100 http://%hostname%/</val>
+      <val>.\ab.exe -n 200000 -c 100 http://%hostname%/</val>
     </recm>
     <recm key="ActionType">
       <val>Server</val>
+    </recm>
+    <recm key="InstanceID">
+      <val>0.0.0.0:80</val>
     </recm>
     <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor</val>
@@ -495,7 +498,7 @@
       <val>10</val>
     </recm>
     <recm key="overrideWarningThreshold">
-      <val>0.2</val>
+      <val>0.002</val>
     </recm>
     <recm key="overrideErrorThreshold">
       <val>20</val>
@@ -511,6 +514,9 @@
     </recm>
     <recm key="ActionType">
       <val>Server</val>
+    </recm>
+    <recm key="InstanceID">
+      <val>0.0.0.0:80</val>
     </recm>
     <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.VirtualHost.URLProbeResponseTime.Monitor</val>
@@ -681,7 +687,7 @@
 
 
   <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
-    <rec key="hostname">a22p64-deb6-01</rec>
+    <rec key="hostname">a24p64-ub14-01</rec>
     <rec key="superuser">root</rec>
     <rec key="superuserpwd">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
@@ -714,7 +720,7 @@
     <rec key="AgentPkgExt">deb</rec>
     <rec key="DirectoryTag">CENTOS5.0_X64</rec>
     <rec key="latestonly">true</rec>
-    <rec key="installonly">false</rec>
+    <rec key="installonly">true</rec>
     <!--
       Agent maintenance account settings
       1. credentials type: 
