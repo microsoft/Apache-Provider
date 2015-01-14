@@ -22,6 +22,10 @@ function restartApacheService {
     if [ "$isDEB" = "true" ]; then
         service apache2 restart
     fi
+    if [ "$isSles" = "true" ]; then
+        service apache2 restart
+    fi
+
     sleep 2
 
 }
@@ -33,6 +37,7 @@ DocumentRoot=/var/www/html/
 isFromPackage=false
 isFromSource=false
 isDEB=false
+isSles=false
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
         isFromPackage=true
@@ -45,6 +50,14 @@ else
         isFromPackage=true
         g_defaultHTTPDConfFileLocation=/etc/apache2/apache2.conf
         isDEB=true
+else
+   if [ -f "/etc/apache2/httpd.conf" ]; then
+        isFromPackeage=true
+        g_defaultHTTPDConfFileLocation=/etc/apache2/vhosts.d/vhost.conf
+        isSles=true
+
+   fi
+
    fi
    fi
 fi

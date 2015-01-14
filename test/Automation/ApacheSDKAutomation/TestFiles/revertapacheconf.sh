@@ -21,6 +21,11 @@ else
         g_defaultHTTPConfFileLocation=/etc/apache2/sites-enabled
         g_defaultSSLConfFileLocation=/etc/apache2/sites-enabled
         isDEB=true
+else 
+   if [ -f "/etc/apache2/httpd.conf" ]; then
+	isFromPackage=true
+	isDEB=true
+   fi
    fi
    fi
 fi

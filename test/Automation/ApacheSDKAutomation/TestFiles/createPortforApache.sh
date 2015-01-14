@@ -87,6 +87,9 @@ function restartApacheService {
     if [ "$isDEB" = "true" ]; then
 	service apache2 restart
     fi
+    if [ "$isSles" = "true" ]; then
+        service apache2 restart
+    fi
     sleep 2
 }
 
@@ -473,6 +476,7 @@ isNoSSL=false;
 isTwoSSLCertificate=false;
 isOneSSLCertificate=false;
 isDEB=false
+isSles=false
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
 	isFromPackage=true
@@ -492,6 +496,16 @@ else
 	isDEB=true
 	SSLCertificateFile=/etc/ssl/certs/ssl-cert-snakeoil.pem
 	SSLCertificateKeyFile=/etc/ssl/private/ssl-cert-snakeoil.key
+else 
+   if [ -f "/etc/apache2/httpd.conf" ]; then
+	isFromPackeage=true
+	g_defaultHTTPDConfFileLocation=/etc/apache2/vhosts.d/vhost.conf
+        g_defaultSSLConfFileLocation=/etc/apache2/vhosts.d/vhost-ssl.conf
+        SSLCertificateFile=/etc/apache2/ssl.crt/server.crt
+        SSLCertificateKeyFile=/etc/apache2/ssl.key/server.key
+	isSles=true
+
+   fi
    fi
    fi
 fi
