@@ -8,6 +8,10 @@ function cleanHTTPBakFile {
     cp $bakFile $g_defaultHTTPDConfFileLocation
     rm $bakFile
 
+	if [ -f "$g_frompackagelocation" ]; then
+		sed 's/AllowOverride All/AllowOverride None/g' $g_frompackagelocation >/tmp/httpd.conf; mv /tmp/httpd.conf $g_frompackagelocation;
+		sed 's/AllowOverride All/AllowOverride none/g' $g_frompackagelocation >/tmp/httpd.conf; mv /tmp/httpd.conf $g_frompackagelocation;
+	fi
 }
 
 function restartApacheService {
@@ -33,6 +37,7 @@ function restartApacheService {
 
 #Main
 g_defaultHTTPDConfFileLocation=/etc/httpd/conf/httpd.conf
+g_frompackagelocation=/etc/apache2/sites-enabled/000-default
 DocumentRoot=/var/www/html/
 isFromPackage=false
 isFromSource=false
@@ -81,7 +86,12 @@ cp $g_defaultHTTPDConfFileLocation $bakFile
 
 
 sed 's/AllowOverride None/AllowOverride All/g' $g_defaultHTTPDConfFileLocation >/tmp/httpd.conf; mv /tmp/httpd.conf $g_defaultHTTPDConfFileLocation;
+sed 's/AllowOverride none/AllowOverride All/g' $g_defaultHTTPDConfFileLocation >/tmp/httpd.conf; mv /tmp/httpd.conf $g_defaultHTTPDConfFileLocation;
 
+if [ -f "$g_frompackagelocation" ]; then
+    sed 's/AllowOverride None/AllowOverride All/g' $g_frompackagelocation >/tmp/httpd.conf; mv /tmp/httpd.conf $g_frompackagelocation;
+    sed 's/AllowOverride none/AllowOverride All/g' $g_frompackagelocation >/tmp/httpd.conf; mv /tmp/httpd.conf $g_frompackagelocation;
+fi
 
 if [ ! -d "$DocumentRoot" ]; then
   mkdir -p $DocumentRoot

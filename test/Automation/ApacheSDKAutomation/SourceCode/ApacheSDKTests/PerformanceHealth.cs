@@ -98,7 +98,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.ComputerObject = this.GetVitualHostMonitor(this.ClientInfo.HostName , instanceID);
 
-                this.RecoverMonitorIfFailed(ctx);
+                //this.RecoverMonitorIfFailed(ctx);
 
                 this.ApplyDefaultMonitorOverride(ctx, 30);
 
