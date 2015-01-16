@@ -104,7 +104,7 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
         {
             if (!this.isInValidInstall && !ctx.Records.HasKey("isHelpOption") && !ctx.Records.HasKey("isRemoveOption"))
             {
-                this.VerifyInstallLog(commandStdOut, this.installLogKeyWorlds, true);
+                //this.VerifyInstallLog(commandStdOut, this.installLogKeyWorlds, true);
 
                 this.VerifyInstallFolders(verifyFolderExistCmd, this.expectedFolderCount, true);
 

@@ -1,0 +1,1788 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<varmap xmlns="http://smxinfranet/schemas/mcf/2002/01/varmap"
+        assembly="..\Apache.dll"
+        dsc="Apache Automation Test"
+        owner="v-litin" contact="v-litin">
+  <snippet id="ApacheInstallInfo">
+    <rec key="Apache.InstallCmd">sh /tmp/{0}</rec>
+    <rec key="Apache.VerifyFolderExistCmd"><![CDATA[/bin/ls /opt/microsoft/|grep -ic "apache";/bin/ls /var/opt/microsoft/|grep -ic "apache";/bin/ls /etc/opt/microsoft/|grep -ic "apache"]]></rec>
+    <rec key="Apache.VerifyApacheInstalledCmd">dpkg -l|grep apache</rec>
+  </snippet>
+  <snippet id="UniqueApacheServerInfo">
+    <rec key="ApacheServer.ConfFile">/etc/apache2/apache2\.conf</rec>
+    <rec key="ApacheServer.Vendor">Apache Software Foundation</rec>
+    <rec key="ApacheServer.ProductVersion">2\.2\.16</rec>
+    <rec key="ApacheServer.ProcessName">apache2</rec>
+    <rec key="ApacheServer.Collection">/etc/apache2</rec>
+  </snippet>
+  <snippet id="LinuxInfo">
+    <!--rec key="Linux.Host">a22p-deb7-02</rec-->
+    <rec key="Linux.Host">hostname</rec>
+    <rec key="Linux.SystemID">localhost</rec>
+  </snippet>
+  <snippet id="ApacheInfo">
+    <rec key="Version">2.2.16</rec>
+    <rec key="SoftwareElementState">3</rec>
+    <rec key="TargetOperatingSystem">36</rec>
+    <rec key="DocumentRoot">/var/www/html</rec>
+    <rec key="ServerName">localhost</rec>
+    <rec key="IpAddress">[0-9]{0,3}.[0-9]{0,3}.[0-9]{0,3}.[0-9]{0,3}</rec>
+    <rec key="ServerAdmin">root@localhost</rec>
+    <rec key="ErrorLog">logs/localhost-error_log</rec>
+    <rec key="CustomLog">logs/localhost-custom_log</rec>
+    <rec key="AccessLog">logs/localhost-access_log</rec>
+    <rec key="RequestValue">[0-9]+</rec>
+  </snippet>
+
+  <!-- Test Case information -->
+  <var set="1" lvl="0" vid="724411" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="Verify enumeration of Apache_HTTPDServer works for 1 Apache Server." act="true">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <rec key="p:InstanceID">%ApacheServer.ConfFile%</rec>
+    <rec key="p:Caption">^$</rec>
+    <rec key="p:Description">^$</rec>
+    <rec key="p:ElementName">^$</rec>
+    <rec key="p:ProductIdentifyingNumber">[0-9]</rec>
+    <rec key="p:ProductName">%ApacheServer.ConfFile%</rec>
+    <rec key="p:ProductVendor">%ApacheServer.Vendor%</rec>
+    <rec key="p:ProductVersion">%ApacheServer.ProductVersion%</rec>
+    <rec key="p:SystemID">%Linux.SystemID%</rec>
+    <rec key="p:CollectionID">%ApacheServer.Collection%</rec>
+    <rec key="p:Name">^$</rec>
+    <rec key="p:ModuleVersion">[0-9].[0-9].[0-9]-[0-9]{3} \([0-9]{8}\)</rec>
+    <rec key="p:ConfigurationFile">%ApacheServer.ConfFile%</rec>
+    <rec key="p:InstalledModules">[A-Za-z0-9]+.c</rec>
+    <rec key="p:InstalledModulesFormatted">[A-Za-z0-9]+.c</rec>
+    <rec key="p:ProcessName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:ServiceName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:OperatingStatus">OK</rec>
+    <rec key="p:OperatingStatusDetail">^$</rec>
+  </var>
+
+  <var set="1" lvl="1" vid="724640" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="Verify the property OperatingStatus of Apache_HttpDServer will be rrror when apache server is not running." act="true">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <rec key="p:InstanceID">%ApacheServer.ConfFile%</rec>
+    <rec key="p:ProductName">%ApacheServer.ConfFile%</rec>
+    <rec key="p:ProductVendor">%ApacheServer.Vendor%</rec>
+    <rec key="p:ProductVersion">%ApacheServer.ProductVersion%</rec>
+    <rec key="p:ModuleVersion">[0-9].[0-9].[0-9]-[0-9]{3} \([0-9]{8}\)</rec>
+    <rec key="p:ServiceName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:OperatingStatus">Error</rec>
+    <rec key="p:OperatingStatusDetail">^$</rec>
+    <rec key="StopApcheServer">true</rec>
+  </var>
+
+  <var set="1" lvl="1" vid="724661" cid="Apache_HTTPDServer" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="Verify enumeration of Apache_HTTPDServer works for 1 Apache Server." act="true">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <rec key="p:InstanceID">%ApacheServer.ConfFile%</rec>
+    <rec key="p:Caption">^$</rec>
+    <rec key="p:Description">^$</rec>
+    <rec key="p:ElementName">^$</rec>
+    <rec key="p:ProductIdentifyingNumber">[0-9]</rec>
+    <rec key="p:ProductName">%ApacheServer.ConfFile%</rec>
+    <rec key="p:ProductVendor">%ApacheServer.Vendor%</rec>
+    <rec key="p:ProductVersion">%ApacheServer.ProductVersion%</rec>
+    <rec key="p:SystemID">%Linux.SystemID%</rec>
+    <rec key="p:CollectionID">%ApacheServer.Collection%</rec>
+    <rec key="p:Name">^$</rec>
+    <rec key="p:ModuleVersion">[0-9].[0-9].[0-9]-[0-9]{3} \([0-9]{8}\)</rec>
+    <rec key="p:ConfigurationFile">%ApacheServer.ConfFile%</rec>
+    <rec key="p:InstalledModules">[A-Za-z0-9]+.c</rec>
+    <rec key="p:InstalledModulesFormatted">[A-Za-z0-9]+.c</rec>
+    <rec key="p:ProcessName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:ServiceName">%ApacheServer.ProcessName%</rec>
+    <rec key="p:OperatingStatus">OK</rec>
+    <rec key="p:OperatingStatusDetail">^$</rec>
+    <rec key="RestartOmAgent">true</rec>
+  </var>
+  
+  <var set="1" lvl="0" vid="724642" cid="Apache_HTTPDServerStatistics" cls="Scx.Test.Apache.Provider.VerifyEnumerate" dsc="Verify enumeration of Apache_HTTPDServerStatistics works for 1 Apache Server." act="true">
+    <snipref id="UniqueApacheServerInfo" />
+    <rec key="p:InstanceID">%ApacheServer.ConfFile%</rec>
+    <rec key="p:TotalPctCPU">0</rec>
+    <rec key="p:IdleWorkers">0</rec>
+    <rec key="p:BusyWorkers">0</rec>
+    <rec key="p:PctBusyWorkers">0</rec>
+    <rec key="p:ConfigurationFile">%ApacheServer.ConfFile%</rec>
+  </var>
+  
+  <var set="1" lvl="0" vid="724644" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTP virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable-->   
+    <recm key="HTTPPort">
+      <val>80</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -p 80</val> 
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh </val>
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">   
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>%Version%</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>%SoftwareElementState%</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>%TargetOperatingSystem%</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+    </recm>
+  <recm key="p:IdentificationCode">
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+    </recm>
+    <recm key="p:IPAddresses">
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:IPAddressesFormatted">
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:Ports">
+      <val>%HTTPPort%</val>
+    </recm>
+    <recm key="p:PortsFormatted">
+      <val>%HTTPPort%</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:ServerAliasFormatted">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DocumentRoot">
+      <val>%DocumentRoot%</val>
+    </recm>
+    <recm key="p:ServerAdmin">
+      <val>%ServerAdmin%</val>
+    </recm>
+    <recm key="p:ErrorLog">
+      <val>%ErrorLog%</val>
+    </recm>
+    <recm key="p:CustomLog">
+      <val>%CustomLog%</val>
+    </recm>
+    <recm key="p:AccessLog">
+      <val>%AccessLog%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724645" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTPS virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable-->   
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -s 443</val> 
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">   
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>%Version%</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>%SoftwareElementState%</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>%TargetOperatingSystem%</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+    </recm>
+  <recm key="p:IdentificationCode">
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+    </recm>
+    <recm key="p:IPAddresses">
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:IPAddressesFormatted">
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:Ports">
+      <val>%HTTPSPort%</val>
+    </recm>
+    <recm key="p:PortsFormatted">
+      <val>%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:ServerAliasFormatted">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DocumentRoot">
+      <val>%DocumentRoot%</val>
+    </recm>
+    <recm key="p:ServerAdmin">
+      <val>%ServerAdmin%</val>
+    </recm>
+    <recm key="p:ErrorLog">
+      <val>%ErrorLog%</val>
+    </recm>
+    <recm key="p:CustomLog">
+      <val>%CustomLog%</val>
+    </recm>
+    <recm key="p:AccessLog">
+      <val>%AccessLog%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724646" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 2 HTTP virtual hosts." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable, there are two http ports-->   
+    <recm key="HTTPPort">
+      <val>81</val>
+      <val>80</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -p 80,81</val>   
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>   
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">      
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">   
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>%Version%</val>
+      <val>%Version%</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>%SoftwareElementState%</val>
+      <val>%SoftwareElementState%</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>%TargetOperatingSystem%</val>
+      <val>%TargetOperatingSystem%</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+  <recm key="p:IdentificationCode">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:IPAddresses">
+      <val>%IpAddress%</val>
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:IPAddressesFormatted">
+      <val>%IpAddress%</val>
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:Ports">
+      <val>%HTTPPort%</val>
+      <val>%HTTPPort%</val>
+    </recm>
+    <recm key="p:PortsFormatted">
+      <val>%HTTPPort%</val>
+      <val>%HTTPPort%</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:ServerAliasFormatted">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DocumentRoot">
+      <val>%DocumentRoot%</val>
+      <val>%DocumentRoot%</val>
+    </recm>
+    <recm key="p:ServerAdmin">
+      <val>%ServerAdmin%</val>
+      <val>%ServerAdmin%</val>
+    </recm>
+    <recm key="p:ErrorLog">
+      <val>%ErrorLog%</val>
+      <val>%ErrorLog%</val>
+    </recm>
+    <recm key="p:CustomLog">
+      <val>%CustomLog%</val>
+      <val>%CustomLog%</val>
+    </recm>
+    <recm key="p:AccessLog">
+      <val>%AccessLog%</val>
+      <val>%AccessLog%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724647" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 2 HTTPS virtual hosts." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable, there are two https ports.-->   
+    <recm key="HTTPSPort">
+      <val>443</val>
+      <val>444</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -s 443,444</val> 
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>     
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">      
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">   
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>%Version%</val>
+      <val>%Version%</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>%SoftwareElementState%</val>
+      <val>%SoftwareElementState%</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>%TargetOperatingSystem%</val>
+      <val>%TargetOperatingSystem%</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+  <recm key="p:IdentificationCode">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:IPAddresses">
+      <val>%IpAddress%</val>
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:IPAddressesFormatted">
+      <val>%IpAddress%</val>
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:Ports">
+      <val>%HTTPSPort%</val>
+      <val>%HTTPSPort%</val>
+    </recm>
+    <recm key="p:PortsFormatted">
+      <val>%HTTPSPort%</val>
+      <val>%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:ServerAliasFormatted">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DocumentRoot">
+      <val>%DocumentRoot%</val>
+      <val>%DocumentRoot%</val>
+    </recm>
+    <recm key="p:ServerAdmin">
+      <val>%ServerAdmin%</val>
+      <val>%ServerAdmin%</val>
+    </recm>
+    <recm key="p:ErrorLog">
+      <val>%ErrorLog%</val>
+      <val>%ErrorLog%</val>
+    </recm>
+    <recm key="p:CustomLog">
+      <val>%CustomLog%</val>
+      <val>%CustomLog%</val>
+    </recm>
+    <recm key="p:AccessLog">
+      <val>%AccessLog%</val>
+      <val>%AccessLog%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724648" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTP virtual host and 1 HTTPS virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable-->   
+    <recm key="HTTPPort">
+      <val>80</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -p 80 -s 443</val>    
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>    
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">      
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">   
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>%Version%</val>
+      <val>%Version%</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>%SoftwareElementState%</val>
+      <val>%SoftwareElementState%</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>%TargetOperatingSystem%</val>
+      <val>%TargetOperatingSystem%</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+  <recm key="p:IdentificationCode">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:IPAddresses">
+      <val>%IpAddress%</val>
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:IPAddressesFormatted">
+      <val>%IpAddress%</val>
+      <val>%IpAddress%</val>
+    </recm>
+    <recm key="p:Ports">
+      <val>%HTTPSPort%</val>
+      <val>%HTTPPort%</val>
+    </recm>
+    <recm key="p:PortsFormatted">
+      <val>%HTTPSPort%</val>
+      <val>%HTTPPort%</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:ServerAliasFormatted">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DocumentRoot">
+      <val>%DocumentRoot%</val>
+      <val>%DocumentRoot%</val>
+    </recm>
+    <recm key="p:ServerAdmin">
+      <val>%ServerAdmin%</val>
+      <val>%ServerAdmin%</val>
+    </recm>
+    <recm key="p:ErrorLog">
+      <val>%ErrorLog%</val>
+      <val>%ErrorLog%</val>
+    </recm>
+    <recm key="p:CustomLog">
+      <val>%CustomLog%</val>
+      <val>%CustomLog%</val>
+    </recm>
+    <recm key="p:AccessLog">
+      <val>%AccessLog%</val>
+      <val>%AccessLog%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724649" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTP virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable-->   
+    <recm key="HTTPPort">
+      <val>80</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -p 80</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>    
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:StartStatisticTime">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatisticTime">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SampleInterval">
+      <val>^$</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:RequestsTotal">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsTotalBytes">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsPerSecond">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerRequest">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerSecond">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorCount400">
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorCount500">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorsPerMinute400">
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorsPerMinute500">
+      <val>%RequestValue%</val>
+    </recm>
+  </var>
+    
+  <var set="1" lvl="0" vid="724650" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTPs virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable.-->   
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -s 443</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>    
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val>
+    </recm>
+    <recm key="p:StartStatisticTime">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatisticTime">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SampleInterval">
+      <val>^$</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:RequestsTotal">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsTotalBytes">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsPerSecond">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerRequest">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerSecond">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorCount400">
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorCount500">
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorsPerMinute400">
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorsPerMinute500">
+      <val>%RequestValue%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724651" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 2 HTTP virtual hosts." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable, there are two http ports.-->   
+    <recm key="HTTPPort">
+      <val>80</val>
+      <val>81</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -p 80,81</val>   
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>    
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:StartStatisticTime">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatisticTime">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SampleInterval">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:RequestsTotal">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsTotalBytes">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsPerSecond">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerRequest">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerSecond">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorCount400">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorCount500">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorsPerMinute400">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorsPerMinute500">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724652" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 2 HTTPs virtual hosts." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable, therer are two https ports.-->   
+    <recm key="HTTPSPort">
+      <val>443</val>
+      <val>444</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -s 443,444</val>   
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>  
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:StartStatisticTime">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatisticTime">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SampleInterval">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:RequestsTotal">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsTotalBytes">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsPerSecond">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerRequest">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerSecond">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorCount400">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorCount500">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorsPerMinute400">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorsPerMinute500">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+  </var>
+  
+  <var set="1" lvl="0" vid="724653" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTP virtual host and 1 HTTPs virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo" />
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable, ssl port is the first one, httpd is the second one.-->   
+    <recm key="HTTPPort">
+      <val>80</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -p 80 -s 443</val>  
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>  
+    </recm>
+    
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPPort%</val>
+    </recm>
+    <recm key="p:Caption">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">      
+      <val>^$</val> 
+      <val>^$</val>
+    </recm>
+    <recm key="p:StartStatisticTime">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatisticTime">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SampleInterval">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:ServerName">
+      <val>%ServerName%</val>
+      <val>%ServerName%</val>
+    </recm>
+    <recm key="p:RequestsTotal">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsTotalBytes">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:RequestsPerSecond">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerRequest">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:KBPerSecond">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorCount400">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorCount500">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+    <recm key="p:ErrorsPerMinute400">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+   <recm key="p:ErrorsPerMinute500">
+      <val>%RequestValue%</val>
+      <val>%RequestValue%</val>
+    </recm>
+  </var>
+
+    <!-- 724656-Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host -->
+  <var set="1" lvl="0" vid="724656" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable.-->
+    <recm key="Name">
+      <val>localhost\.crt\*\w{8}</val>
+    </recm>
+    <recm key="File">
+      <val>/etc/ssl/crt/localhost\.crt</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -1sslc</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>
+    </recm>
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:Caption">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>[0-9].[0-9].[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementState"><val>[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+    </recm>
+    <recm key="p:IdentificationCode">
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+    </recm>
+    <recm key="p:VirtualHost">
+      <val>localhost\.%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ExpirationDate">
+      <val>true</val>
+    </recm>
+    <recm key="p:Datetime">
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+z</val>
+    </recm>
+    <recm key="p:DaysUntilExpiration">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:FileName">
+      <val>%File%</val>
+    </recm>
+ </var>
+  
+  <!-- 724657- Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host. -->
+  <var set="2" lvl="0" vid="724657" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <!--set the common variable-->
+    <recm key="Name">
+      <val>localhost\.crt\*\w{8}</val>
+    </recm>
+    <recm key="File">
+      <val>/etc/ssl/crt/localhost\.crt</val>
+      <val>/etc/ssl/crt/localhost1\.crt</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+  <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -2sslc</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>
+    </recm>
+    <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%Name%</val>
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:Caption">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">
+      <val>%Name%</val>
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>[0-9].[0-9].[0-9]</val>
+      <val>[0-9].[0-9].[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementState">
+      <val>[0-9]</val>
+      <val>[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%Name%</val>
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>[0-9]+</val>
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:IdentificationCode">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+      <val>^$</val>
+    </recm>
+    <recm key="p:VirtualHost">
+      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ExpirationDate">
+      <val>true</val>
+      <val>true</val>
+    </recm>
+    <recm key="p:Datetime">
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+    </recm>
+    <recm key="p:DaysUntilExpiration">
+      <val>[0-9]+</val>
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:FileName">
+       <val>%File%</val>
+       <val>%File%</val>
+    </recm>
+  </var>
+
+   <!-- 724658-Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured. -->
+  <var set="2" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -nossl</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>
+    </recm>
+    <recm key="NoInstance">
+      <val>true</val>
+    </recm>
+  </var>
+
+
+  <!-- 724659-Verify the value is correct if SSL certificate is expired. -->
+  <var set="2" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
+    <snipref id="UniqueApacheServerInfo"/>
+    <snipref id="LinuxInfo" />
+    <snipref id="ApacheInfo" />
+  <!--set the common variable-->
+    <recm key="Name">
+      <val>localhost\.crt\*\w{8}</val>
+    </recm>
+    <recm key="File">
+      <val>/etc/ssl/crt/localhost\.crt</val>
+    </recm>
+    <recm key="HTTPSPort">
+      <val>443</val>
+    </recm>
+    <recm key="ActionCmd">
+      <val>bash /tmp/createPortforApache.sh -expireSSL</val>
+    </recm>
+    <recm key="PostCmd">
+      <val>bash /tmp/revertapacheconf.sh</val>
+    </recm>  
+   <!--Property values-->
+    <recm key="p:InstanceID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:Caption">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Description">
+      <val>^$</val>
+    </recm>
+    <recm key="p:ElementName">
+      <val>^$</val>
+    </recm>
+    <recm key="p:InstallDate">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Name">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:OperationalStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:StatusDescriptions">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Status">
+      <val>^$</val>
+    </recm>
+    <recm key="p:HealthState">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CommunicationStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:DetailedStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:OperatingStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:PrimaryStatus">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Version">
+      <val>[0-9].[0-9].[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementState"><val>[0-9]</val>
+    </recm>
+    <recm key="p:SoftwareElementID">
+      <val>%Name%</val>
+    </recm>
+    <recm key="p:TargetOperatingSystem">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:OtherTargetOS">
+      <val>^$</val>
+    </recm>
+    <recm key="p:Manufacturer">
+      <val>^$</val>
+    </recm>
+    <recm key="p:BuildNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:SerialNumber">
+      <val>^$</val>
+    </recm>
+    <recm key="p:CodeSet">
+      <val>^$</val>
+    </recm>
+    <recm key="p:IdentificationCode">
+      <val>^$</val>
+    </recm>
+    <recm key="p:LanguageEdition">
+      <val>^$</val>
+    </recm>
+    <recm key="p:VirtualHost">
+      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+    </recm>
+    <recm key="p:ExpirationDate">
+      <val>true</val>
+    </recm>
+    <recm key="p:Datetime">
+      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+    </recm>
+    <recm key="p:DaysUntilExpiration">
+      <val>[0-9]+</val>
+    </recm>
+    <recm key="p:FileName">
+      <val>%File%</val>
+    </recm>
+ </var>
+
+
+ <!-- 724953-VerifyCimProvInstallationUsingOptionInstall -->
+ <var set="2" lvl="0" vid="724953" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="isInvalidInstall">false</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <!-- The apache-cimprov folder under /opt/microsoft and /var/opt/microsoft and /etc/opt/microsoft should be 1,1,1 -->
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="installLogKeyWorlds">done</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724954-VerifyCimProvInstallationUsingOptionInstallAndForce -->
+  <var set="2" lvl="0" vid="724954" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install --force' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --install --force</rec>
+    <rec key="isInvalidInstall">false</rec>
+    <!-- The apache-cimprov folder under /opt/microsoft and /var/opt/microsoft and /etc/opt/microsoft should be 1,1,1 -->
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="installLogKeyWorlds">done</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724955-VerifyCimProvInstallationtwicefailed -->
+  <var set="2" lvl="0" vid="724955" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="isInvalidInstall">true</rec>
+    <rec key="installTwice">true</rec>
+  </var>
+
+  <!-- 724956-VerifyCimProvInstallationUsingInvalidOptions-->
+  <var set="2" lvl="0" vid="724956" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent failed with invalid option" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --invalidinstall</rec>
+    <rec key="isInvalidInstall">true</rec>
+  </var>
+
+  <!-- 724957-VerifyCimProvInstallationWithOutOption -->
+  <var set="2" lvl="0" vid="724957" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent failed without options" act="true">
+    <rec key="apacheCmd">sh /tmp/{0}</rec>
+    <rec key="isInvalidInstall">true</rec>
+    <rec key="installLogKeyWorlds">usage</rec>
+  </var>
+
+  <!-- 724963-VerifyCimProvUsingRemoveOption -->
+  <var set="2" lvl="0" vid="724963" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if uninstall Apache agent successfully with '--remove' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --remove</rec>
+    <rec key="isRemoveOption">true</rec>
+    <rec key="expectedFolderCount">0,0,0</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724964-VerifyCimProvUsingpurgeOption -->
+  <var set="2" lvl="0" vid="724964" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if uninstalll Apache agent cleanly with '--purge' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --purge</rec>
+    <rec key="isRemoveOption">true</rec>
+    <rec key="expectedFolderCount">0,0,0</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724965-VerifyCimProvHelpOption -->
+  <var set="2" lvl="0" vid="724965" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if output the usage properly when type '--help' option" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --help</rec>
+    <rec key="isHelpOption">true</rec>
+  </var>
+
+  <!-- 724958-VerifyCimProvUpgradeOption -->
+  <var set="2" lvl="0" vid="724958" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade</rec>
+    <rec key="isUpgrade">true</rec>
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724961-VerifyCimProvUpgradeUsingForceOption -->
+  <var set="2" lvl="0" vid="724961" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade --force</rec>
+    <rec key="isUpgrade">true</rec>
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724962-VerifyCimProvDoesNotUpgradeToLowerVersion-->
+  <var set="2" lvl="0" vid="724962" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade</rec>
+    <rec key="isUpgrade">false</rec>
+  </var>
+
+  <!-- Test Variables Definition -->
+  <grp cls="Scx.Test.Apache.Provider.GroupHelper">
+    <snipref id="LinuxInfo" />
+    <rec key="hostname">%Linux.Host%</rec>
+    <!--rec key="omserver">osst-ws8r2-02</rec-->
+    <rec key="omserver">OM_Server</rec>
+    <rec key="username">root</rec>
+    <rec key="password">OpsMgr2007R2</rec>
+    <rec key="nonsuperuser">scxuser</rec>
+    <rec key="nonsuperuserpwd">scxuser</rec>
+    <rec key="PlatformTag">universald.1.x86</rec>
+    <rec key="ApacheTag">universal.1.i686</rec>
+    <rec key="InstallOMCmd">sh /tmp/{0} --install</rec>
+    <rec key="UninstallOMCmd">/opt/microsoft/scx/bin/uninstall P</rec>
+    <rec key="RestartOMAgentCmd">scxadmin -restart</rec>
+    <rec key="CleanupOMCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall P; rm -rf /etc/opt/microsoft  /var/opt/microsoft  /opt/microsoft /tmp/scx*]]></rec>
+    <rec key="AgentPkgExt">dpkg</rec>
+    <rec key="DirectoryTag">Debian5.0_x86</rec>
+    <rec key="installonly">false</rec>
+    <rec key="knownIssueFormat">Known Issue: WI {0}: '{1}'</rec>
+    <rec key="OMAgentLocation"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents]]></rec>
+    <!--cimprov-->
+    <rec key="ApachesLocation"><![CDATA[C:\Apache\cimprov]]></rec>
+    <rec key="installApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="UninstallApacheCmd">sh /tmp/{0} --purge</rec>
+    <rec key="CleanupApacheCmd"><![CDATA[sh /tmp/{0} --purge;rm -rf /etc/opt/microsoft/apache* /opt/microsoft/apache* /var/opt/microsoft/apache*;]]></rec>
+    <!--check apache status-->
+    <rec key="installApachePkg">yum install httpd</rec>
+    <rec key="startApacheCmd">service apache2 start</rec>
+    <rec key="stopApacheCmd">service apache2 stop</rec>
+    <rec key="restartApacheCmd">service apache2 restart</rec>
+    <rec key="checkServiceCmd">service apache2 status</rec>
+    <!--<rec key="checkApacheInstalled">dpkg -l|grep apache</rec>-->
+
+    <!-- If this is true, ignore the remote agent drop folder, and use only local agents found in the pat given by 'OMAgentLocation' -->
+    <rec key="useagentlocation">true</rec>
+    <rec key="useapacheLocation">true</rec>
+    <!-- Use only the latest agent: if an agent is not available in the latest build folder, exit with an error -->
+    <rec key="latestonly">true</rec>
+    <!-- Skip agent deployment: run WSMAN tests without attempting to install a new agent on the client machine, and don't uninstall the agent when testing is done-->
+    <rec key="skipagentdeploy">false</rec>
+    <varref />
+  </grp>
+</varmap>

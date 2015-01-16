@@ -267,11 +267,12 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
                 // version is 1.0.0-271.
                 // get expected version number:
                 string[] nameParts = this.ApacheHelper.apacheAgentName.Split('-');
-                string versionNumber = nameParts[2] + '-' + nameParts[3].Split('.')[0];
+                string versionNumber1 = nameParts[2] + '-' + nameParts[3].Split('.')[0];
+                string versionNumber2 = nameParts[2] + '.' + nameParts[3].Split('.')[0];
 
                 // get acutally version number using cmd.
                 string commandStdOut = this.ApacheHelper.RunCmd(verifyApacheInstalledCmd).StdOut;
-                if (!commandStdOut.Contains(versionNumber))
+                if (!commandStdOut.Contains(versionNumber1) && !commandStdOut.Contains(versionNumber2))
                 {
                     throw new VarAbort("verify the apache version failed");
                 }

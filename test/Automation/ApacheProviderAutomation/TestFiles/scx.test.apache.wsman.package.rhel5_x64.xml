@@ -3,19 +3,25 @@
         assembly="..\Apache.dll"
         dsc="Apache Automation Test"
         owner="v-litin" contact="v-litin">
+  <snippet id="ApacheInstallInfo">
+    <rec key="Apache.InstallCmd">sh /tmp/{0}</rec>
+    <rec key="Apache.VerifyFolderExistCmd"><![CDATA[/bin/ls /opt/microsoft/|grep -ic "apache";/bin/ls /var/opt/microsoft/|grep -ic "apache";/bin/ls /etc/opt/microsoft/|grep -ic "apache"]]></rec>
+    <rec key="Apache.VerifyApacheInstalledCmd">rpm -qa|grep apache</rec>
+  </snippet>
   <snippet id="UniqueApacheServerInfo">
     <rec key="ApacheServer.ConfFile">/etc/httpd/conf/httpd\.conf</rec>
     <rec key="ApacheServer.Vendor">Apache Software Foundation</rec>
-    <rec key="ApacheServer.ProductVersion">2\.2\.15</rec>
+    <rec key="ApacheServer.ProductVersion">2\.2\.3</rec>
     <rec key="ApacheServer.ProcessName">httpd</rec>
     <rec key="ApacheServer.Collection">/etc/httpd</rec>
   </snippet>
   <snippet id="LinuxInfo">
-    <rec key="Linux.Host">a22p-cent6-01</rec>
+    <!--rec key="Linux.Host">a22p64-rhel5-01</rec-->
+    <rec key="Linux.Host">hotsname</rec>
     <rec key="Linux.SystemID">localhost</rec>
   </snippet>
   <snippet id="ApacheInfo">
-    <rec key="Version">2.2.15</rec>
+    <rec key="Version">2.2.3</rec>
     <rec key="SoftwareElementState">3</rec>
     <rec key="TargetOperatingSystem">36</rec>
     <rec key="DocumentRoot">/var/www/html</rec>
@@ -228,7 +234,7 @@
     </recm>
   </var>
   
-  <var set="1" lvl="0" vid="724645" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTPS virtual host." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724645" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTPS virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -517,7 +523,7 @@
     </recm>
   </var>
   
-  <var set="1" lvl="0" vid="724647" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 2 HTTPS virtual hosts." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724647" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 2 HTTPS virtual hosts." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -680,7 +686,7 @@
     </recm>
   </var>
   
-  <var set="1" lvl="0" vid="724648" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTP virtual host and 1 HTTPS virtual host." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724648" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTP virtual host and 1 HTTPS virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -914,7 +920,7 @@
     </recm>
   </var>
     
-  <var set="1" lvl="0" vid="724650" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTPs virtual host." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724650" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTPs virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1070,7 +1076,7 @@
     </recm>
   </var>
   
-  <var set="1" lvl="0" vid="724652" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 2 HTTPs virtual hosts." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724652" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 2 HTTPs virtual hosts." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1080,7 +1086,7 @@
       <val>444</val>
     </recm>
     <recm key="ActionCmd">
-      <val>sh /tmp/createPortforApache.sh -s 443</val>   
+      <val>sh /tmp/createPortforApache.sh -s 443,444</val>   
     </recm>
     <recm key="PostCmd">
       <val>sh /tmp/revertapacheconf.sh</val>  
@@ -1157,7 +1163,7 @@
     </recm>
   </var>
   
-  <var set="1" lvl="0" vid="724653" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTP virtual host and 1 HTTPs virtual host." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724653" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTP virtual host and 1 HTTPs virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1247,7 +1253,7 @@
   </var>
 
     <!-- 724656-Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host -->
-  <var set="1" lvl="0" vid="724656" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724656" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1360,7 +1366,7 @@
  </var>
   
   <!-- 724657- Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host. -->
-  <var set="2" lvl="0" vid="724657" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724657" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1505,7 +1511,7 @@
   </var>
 
    <!-- 724658-Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured. -->
-  <var set="2" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
+  <var set="1001" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1522,7 +1528,7 @@
 
 
   <!-- 724659-Verify the value is correct if SSL certificate is expired. -->
-  <var set="2" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
+  <var set="1001" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1634,23 +1640,126 @@
     </recm>
  </var>
 
+
+ <!-- 724953-VerifyCimProvInstallationUsingOptionInstall -->
+ <var set="2" lvl="0" vid="724953" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="isInvalidInstall">false</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <!-- The apache-cimprov folder under /opt/microsoft and /var/opt/microsoft and /etc/opt/microsoft should be 1,1,1 -->
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="installLogKeyWorlds">OK</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724954-VerifyCimProvInstallationUsingOptionInstallAndForce -->
+  <var set="2" lvl="0" vid="724954" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install Apache agent successfully with '--install --force' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --install --force</rec>
+    <rec key="isInvalidInstall">false</rec>
+    <!-- The apache-cimprov folder under /opt/microsoft and /var/opt/microsoft and /etc/opt/microsoft should be 1,1,1 -->
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="installLogKeyWorlds">OK</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724955-VerifyCimProvInstallationtwicefailed -->
+  <var set="2" lvl="0" vid="724955" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent twice failed on the same version" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="isInvalidInstall">true</rec>
+    <rec key="installTwice">true</rec>
+  </var>
+
+  <!-- 724956-VerifyCimProvInstallationUsingInvalidOptions-->
+  <var set="2" lvl="0" vid="724956" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent failed with invalid option" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --invalidinstall</rec>
+    <rec key="isInvalidInstall">true</rec>
+  </var>
+
+  <!-- 724957-VerifyCimProvInstallationWithOutOption -->
+  <var set="2" lvl="0" vid="724957" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if install an Apache agent failed without options" act="true">
+    <rec key="apacheCmd">sh /tmp/{0}</rec>
+    <rec key="isInvalidInstall">true</rec>
+    <rec key="installLogKeyWorlds">usage</rec>
+  </var>
+
+  <!-- 724963-VerifyCimProvUsingRemoveOption -->
+  <var set="2" lvl="0" vid="724963" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if uninstall Apache agent successfully with '--remove' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --remove</rec>
+    <rec key="isRemoveOption">true</rec>
+    <rec key="expectedFolderCount">0,0,0</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724964-VerifyCimProvUsingpurgeOption -->
+  <var set="2" lvl="0" vid="724964" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if uninstalll Apache agent cleanly with '--purge' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="apacheCmd">sh /tmp/{0} --purge</rec>
+    <rec key="isRemoveOption">true</rec>
+    <rec key="expectedFolderCount">0,0,0</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724965-VerifyCimProvHelpOption -->
+  <var set="2" lvl="0" vid="724965" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProv" dsc="[Apache]Verify if output the usage properly when type '--help' option" act="true">
+    <rec key="apacheCmd">sh /tmp/{0} --help</rec>
+    <rec key="isHelpOption">true</rec>
+  </var>
+
+  <!-- 724958-VerifyCimProvUpgradeOption -->
+  <var set="1001" lvl="0" vid="724958" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade</rec>
+    <rec key="isUpgrade">true</rec>
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724961-VerifyCimProvUpgradeUsingForceOption -->
+  <var set="1001" lvl="0" vid="724961" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+    <snipref id="ApacheInstallInfo" />
+    <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade --force</rec>
+    <rec key="isUpgrade">true</rec>
+    <rec key="expectedFolderCount">1,1,1</rec>
+    <rec key="verifyFolderExistCmd">%Apache.VerifyFolderExistCmd%</rec>
+    <rec key="verifyApacheInstalledCmd">%Apache.VerifyApacheInstalledCmd%</rec>
+  </var>
+
+  <!-- 724962-VerifyCimProvDoesNotUpgradeToLowerVersion-->
+  <var set="2" lvl="0" vid="724962" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+    <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
+    <rec key="apacheCmd">sh /tmp/{0} --upgrade</rec>
+    <rec key="isUpgrade">false</rec>
+  </var>
+
   <!-- Test Variables Definition -->
   <grp cls="Scx.Test.Apache.Provider.GroupHelper">
     <snipref id="LinuxInfo" />
     <rec key="hostname">%Linux.Host%</rec>
-    <rec key="omserver">osst-ws8r2-01</rec>
+    <!--rec key="omserver">osst-ws8r2-02</rec-->
+    <rec key="omserver">OM_Server</rec>
     <rec key="username">root</rec>
     <rec key="password">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
     <rec key="nonsuperuserpwd">scxuser</rec>
-    <rec key="PlatformTag">universalr.1.x86</rec>
-    <rec key="ApacheTag">universal.1.i686</rec>
+    <rec key="PlatformTag">rhel.5.x64</rec>
+    <rec key="ApacheTag">universal.1.x86_64</rec>
     <rec key="InstallOMCmd">sh /tmp/{0} --install</rec>
-    <rec key="UninstallOMCmd">/opt/microsoft/scx/bin/uninstall</rec>
+    <rec key="UninstallOMCmd">/opt/microsoft/scx/bin/uninstall P</rec>
     <rec key="RestartOMAgentCmd">scxadmin -restart</rec>
-    <rec key="CleanupOMCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -rf /tmp/scx*;rm -rf /var/opt/microsoft]]></rec>
+    <rec key="CleanupOMCmd"><![CDATA[/opt/microsoft/scx/bin/uninstall P;rm -rf /etc/opt/microsoft/ /opt/microsoft /tmp/scx* /var/opt/microsoft]]></rec>
     <rec key="AgentPkgExt">rpm</rec>
-    <rec key="DirectoryTag">CentOS6.0_x86</rec>
+    <rec key="DirectoryTag">Rhel5.0_x64</rec>
     <rec key="installonly">false</rec>
     <rec key="knownIssueFormat">Known Issue: WI {0}: '{1}'</rec>
     <rec key="OMAgentLocation"><![CDATA[C:\Program Files\Microsoft System Center 2012 R2\Operations Manager\Server\AgentManagement\UnixAgents]]></rec>
@@ -1658,7 +1767,7 @@
     <rec key="ApachesLocation"><![CDATA[C:\Apache\cimprov]]></rec>
     <rec key="installApacheCmd">sh /tmp/{0} --install</rec>
     <rec key="UninstallApacheCmd">sh /tmp/{0} --purge</rec>
-    <rec key="CleanupApacheCmd"><![CDATA[sh /tmp/{0} --purge;rm -rf /etc/opt/microsoft/apache*;rm -rf /opt/microsoft/apache*;rm -rf /var/opt/microsoft/apache*;]]></rec>
+    <rec key="CleanupApacheCmd"><![CDATA[sh /tmp/{0} --purge;rm -rf /etc/opt/microsoft/apache* /opt/microsoft/apache* /var/opt/microsoft/apache*;]]></rec>
     <!--check apache status-->
     <rec key="installApachePkg">yum install httpd</rec>
     <rec key="startApacheCmd">service httpd start</rec>
