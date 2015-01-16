@@ -349,13 +349,13 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                      { 
                          this.fullApacheAgentPath = ctx.Records.GetValue("apacheAgentPath");
                          string tag = ctx.Records.GetValue("apacheTag");
-                         //this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
+                         this.apacheAgentHelper.InstallApacheAgentWihCommand(fullApacheAgentPath, tag);
                      }
                 }
 
                 this.computerObject = this.monitorHelper.GetComputerObject(this.clientInfo.HostName);
 
-                //this.VerifyHostIsCompletelyDiscoveried(ctx);
+                this.VerifyHostIsCompletelyDiscoveried(ctx);
 
             }
             catch (Exception ex)

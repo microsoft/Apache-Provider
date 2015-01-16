@@ -2,9 +2,9 @@
   <!--SDk Test Cases-->
 
   <!--Tasks[9]-->
-  <var set="0" lvl="0" vid="724163" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify deploy Apache CIM module by PowerShell command successful." permutation="rows">
+  <var set="0" lvl="0" vid="724163" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module works by running taskInstall/Upgrade Apache CIM Modul with valid root account." permutation="rows">
     <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with valid root account</val>
+      <val>Install Apache CIM Module with valid root account</val>
     </recm>
     <recm key="TaskName">
       <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
@@ -19,8 +19,8 @@
       <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
-  
-    <var set="0" lvl="0" vid="779558" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if upgade Apache CIM Module works by running task Install/Upgrade Apache CIM Module with valid root account." permutation="rows">
+
+  <var set="0" lvl="0" vid="779558" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if upgade Apache CIM Module works by running task Install/Upgrade Apache CIM Module with valid root account." permutation="rows">
     <recm key="EntityName">
       <val>upgrade Apache CIM Module with valid root account</val>
     </recm>
@@ -37,7 +37,7 @@
       <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
-  
+
   <var set="0" lvl="0" vid="725226" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify that it doesn't upgrade Apache CIM Module to a lower version by running task Install/Upgrade Apache CIM Module." permutation="rows">
     <recm key="EntityName">
       <val>Doesn't upgrade Apache CIM Module to a lower version by running task "Install/Upgrade Apache CIM Module"</val>
@@ -55,10 +55,10 @@
       <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
     </recm>
   </var>
-  
+
   <var set="0" lvl="0" vid="725842" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with root account which password is incorrect." permutation="rows">
     <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with incorrect password of root account</val>
+      <val>Install Apache CIM Module with incorrect password of root account</val>
     </recm>
     <recm key="TaskName">
       <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
@@ -74,12 +74,12 @@
     </recm>
     <recm key="expectedOutputKeyWord">
       <val>&lt;stderr&gt;\S*&lt;/stderr&gt;</val>
-    </recm>  
+    </recm>
   </var>
-  
+
   <var set="0" lvl="0" vid="725856" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if Install/Upgrade Apache CIM Module with valid scxuser account with sudo works." permutation="rows">
     <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with valid scxuser account with sudo.</val>
+      <val>Install Apache CIM Module with valid scxuser account with sudo.</val>
     </recm>
     <recm key="TaskName">
       <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
@@ -97,10 +97,10 @@
       <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
     </recm>
   </var>
-  
+
   <var set="0" lvl="0" vid="725868" cid="DeployModuleTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTask" dsc="Verify if install Apache CIM Module failed by running task Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access." permutation="rows">
     <recm key="EntityName">
-      <val>Install/Upgrade Apache CIM Module with valid scxuser account which didn't have sudo access.</val>
+      <val>Install Apache CIM Module with valid scxuser account which didn't have sudo access.</val>
     </recm>
     <recm key="TaskName">
       <val>Microsoft.ApacheHTTPServer.DeployModule.Task</val>
@@ -112,7 +112,7 @@
       <val>1,1,0,2</val>
     </recm >
     <recm key="CommentSudoers">
-        <val>sed -i 's/scxuser/#scxuser/g' /etc/sudoers</val>
+      <val>sed -i 's/scxuser/#scxuser/g' /etc/sudoers</val>
     </recm>
     <recm key="UnCommentSudoers">
       <val>sed -i 's/#scxuser/scxuser/g' /etc/sudoers</val>
@@ -125,7 +125,6 @@
     </recm>
   </var>
 
-  <!--Case 725217 Verify Reload Apache HTTP Server (Graceful) task works.-->
   <var set="0" lvl="0" vid="725217" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Reload Apache HTTP Server (Graceful) task works." permutation="rows">
     <recm key="EntityName">
       <val>Reload Apache HTTP Server(Graceful) with valid root account</val>
@@ -140,11 +139,10 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+      <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
   </var>
 
-  <!--Case 725218 Verify Restart Apache HTTP Server task works.-->
   <var set="0" lvl="0" vid="725218" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Restart Apache HTTP Server task works." permutation="rows">
     <recm key="EntityName">
       <val>Restart Apache HTTP Server with valid root account</val>
@@ -159,11 +157,10 @@
       <val>Success</val>
     </recm>
     <recm key="expectedOutputKeyWord">
-      <val>&lt;returnCode&gt;0&lt;/returnCode&gt;</val>
+      <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
   </var>
 
-  <!--Case 725219 Verify Update Discovered Properties task works-->
   <var set="0" lvl="0" vid="725219" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Update Discovered Properties task works." permutation="rows">
     <recm key="EntityName">
       <val>Update Discovered Properties with valid root account</val>
@@ -182,7 +179,8 @@
     </recm>
   </var>
 
-  <!--Monitor[16]-->
+
+  <!--Monitor[15]-->
   <var set="1" lvl="0" vid="725203" cid="SSLCertExpirationHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.SSLCertExpirationHealth" dsc="This case if for 725203 and 725204, Verify SSL Certificate Expiration monitor can change to Warning/Error when the expiration time reach to Warning/Error state." permutation="rows">
     <recm key="ActionCmd">
       <val>bash /tmp/createPortforApache.sh -1sslc</val>
@@ -263,7 +261,7 @@
 
   <var set="1" lvl="0" vid="725208" cid="ApacheHTTPServerHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ApacheHTTPServerHealth" dsc="Verify if Apache HTTP Server Pct Busy Workers changed Unhealthy when excessive number of HTTP request made on  Apache http server." permutation="rows">
     <recm key="ActionCmd">
-      <val>/usr/local/apache2/bin/ab -n 100000 -c 100 http://localhost/ </val>
+      <val>/usr/local/apache2/bin/ab -n 1000 -c 10 http://localhost/ </val>
     </recm>
     <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.PctBusyWorkers.Monitor</val>
@@ -276,7 +274,7 @@
       <val>200</val>
     </recm>
     <recm key="monitorthreshold">
-      <val>20</val>
+      <val>1</val>
     </recm>
     <recm key="ExpectedState">
       <val>Error</val>
@@ -286,7 +284,7 @@
   <!--Didn't simulate the scenario by manual, need confirm with Allen.-->
   <var set="1" lvl="0" vid="725209" cid="ApacheHTTPServerHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ApacheHTTPServerHealth" dsc="Verify if Apache HTTP Server Total Pct CPU changed Unhealthy when number of request utilization currently high for Apache HTTP server." permutation="rows">
     <recm key="ActionCmd">
-      <val>/usr/local/apache2/bin/ab -n 1000 -c 10 http://localhost/ </val>
+      <val>/usr/local/apache2/bin/ab -n 10000 -c 100 http://localhost/ </val>
     </recm>
     <recm key="monitorname">
       <val>Microsoft.ApacheHTTPServer.ManagedServer.Unix.TotalPctCPU.Monitor</val>
@@ -298,7 +296,7 @@
       <val>80</val>
     </recm>
     <recm key="monitorthreshold">
-      <val>10</val>
+      <val>1</val>
     </recm>
     <recm key="ExpectedState">
       <val>Error</val>
@@ -418,10 +416,10 @@
       <val>524288</val>
     </recm>
     <recm key="overrideWarningThreshold">
-      <val>20000</val>
+      <val>100</val>
     </recm>
     <recm key="overrideErrorThreshold">
-      <val>524288</val>
+      <val>80000</val>
     </recm>
     <recm key="ExpectedState">
       <val>Warning</val>
@@ -447,12 +445,11 @@
     <recm key="monitorcontext">
       <val>Microsoft.ApacheHTTPServer.VirtualHost.Unix</val>
     </recm>
-    <!--The default threshold value is 1, but it's too low and will lead to the health state to error, so set to 400.-->
     <recm key="defaultmonitorthreshold">
       <val>1</val>
     </recm>
     <recm key="monitorthreshold">
-      <val>10</val>
+      <val>1</val>
     </recm>
     <recm key="ExpectedState">
       <val>Error</val>
@@ -461,7 +458,7 @@
 
   <var set="1" lvl="0" vid="726528" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the monitor Apache Virtual Host Web Request Total Response Time indicate Warning when server response the remote HTTP request time reached ResponseTimeWarningThreshold." permutation="rows">
     <recm key="ActionCmd">
-      <val>.\ab.exe -n 20000 -c 1000 http://%hostname%/</val>
+      <val>.\ab.exe -n 20000 -c 100 http://%hostname%/</val>
     </recm>
     <recm key="ActionType">
       <val>Server</val>
@@ -488,7 +485,7 @@
       <val>10</val>
     </recm>
     <recm key="overrideWarningThreshold">
-      <val>0.02</val>
+      <val>0.01</val>
     </recm>
     <recm key="overrideErrorThreshold">
       <val>20</val>
@@ -498,9 +495,9 @@
     </recm>
   </var>
 
-  <var set="1" lvl="0" vid="726529" cid="PerformanceWithTw7oStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the monitor Apache Virtual Host Web Request Total Response Time indicate Error when server response the remote HTTP request time reached ResponseTimeErrorThreshold." permutation="rows">
+  <var set="1" lvl="0" vid="726529" cid="PerformanceWithTwoStateHealth" cls="Scx.Test.Apache.SDK.ApacheSDKTests.PerformanceWithTwoStateHealth" dsc="Verify if the monitor Apache Virtual Host Web Request Total Response Time indicate Error when server response the remote HTTP request time reached ResponseTimeErrorThreshold." permutation="rows">
     <recm key="ActionCmd">
-      <val>.\ab.exe -n 20000 -c 1000 http://%hostname%/</val>
+      <val>.\ab.exe -n 20000 -c 100 http://%hostname%/</val>
     </recm>
     <recm key="ActionType">
       <val>Server</val>
@@ -513,7 +510,7 @@
     </recm>
     <recm key="InstanceID">
       <val>0.0.0.0:80</val>
-    </recm>
+    </recm>    
     <recm key="warningThresholdName">
       <val>ResponseTimeWarningThreshold</val>
     </recm>
@@ -527,15 +524,16 @@
       <val>10</val>
     </recm>
     <recm key="overrideWarningThreshold">
-      <val>10</val>
+      <val>20</val>
     </recm>
     <recm key="overrideErrorThreshold">
-      <val>0.02</val>
+      <val>0.01</val>
     </recm>
     <recm key="ExpectedState">
       <val>Error</val>
     </recm>
   </var>
+
 
   <!--Performance[22]-->
   <!--This case will test Performance Collection Rule 724772,724777,724778,724782,724933,724935,724937,724936,724940-->
@@ -660,6 +658,7 @@
     </recm>
   </var>
 
+
   <!--PowerShell[1]-->
   <var set="3" lvl="1" vid="726047" cid="DeployModuleTaskWithPS" cls="Scx.Test.Apache.SDK.ApacheSDKTests.DeployModuleTaskWithPS" dsc=" Verify deploy Apache CIM module by PowerShell command successful.." permutation="rows">
     <rec key="scripts">
@@ -673,8 +672,9 @@
     <rec key="expectedOutputKeyWord">Succeeded</rec>
   </var>
 
+  
   <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
-    <rec key="hostname">a24s-ubun14-01</rec>
+    <rec key="hostname">a24s-deb6-01</rec>
     <rec key="superuser">root</rec>
     <rec key="superuserpwd">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>
@@ -685,10 +685,10 @@
     <rec key="ompassword">OpsMgr2007R2</rec>
     <!--<rec key="testingoverride">overrideApacheMp.xml</rec>-->
     <rec key="testingoverride">overrideApacheMp</rec>
-    <rec key="cleanupcommand"><![CDATA[/opt/microsoft/scx/bin/uninstall -p;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.0.*;rm -rf /var/opt/microsoft]]></rec>
+    <rec key="cleanupcommand"><![CDATA[/opt/microsoft/scx/bin/uninstall P;rm -rf /etc/opt/microsoft/;rm -rf /opt/microsoft;rm -f /tmp/scx-1.0.*;rm -rf /var/opt/microsoft]]></rec>
     <rec key="platformtag">universald.1.x86</rec>
     <rec key="apacheTag">universal.1.i686</rec>
-    <rec key="architecture">x64</rec>
+    <rec key="architecture">x86</rec>
     <rec key="logicalprocessors">[0-9]{1}</rec>
     <rec key="isvirtualmachine">Virtual</rec>
     <rec key="physicalprocessors">\s{0}</rec>
@@ -705,7 +705,7 @@
     <rec key="useTaskInstallApacheAgent">false</rec>
     <rec key="apacheAgentPath"><![CDATA[C:\Apache\cimprov]]></rec>
     <rec key="apacheHelperABPath"><![CDATA[C:\Apache\bin]]></rec>
-    <rec key="AgentPkgExt">rpm</rec>
+    <rec key="AgentPkgExt">deb</rec>
     <rec key="DirectoryTag">Debian5.0_X86</rec>
     <rec key="latestonly">true</rec>
     <rec key="installonly">true</rec>

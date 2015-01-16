@@ -225,7 +225,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
         {
             string ruleName = ctx.Records.GetValue("rulename");
             string monitorContext = ctx.Records.GetValue("monitorcontext");
-            this.overrideHelper.SetClientCollectionRuleParameter(this.monitorObject, ruleName, monitorContext, "Interval", "30");
+            this.overrideHelper.SetClientCollectionRuleParameter(this.monitorObject, ruleName, monitorContext, "Interval", "10");
         }
 
         /// <summary>

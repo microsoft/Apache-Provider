@@ -340,7 +340,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
                 // Override errorThreshold
                 this.OverrideHelper.SetClientMonitorParameter(this.ComputerObject, monitorName, monitorContext, monitorTarget, errorThresholdName, monitorErrorThreshold);
 
-                this.OverrideHelper.SetClientMonitorInterval(this.ComputerObject, monitorName, monitorContext, monitorTarget, 30);
+                this.OverrideHelper.SetClientMonitorInterval(this.ComputerObject, monitorName, monitorContext, monitorTarget, 10);
             }
         }
 

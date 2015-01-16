@@ -24,11 +24,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{
 		TestFiles\createPortforApache.sh = TestFiles\createPortforApache.sh
 		TestFiles\createSSLCertification.sh = TestFiles\createSSLCertification.sh
 		TestFiles\revertapacheconf.sh = TestFiles\revertapacheconf.sh
+		TestFiles\scx.test.apache.sdk.package.Sles.x86.xml = TestFiles\scx.test.apache.sdk.package.Sles.x86.xml
 		TestFiles\scx.test.apache.sdk.package.universald_x64.xml = TestFiles\scx.test.apache.sdk.package.universald_x64.xml
 		TestFiles\scx.test.apache.sdk.package.universalr_x64.xml = TestFiles\scx.test.apache.sdk.package.universalr_x64.xml
 		TestFiles\scx.test.apache.sdk.package.universalr_x86.xml = TestFiles\scx.test.apache.sdk.package.universalr_x86.xml
+		TestFiles\scx.test.apache.sdk.source.Sles.x64.xml = TestFiles\scx.test.apache.sdk.source.Sles.x64.xml
+		TestFiles\scx.test.apache.sdk.source.Sles.x86.xml = TestFiles\scx.test.apache.sdk.source.Sles.x86.xml
 		TestFiles\scx.test.apache.sdk.source.universald_x86.xml = TestFiles\scx.test.apache.sdk.source.universald_x86.xml
 		TestFiles\scx.test.apache.sdk.source.universalr_x64.xml = TestFiles\scx.test.apache.sdk.source.universalr_x64.xml
+		TestFiles\scx.test.apache.sdk.source.universalr_x86.xml = TestFiles\scx.test.apache.sdk.source.universalr_x86.xml
 	EndProjectSection
 EndProject
 Global

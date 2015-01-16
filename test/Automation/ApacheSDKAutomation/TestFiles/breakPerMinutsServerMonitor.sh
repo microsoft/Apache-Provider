@@ -37,8 +37,8 @@ function restartApacheService {
 
 #Main
 g_defaultHTTPDConfFileLocation=/etc/httpd/conf/httpd.conf
-g_frompackagelocation=/etc/apache2/sites-enabled/000-default
-DocumentRoot=/var/www/html/
+g_frompackagelocation=/etc/apache2/sites-enabled/default
+DocumentRoot=/var/www/html
 isFromPackage=false
 isFromSource=false
 isDEB=false
