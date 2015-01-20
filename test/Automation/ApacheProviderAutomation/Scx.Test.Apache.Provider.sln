@@ -5,13 +5,23 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFiles", "TestFiles", "{B8CB00A2-23FB-4ACF-8752-BAAA55BF3162}"
 	ProjectSection(SolutionItems) = preProject
-		scx.centos5x64.apache.test.xml = scx.centos5x64.apache.test.xml
-		TestFiles\scx.centos5x86.apache.test.xml = TestFiles\scx.centos5x86.apache.test.xml
-		scx.centos6x64.apache.test.xml = scx.centos6x64.apache.test.xml
-		scx.centos6x86.apache.test.xml = scx.centos6x86.apache.test.xml
-		scx.centos7x64.apache.test.xml = scx.centos7x64.apache.test.xml
-		scx.centos7x86.apache.test.xml = scx.centos7x86.apache.test.xml
-		TestFiles\scx.ubuntu12.x64.apache.test.xml = TestFiles\scx.ubuntu12.x64.apache.test.xml
+		TestFiles\createPortforApache.sh = TestFiles\createPortforApache.sh
+		TestFiles\createSSLCertification.sh = TestFiles\createSSLCertification.sh
+		TestFiles\revertapacheconf.sh = TestFiles\revertapacheconf.sh
+		TestFiles\scx.test.apache.wsman.package.rhel5_x64.xml = TestFiles\scx.test.apache.wsman.package.rhel5_x64.xml
+		TestFiles\scx.test.apache.wsman.package.rhel6_x86.xml = TestFiles\scx.test.apache.wsman.package.rhel6_x86.xml
+		TestFiles\scx.test.apache.wsman.package.sles11_x86.xml = TestFiles\scx.test.apache.wsman.package.sles11_x86.xml
+		TestFiles\scx.test.apache.wsman.package.universald_x64.xml = TestFiles\scx.test.apache.wsman.package.universald_x64.xml
+		TestFiles\scx.test.apache.wsman.package.universald_x86.xml = TestFiles\scx.test.apache.wsman.package.universald_x86.xml
+		TestFiles\scx.test.apache.wsman.package.universalr_x64.xml = TestFiles\scx.test.apache.wsman.package.universalr_x64.xml
+		TestFiles\scx.test.apache.wsman.package.universalr_x86.xml = TestFiles\scx.test.apache.wsman.package.universalr_x86.xml
+		TestFiles\scx.test.apache.wsman.source.rhel5_x86.xml = TestFiles\scx.test.apache.wsman.source.rhel5_x86.xml
+		TestFiles\scx.test.apache.wsman.source.rhel7_x64.xml = TestFiles\scx.test.apache.wsman.source.rhel7_x64.xml
+		TestFiles\scx.test.apache.wsman.source.sles10_x86.xml = TestFiles\scx.test.apache.wsman.source.sles10_x86.xml
+		TestFiles\scx.test.apache.wsman.source.universald_x64.xml = TestFiles\scx.test.apache.wsman.source.universald_x64.xml
+		TestFiles\scx.test.apache.wsman.source.universald_x86.xml = TestFiles\scx.test.apache.wsman.source.universald_x86.xml
+		TestFiles\scx.test.apache.wsman.source.universalr_x64.xml = TestFiles\scx.test.apache.wsman.source.universalr_x64.xml
+		TestFiles\scx.test.apache.wsman.source.universalr_x86.xml = TestFiles\scx.test.apache.wsman.source.universalr_x86.xml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WSManCommon", "WSManCommon\WSManCommon.csproj", "{EB1D1123-7E8A-4634-8E57-C06131B791C8}"
@@ -20,19 +30,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApacheProviderTest", "Sourc
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
+		SccNumberOfProjects = 3
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = http://cdmvstf:8080/tfs/cdm
 		SccProjectUniqueName0 = WSManCommon\\WSManCommon.csproj
 		SccProjectName0 = WSManCommon
-		SccAuxPath0 = http://cdmvstf:8080/tfs/cdm
 		SccLocalPath0 = WSManCommon
-		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccProjectUniqueName1 = SourceCode\\ApacheProviderTest.csproj
 		SccProjectName1 = SourceCode
-		SccAuxPath1 = http://cdmvstf:8080/tfs/cdm
 		SccLocalPath1 = SourceCode
-		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccLocalPath2 = .
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
