@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) Microsoft Corporation.  All rights reserved.
 # author: v-jeyin
 
@@ -12,6 +12,7 @@ function usage {
    echo  "-nossl: Disable all ssl port"
    echo  "-2sslc: create 2 SSL ports with different certificate"
    echo  "-1sslc: create 1 ssl port with custom certificate"
+   echo  "-breakConf" break conf file. Please use -revertConf after the operate.
    echo  "example:"
    echo  "1. create a http port : sh createPortforApache.sh -p 80"
    echo  "2. create a ssl port : sh createPortforApache.sh -s 443"
@@ -26,13 +27,13 @@ function usage {
 function removeOldPorts {
     sed -i '/^<VirtualHost/i\<Ifmodule test\>' $1
     sed -i '/^<\/VirtualHost/a\<\/Ifmodule\>' $1
-    sed -i 's/^Listen/#&/' $1
+#    sed -i 's/^Listen/#&/' $1
 
 }
 
 ServerAdmin=root@localhost
 DocumentRoot=/var/www/html
-ServerName=localhost
+ServerName=`hostname`
 ErrorLog=logs/localhost-error_log
 CustomLog="logs/localhost-custom_log common"
 TransferLog=logs/localhost-access_log
@@ -42,10 +43,11 @@ CustomSSLCertificateFile=localhost.crt
 CustomSSLCertificateKeyFile=localhost.key
 CustomSSLCertificateFile1=localhost1.crt
 CustomSSLCertificateKeyFile1=localhost1.key
+DebTempDir=/etc/apache2/tmp
 
 function AddPort {
-    echo "Listen $1" >> $2
-    echo "<VirtualHost *:$1>" >> $2
+    #echo "Listen $1" >> $2
+    echo "<VirtualHost 0.0.0.0:$1>" >> $2
     echo "ServerAdmin $ServerAdmin" >> $2
     echo "DocumentRoot $DocumentRoot" >> $2
     echo "ServerName $ServerName" >> $2
@@ -56,8 +58,8 @@ function AddPort {
 }
 
 function AddSSLPort {
-    echo "Listen $1" >> $2
-    echo "<VirtualHost _default_:$1>" >> $2
+    #echo "Listen $1" >> $2
+    echo "<VirtualHost 255.255.255.255:$1>" >> $2
     echo "ServerAdmin $ServerAdmin" >> $2
     echo "DocumentRoot $DocumentRoot" >> $2
     echo "ServerName $ServerName" >> $2
@@ -81,12 +83,20 @@ function restartApacheService {
      	service httpd restart
      fi
      fi
+
+    if [ "$isDEB" = "true" ]; then
+	service apache2 restart
+    fi
+    if [ "$isSles" = "true" ]; then
+        service apache2 restart
+    fi
+    sleep 2
 }
 
 function createSSLPort {
     hostname=`hostname`
-    echo "Listen $2" >> $1
-    echo "<VirtualHost _default_:443>" >> $1
+    #echo "Listen $2" >> $1
+    echo "<VirtualHost 255.255.255.255:$2>" >> $1
     echo "ErrorLog $ErrorLog" >> $1
     echo "TransferLog $TransferLog" >> $1
     echo "LogLevel warn" >> $1
@@ -98,28 +108,337 @@ function createSSLPort {
     echo "</VirtualHost>" >> $1
 }
 
-function createSSLExpirePort {
-    date -s last-month
-    sh ./createSSLCertification.sh
-    createSSLPort $1 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
-    restartApacheService  
+function createHTTPPort {
+    port[0]=`echo $httpPort | awk -F ',' '{print $1}'`
+    port[1]=`echo $httpPort | awk -F ',' '{print $2}'`
+    if [ -z "${port[0]}" ]; then
+        echo "Please add ports you want set"
+        exit 1
+    fi
 
-    date -s next-month
+    if [ "$isDEB" = "true" ]; then
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultHTTPDConfFileLocation/* $DebTempDir/
+        rm $g_defaultHTTPDConfFileLocation/*
+        touch $g_defaultHTTPDConfFileLocation/my.conf
+        mkdir $g_defaultHTTPDConfFileLocation/../logs
+        touch $ErrorLog
+        touch $CustomLog
+        touch $TransferLog
+        AddPort ${port[0]} $g_defaultHTTPDConfFileLocation/my.conf 
+	if [ ! -z "${port[1]}" ]; then
+                AddPort ${port[1]} $g_defaultHTTPDConfFileLocation/my.conf
+        fi
+
+        restartApacheService
+        mv $DebTempDir/* $g_defaultHTTPDConfFileLocation/
+        mv $g_defaultHTTPDConfFileLocation/my.conf $DebTempDir/
+    else
+        bakFile=$g_defaultHTTPDConfFileLocation"_bak"
+        cp $g_defaultHTTPDConfFileLocation $bakFile
+        removeOldPorts $g_defaultHTTPDConfFileLocation
+	AddPort ${port[0]} $g_defaultHTTPDConfFileLocation
+	if [ ! -z "${port[1]}" ]; then
+                AddPort ${port[1]} $g_defaultHTTPDConfFileLocation
+        fi
+        restartApacheService
+        cleanHTTPBakFile
+    fi
+}
+
+function createHTTPSPort {
+    port[0]=`echo $sslPort | awk -F ',' '{print $1}'`
+    port[1]=`echo $sslPort | awk -F ',' '{print $2}'`
+    if [ -z "${port[0]}" ]; then 
+        echo "Please add ports you want set"
+        exit 1  
+    fi
+
+    if [ "$isDEB" = "true" ]; then 
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultSSLConfFileLocation/* $DebTempDir/
+        rm $g_defaultSSLConfFileLocation/*
+        touch $g_defaultSSLConfFileLocation/myssl.conf
+        mkdir $g_defaultSSLDConfFileLocation/../logs
+        touch $ErrorLog
+        touch $CustomLog
+        touch $TransferLog
+        AddSSLPort ${port[0]} $g_defaultSSLConfFileLocation/myssl.conf 
+        if [ ! -z "${port[1]}" ]; then 
+                AddSSLPort ${port[1]} $g_defaultSSLConfFileLocation/myssl.conf
+        fi      
+
+        restartApacheService
+        mv $DebTempDir/* $g_defaultSSLConfFileLocation/
+        mv $g_defaultSSLConfFileLocation/myssl.conf $DebTempDir/
+    else    
+        bakFile=$g_defaultSSLConfFileLocation"_bak"
+        cp $g_defaultSSLConfFileLocation $bakFile
+        removeOldPorts $g_defaultSSLConfFileLocation
+        AddSSLPort ${port[0]} $g_defaultSSLConfFileLocation
+        if [ ! -z "${port[1]}" ]; then 
+                AddSSLPort ${port[1]} $g_defaultSSLConfFileLocation
+        fi      
+        restartApacheService
+        cleanSSLBakFile
+    fi
+}
+
+function createHTTPAndHTTPSPort {
+
+    port[0]=`echo $httpPort | awk -F ',' '{print $1}'`
+    port[1]=`echo $httpPort | awk -F ',' '{print $2}'`
+    sport[0]=`echo $sslPort | awk -F ',' '{print $1}'`
+    sport[1]=`echo $sslPort | awk -F ',' '{print $2}'`
+
+    if [ -z "${port[0]}" ]; then
+        echo "Please add ports you want set"
+        exit 1
+    fi
+    if [ -z "${sport[0]}" ]; then
+        echo "Please add ports you want set"
+        exit 1
+    fi
+
+    if [ "$isDEB" = "true" ]; then
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultSSLConfFileLocation/* $DebTempDir/
+        rm $g_defaultSSLConfFileLocation/*
+        touch $g_defaultSSLConfFileLocation/myssl.conf
+        mkdir $g_defaultSSLDConfFileLocation/../logs
+        touch $ErrorLog
+        touch $CustomLog
+        touch $TransferLog
+        AddSSLPort ${sport[0]} $g_defaultSSLConfFileLocation/myssl.conf
+        touch $g_defaultHTTPDConfFileLocation/my.conf
+	AddPort ${port[0]} $g_defaultHTTPDConfFileLocation/my.conf 
+        restartApacheService
+        mv $DebTempDir/* $g_defaultSSLConfFileLocation/
+        mv $g_defaultSSLConfFileLocation/myssl.conf $DebTempDir/
+	mv $g_defaultHTTPDConfFileLocation/my.conf $DebTempDir/
+    else
+	sslbakFile=$g_defaultSSLConfFileLocation"_bak"
+        cp $g_defaultSSLConfFileLocation $sslbakFile
+        removeOldPorts $g_defaultSSLConfFileLocation
+	#echo "Listen ${sport[0]}" >> $g_defaultSSLConfFileLocation
+        AddSSLPort ${sport[0]} $g_defaultSSLConfFileLocation
+
+        httpbakFile=$g_defaultHTTPDConfFileLocation"_bak"
+        cp $g_defaultHTTPDConfFileLocation $httpbakFile
+        removeOldPorts $g_defaultHTTPDConfFileLocation
+        AddPort ${port[0]} $g_defaultHTTPDConfFileLocation
+
+
+        restartApacheService
+        cleanSSLBakFile
+        cleanHTTPBakFile
+
+    fi
+}
+
+function createSSLExpirePort {
+    
+    if [ "$isDEB" = "true" ]; then
+	if [ ! -d "$g_defaultSSLConfFileLocation" ]; then
+	   echo "Could not fild ssl conf file under $g_defaultSSLConfFileLocation"
+	   exit 1
+	fi
+
+	mkdir $DebTempDir
+	rm $DebTempDir/*
+	cp $g_defaultSSLConfFileLocation/* $DebTempDir/
+	rm $g_defaultSSLConfFileLocation/*
+	touch $g_defaultSSLConfFileLocation/myssl.conf
+	mkdir $g_defaultSSLConfFileLocation/../logs
+	touch $ErrorLog
+	touch $CustomLog
+	touch $TransferLog
+	date -s last-month
+        sh /tmp/createSSLCertification.sh
+        createSSLPort $g_defaultSSLConfFileLocation/myssl.conf 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+        restartApacheService
+        date -s next-month
+	mv $DebTempDir/* $g_defaultSSLConfFileLocation/
+	mv $g_defaultSSLConfFileLocation/myssl.conf $DebTempDir/
+    else
+	if [ ! -f "$g_defaultSSLConfFileLocation" ]; then 
+            echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
+            exit 1  
+        fi
+
+        bakFile=$g_defaultSSLConfFileLocation"_bak"
+        cp $g_defaultSSLConfFileLocation $bakFile
+        removeOldPorts $g_defaultSSLConfFileLocation
+	date -s last-month
+    	sh /tmp/createSSLCertification.sh
+    	createSSLPort $g_defaultSSLConfFileLocation 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+    	restartApacheService
+    	date -s next-month
+        cleanSSLBakFile
+    fi
+
+}
+
+function createNoSSLPort {
+
+    if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultSSLConfFileLocation" ]; then
+           echo "Could not fild ssl conf file under $g_defaultSSLConfFileLocation"
+           exit 1
+        fi
+
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultSSLConfFileLocation/* $DebTempDir/
+        rm $g_defaultSSLConfFileLocation/*
+        restartApacheService
+        mv $DebTempDir/* $g_defaultSSLConfFileLocation/
+    else
+        if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
+            echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultSSLConfFileLocation"_bak"
+        cp $g_defaultSSLConfFileLocation $bakFile
+        removeOldPorts $g_defaultSSLConfFileLocation
+        restartApacheService
+        cleanSSLBakFile
+    fi
+
 }
 
 function create2SSLAndCertificate {
-   sh ./createSSLCertification.sh
-   createSSLPort $1 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
-   
-   sh ./createSSLCertification.sh -c $CustomSSLCertificateFile1 -k $CustomSSLCertificateKeyFile1
-   createSSLPort $1 444 $CustomSSLCertificateFile1 $CustomSSLCertificateKeyFile1
 
+    if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultSSLConfFileLocation" ]; then
+           echo "Could not fild ssl conf file under $g_defaultSSLConfFileLocation"
+           exit 1
+        fi
+
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultSSLConfFileLocation/* $DebTempDir/
+        rm $g_defaultSSLConfFileLocation/*
+	touch $g_defaultSSLConfFileLocation/myssl.conf
+        mkdir $g_defaultSSLConfFileLocation/../logs
+        touch $ErrorLog
+        touch $CustomLog
+        touch $TransferLog
+        sh /tmp/createSSLCertification.sh
+        createSSLPort $g_defaultSSLConfFileLocation/myssl.conf 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+	sh /tmp/createSSLCertification.sh -c $CustomSSLCertificateFile1 -k $CustomSSLCertificateKeyFile1
+        createSSLPort $g_defaultSSLConfFileLocation/myssl.conf 444 $CustomSSLCertificateFile1 $CustomSSLCertificateKeyFile1
+        restartApacheService
+        mv $DebTempDir/* $g_defaultSSLConfFileLocation/
+        mv $g_defaultSSLConfFileLocation/myssl.conf $DebTempDir/
+    else
+        if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
+            echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultSSLConfFileLocation"_bak"
+        cp $g_defaultSSLConfFileLocation $bakFile
+        removeOldPorts $g_defaultSSLConfFileLocation
+	sh /tmp/createSSLCertification.sh
+	createSSLPort $g_defaultSSLConfFileLocation 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+
+        sh /tmp/createSSLCertification.sh -c $CustomSSLCertificateFile1 -k $CustomSSLCertificateKeyFile1
+        createSSLPort $g_defaultSSLConfFileLocation 444 $CustomSSLCertificateFile1 $CustomSSLCertificateKeyFile1
+        restartApacheService
+        cleanSSLBakFile
+    fi
 }  
 
-function create1SSLAndCertificate {
-   sh ./createSSLCertification.sh
-   createSSLPort $1 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+function breakConfFile {
+   if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultHTTPDConfFileLocation" ]; then
+           echo "Could not fild conf file under $g_defaultHTTPDConfFileLocation"
+           exit 1
+        fi
 
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultHTTPDConfFileLocation/* $DebTempDir/
+        rm $g_defaultHTTPDConfFileLocation/*
+        touch $g_defaultHTTPDConfFileLocation/my.conf
+	echo "ErrorSign" >> $g_defaultHTTPDConfFileLocation/my.conf
+    else
+        if [ ! -f "$g_defaultHTTPDConfFileLocation" ]; then
+            echo "Could not find conf under $g_defaultHTTPDConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultHTTPDConfFileLocation"_bak"
+        cp $g_defaultHTTPDConfFileLocation $bakFile
+	echo "ErrorSign" >> $g_defaultHTTPDConfFileLocation
+    fi
+
+}
+
+function revertConfFile {
+   if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultHTTPDConfFileLocation" ]; then
+           echo "Could not fild conf file under $g_defaultHTTPDConfFileLocation"
+           exit 1
+        fi
+
+	rm $g_defaultHTTPDConfFileLocation/*
+	cp $DebTempDir/* $g_defaultHTTPDConfFileLocation/
+	rm $DebTempDir/*
+    else
+        if [ ! -f "$g_defaultHTTPDConfFileLocation" ]; then
+            echo "Could not find conf under $g_defaultHTTPDConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultHTTPDConfFileLocation"_bak"
+        cp $bakFile $g_defaultHTTPDConfFileLocation
+	rm $bakFile
+    fi
+	
+}
+
+function create1SSLAndCertificate {
+   if [ "$isDEB" = "true" ]; then
+        if [ ! -d "$g_defaultSSLConfFileLocation" ]; then
+           echo "Could not fild ssl conf file under $g_defaultSSLConfFileLocation"
+           exit 1
+        fi
+
+        mkdir $DebTempDir
+        rm $DebTempDir/*
+        cp $g_defaultSSLConfFileLocation/* $DebTempDir/
+        rm $g_defaultSSLConfFileLocation/*
+        touch $g_defaultSSLConfFileLocation/myssl.conf
+        mkdir $g_defaultSSLConfFileLocation/../logs
+        touch $ErrorLog
+        touch $CustomLog
+        touch $TransferLog
+        sh /tmp/createSSLCertification.sh
+        createSSLPort $g_defaultSSLConfFileLocation/myssl.conf 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+        restartApacheService
+        mv $DebTempDir/* $g_defaultSSLConfFileLocation/
+        mv $g_defaultSSLConfFileLocation/myssl.conf $DebTempDir/
+    else
+        if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
+            echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
+            exit 1
+        fi
+
+        bakFile=$g_defaultSSLConfFileLocation"_bak"
+        cp $g_defaultSSLConfFileLocation $bakFile
+        removeOldPorts $g_defaultSSLConfFileLocation
+        sh /tmp/createSSLCertification.sh
+        createSSLPort $g_defaultSSLConfFileLocation 443 $CustomSSLCertificateFile $CustomSSLCertificateKeyFile
+
+        restartApacheService
+        cleanSSLBakFile
+    fi
 }  
 
 	
@@ -156,14 +475,38 @@ isFromSource=false
 isNoSSL=false;
 isTwoSSLCertificate=false;
 isOneSSLCertificate=false;
+isDEB=false
+isSles=false
 
 if [ -f "$g_defaultHTTPDConfFileLocation" ]; then
 	isFromPackage=true
+   	if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
+	    g_defaultSSLConfFileLocation=/etc/httpd/conf/extra/httpd-ssl.conf
+	fi
 else 
    if [ -f "/usr/local/apache2/conf/httpd.conf" ]; then
 	isFromSource=true
 	g_defaultHTTPDConfFileLocation=/usr/local/apache2/conf/httpd.conf
 	g_defaultSSLConfFileLocation=/usr/local/apache2/conf/extra/httpd-ssl.conf
+else
+   if [ -f "/etc/apache2/apache2.conf" ]; then
+	isFromPackage=true
+	g_defaultHTTPDConfFileLocation=/etc/apache2/sites-enabled
+        g_defaultSSLConfFileLocation=/etc/apache2/sites-enabled
+	isDEB=true
+	SSLCertificateFile=/etc/ssl/certs/ssl-cert-snakeoil.pem
+	SSLCertificateKeyFile=/etc/ssl/private/ssl-cert-snakeoil.key
+else 
+   if [ -f "/etc/apache2/httpd.conf" ]; then
+	isFromPackeage=true
+	g_defaultHTTPDConfFileLocation=/etc/apache2/vhosts.d/vhost.conf
+        g_defaultSSLConfFileLocation=/etc/apache2/vhosts.d/vhost-ssl.conf
+        SSLCertificateFile=/etc/apache2/ssl.crt/server.crt
+        SSLCertificateKeyFile=/etc/apache2/ssl.key/server.key
+	isSles=true
+
+   fi
+   fi
    fi
 fi
 
@@ -186,17 +529,33 @@ while [ $# -ne 0 ]; do
     	    needCreateSSLPorts=true
 	    shift 2;;
         -expireSSL)
-            expire=true;
+            expire=true
+            createSSLExpirePort 	
+            exit 0
             shift 1;;
 	-nossl)
-	    isNoSSL=true;
+	    isNoSSL=true
+	    createNoSSLPort
+	    exit 0
 	    shift 1;;
 	-2sslc)
-	    isTwoSSLCertificate=true;
+	    isTwoSSLCertificate=true
+	    create2SSLAndCertificate
+	    exit 0
 	    shift 1;;
 	-1sslc)
-	    isOneSSLCertificate=true;
+	    isOneSSLCertificate=true
+	    create1SSLAndCertificate
+	    exit 0
 	    shift 1;;
+	-breakConf)
+	    breakConfFile
+	    exit 0
+	    shift 1;;
+	-revertConf)
+	   revertConfFile
+	   exit 0
+	   shift 1;;
 	-?)
 	    usage
 	    exit 0;;
@@ -206,157 +565,42 @@ while [ $# -ne 0 ]; do
     esac
 done
 
-if [ ! -f "$g_defaultHTTPDConfFileLocation" ] && [ "$needCreateHTTPPorts" = "true" ]; then
-        echo "The httpd.conf file $g_defaultHTTPDConfFileLocation didn't exist"
-	exit 1
-fi
-
-if [ ! -f "$g_defaultSSLConfFileLocation" ] && [ "$needCreateSSLPorts" = "true" ]; then
-	echo "The ssl.conf file $g_defaultSSLConfFileLocation didn't exist"
-	exit 1
-fi
-
-#create expire ssl port
-if [ ! -z "$expire" ]; then 
-    if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
-        echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
-        exit 1
-    fi
-    bakFile=$g_defaultSSLConfFileLocation"_bak"
-
-    cp $g_defaultSSLConfFileLocation $bakFile
-
-    removeOldPorts $g_defaultSSLConfFileLocation
-    createSSLExpirePort $g_defaultSSLConfFileLocation
-    
-    cleanSSLBakFile
-    exit 0
-fi
-
-#Disable all ssl port
-if [ "$isTwoSSLCertificate" = "true" ]; then
-    if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
-        echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
-        exit 1
-    fi
-    bakFile=$g_defaultSSLConfFileLocation"_bak"
-
-    cp $g_defaultSSLConfFileLocation $bakFile
-
-    removeOldPorts $g_defaultSSLConfFileLocation
-    create2SSLAndCertificate $g_defaultSSLConfFileLocation
-    restartApacheService
-    cleanSSLBakFile
-    exit 0
-fi
-
-if [ "$isOneSSLCertificate" = "true" ]; then
-    if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
-        echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
-        exit 1
-    fi
-    bakFile=$g_defaultSSLConfFileLocation"_bak"
-
-    cp $g_defaultSSLConfFileLocation $bakFile
-
-    removeOldPorts $g_defaultSSLConfFileLocation
-    create1SSLAndCertificate $g_defaultSSLConfFileLocation
-    restartApacheService
-    cleanSSLBakFile
-    exit 0
-fi
-
-#create 2 ssl with different certification
-if [ "$isNoSSL" = "true" ]; then
-    if [ ! -f "$g_defaultSSLConfFileLocation" ]; then
-        echo "Could not find ssl.conf under $g_defaultSSLConfFileLocation"
-        exit 1
-    fi
-    bakFile=$g_defaultSSLConfFileLocation"_bak"
-        
-    cp $g_defaultSSLConfFileLocation $bakFile
-            
-    removeOldPorts $g_defaultSSLConfFileLocation
-    restartApacheService
-    cleanSSLBakFile
-    exit 0
-fi
-
-
-
-#Create HTTPPorts
-if [ "$needCreateHTTPPorts" = "true" ] && [ "$needCreateSSLPorts" = "false" ]; then
-	port[0]=`echo $httpPort | awk -F ',' '{print $1}'`
-	port[1]=`echo $httpPort | awk -F ',' '{print $2}'`
-	if [ -z "${port[0]}" ]; then
-	    echo "Please add ports you want set"
+if [ "$isDEB" = "true" ]; then
+	if [ ! -d "$g_defaultHTTPDConfFileLocation" ] && [ "$needCreateHTTPPorts" = "true" ]; then
+	    echo "Could not find path $g_defaultHTTPConfFileLocation"
 	    exit 1
 	fi
-	bakFile=$g_defaultHTTPDConfFileLocation"_bak"
-	cp $g_defaultHTTPDConfFileLocation $bakFile
-	removeOldPorts $g_defaultHTTPDConfFileLocation
-	AddPort ${port[0]} $g_defaultHTTPDConfFileLocation
-	if [ ! -z "$port[1]" ]; then
-		AddPort ${port[1]} $g_defaultHTTPDConfFileLocation
+	if [ ! -d "$g_defaultSSLConfFileLocation" ] && [ "$needCreateSSLPorts" = "true" ]; then
+            echo "Could not find path $g_defaultHTTPConfFileLocation"
+            exit 1
+        fi
+else
+
+	if [ ! -f "$g_defaultHTTPDConfFileLocation" ] && [ "$needCreateHTTPPorts" = "true" ]; then
+            echo "The httpd.conf file $g_defaultHTTPDConfFileLocation didn't exist"
+	    exit 1
 	fi
-	restartApacheService
-	cleanHTTPBakFile
+
+	if [ ! -f "$g_defaultSSLConfFileLocation" ] && [ "$needCreateSSLPorts" = "true" ]; then
+	    echo "The ssl.conf file $g_defaultSSLConfFileLocation didn't exist"
+	    exit 1
+	fi
+fi
+
+#Create HTTPPorts
+if [ "$needCreateSSLPorts" = "false" ] && [ "$needCreateHTTPPorts" = "true" ]; then
+	createHTTPPort
 	exit 0
 fi
 	
 #Create SSLPorts
 if [ "$needCreateSSLPorts" = "true" ] && [ "$needCreateHTTPPorts" = "false" ]; then
-        port[0]=`echo $sslPort | awk -F ',' '{print $1}'`
-        port[1]=`echo $sslPort | awk -F ',' '{print $2}'`
-        if [ -z "${port[0]}" ]; then
-            echo "Please add ports you want set"
-            exit 1
-        fi
-        bakFile=$g_defaultSSLConfFileLocation"_bak"
-        cp $g_defaultSSLConfFileLocation $bakFile
-        removeOldPorts $g_defaultSSLConfFileLocation
-        AddSSLPort ${port[0]} $g_defaultSSLConfFileLocation
-        if [ ! -z "$port[1]" ]; then
-                AddSSLPort ${port[1]} $g_defaultSSLConfFileLocation
-        fi
-        restartApacheService
-	cleanSSLBakFile
+        createHTTPSPort
         exit 0
 fi
 
 #Create HTTP and SSL Ports
 if [ "$needCreateSSLPorts" = "true" ] && [ "$needCreateHTTPPorts" = "true" ]; then
-        
-	port[0]=`echo $httpPort | awk -F ',' '{print $1}'`
-        port[1]=`echo $httpPort | awk -F ',' '{print $2}'`
-
-	sport[0]=`echo $sslPort | awk -F ',' '{print $1}'`
-        sport[1]=`echo $sslPort | awk -F ',' '{print $2}'`
-        if [ -z "${sport[0]}" ]; then
-            echo "Please add ports you want set"
-            exit 1
-        fi
-	
-	if [ -z "${port[0]}" ]; then
-            echo "Please add ports you want set"
-            exit 1
-        fi
-
-        sslbakFile=$g_defaultSSLConfFileLocation"_bak"
-        cp $g_defaultSSLConfFileLocation $sslbakFile
-        removeOldPorts $g_defaultSSLConfFileLocation
-        AddSSLPort ${sport[0]} $g_defaultSSLConfFileLocation
-        
-        httpbakFile=$g_defaultHTTPDConfFileLocation"_bak"
-        cp $g_defaultHTTPDConfFileLocation $httpbakFile
-        removeOldPorts $g_defaultHTTPDConfFileLocation
-        AddPort ${port[0]} $g_defaultHTTPDConfFileLocation
-	
-
-        restartApacheService
-	cleanSSLBakFile
-	cleanHTTPBakFile
+	createHTTPAndHTTPSPort
         exit 0
 fi
-
-exit 0

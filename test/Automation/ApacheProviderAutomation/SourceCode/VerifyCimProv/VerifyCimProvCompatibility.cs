@@ -142,7 +142,16 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
         /// <param name="ctx">ctx</param>
         public void Cleanup(IContext ctx)
         {
-            // the uninstall will be down via group clean up.
+            if (isUpgrade)
+            {
+                this.ApacheHelper.UninstallApacheAgent(this.UninstallApacheCmd);
+            }
+            else
+            {
+                this.ApacheHelper.RunCmd(string.Format("sh /tmp/{0} --purge", Path.GetFileName(this.apacheOlderAgentFullName)));
+            }
+
+            this.ApacheHelper.RunCmd(string.Format(this.apacheCmd, this.ApacheHelper.apacheAgentName));
         }
 
         /// <summary>

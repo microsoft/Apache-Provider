@@ -312,18 +312,24 @@ namespace Scx.Test.Apache.Provider
                     Console.WriteLine();
                 }
 
-                XmlNodeList nameNodeList = root.GetElementsByTagName("p:InstanceID");
+                XmlNodeList nameNodeList = root.GetElementsByTagName("p:VirtualHost");
                 string xmlDocumentName = nameNodeList.Count > 0 ? nameNodeList[0].InnerText : "unknown";
 
                 mcfContext.Trc("Processing new XML document: " + xmlDocumentName);
-                
-                string portRecordValue = mcfContext.Records.GetValue("p:InstanceID");
-                System.Text.RegularExpressions.Regex criteriaPort = new Regex(portRecordValue);
 
+                string portRecordValue = mcfContext.Records.GetValue("p:VirtualHost");
+                if (string.IsNullOrEmpty(portRecordValue))
+                {
+                    portRecordValue = mcfContext.Records.GetValue("p:InstanceID");
+                    nameNodeList = root.GetElementsByTagName("p:InstanceID");
+                }
+
+                System.Text.RegularExpressions.Regex criteriaPort = new Regex(portRecordValue);
                 if (!criteriaPort.IsMatch(nameNodeList[0].InnerText))
                 {
                     continue;
                 }
+
                 requiredInstanceFound = true;
                 // Test entries in MCF variation map records agains fields returned by WSMAN
                 // The WSMAN fields will be start with 'p:','wsa:','wsman:'.
@@ -391,6 +397,11 @@ namespace Scx.Test.Apache.Provider
                     {
                         mcfContext.Alw("'nodes' == null for " + recordKey);
                     }
+                }
+
+                if (!matchingInstance)
+                {
+                    throw new VarAbort("Values in WSMAN query failed criteria check");
                 }
             }
 

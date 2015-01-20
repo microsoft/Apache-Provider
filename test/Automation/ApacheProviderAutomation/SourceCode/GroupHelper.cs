@@ -161,7 +161,7 @@ namespace Scx.Test.Apache.Provider
 
                 this.apacheHelper = new ApacheHelper(ctx.Trc, this.hostName, this.userName, this.password);
 
-                this.apacheHelper.CheckApacheServiceStatus(this.checkServiceCmd);
+                this.apacheHelper.CheckApacheServiceStatus(this.checkServiceCmd, this.startApacheCmd);
 
                 this.SetApacheAgentPath(ctx);
 

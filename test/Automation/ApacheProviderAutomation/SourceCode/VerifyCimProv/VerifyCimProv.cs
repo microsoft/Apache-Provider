@@ -132,6 +132,10 @@ namespace Scx.Test.Apache.Provider.VerifyCimProv
         public void Cleanup(IContext ctx)
         {
             // the uninstall will be down via group clean up.
+            if ((this.isInValidInstall && !ctx.Records.HasKey("installTwice")) || ctx.Records.HasKey("isRemoveOption"))
+            {
+                this.ApacheHelper.InstallApacheAgent(this.InstallApacheCmd);
+            }
         }
     }
 }

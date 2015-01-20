@@ -261,14 +261,18 @@ namespace Scx.Test.Common
         /// true: running
         /// false: not running
         /// </summary>
-        public bool CheckApacheServiceStatus(string checkApacheServiceStatus)
+        public bool CheckApacheServiceStatus(string checkApacheServiceStatus, string startApacheServiceCmd)
         {
             try
             {
                 RunPosixCmd returnValue = this.RunCmd(checkApacheServiceStatus);
-                if (returnValue.StdOut.ToLower().Contains("running"))
+                if (returnValue.StdOut.ToLower().Contains("pid") || returnValue.StdOut.ToLower().Contains("/usr/local/apache2/bin/httpd") || returnValue.StdOut.ToLower().Contains("is running"))
                 {
                     return true;
+                }
+                else
+                {
+                    StartApacheServiceStatus(startApacheServiceCmd);
                 }
             }
             catch (Exception e)
@@ -277,6 +281,7 @@ namespace Scx.Test.Common
             }
             return false;
         }
+
 
         /// <summary>
         /// Start apache server

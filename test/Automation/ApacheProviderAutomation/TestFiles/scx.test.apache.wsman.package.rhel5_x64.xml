@@ -17,7 +17,7 @@
   </snippet>
   <snippet id="LinuxInfo">
     <!--rec key="Linux.Host">a22p64-rhel5-01</rec-->
-    <rec key="Linux.Host">hotsname</rec>
+    <rec key="Linux.Host">a22p64-rhel5-01</rec>
     <rec key="Linux.SystemID">localhost</rec>
   </snippet>
   <snippet id="ApacheInfo">
@@ -25,7 +25,7 @@
     <rec key="SoftwareElementState">3</rec>
     <rec key="TargetOperatingSystem">36</rec>
     <rec key="DocumentRoot">/var/www/html</rec>
-    <rec key="ServerName">localhost</rec>
+    <rec key="ServerName">a22p64-rhel5-01</rec>
     <rec key="IpAddress">[0-9]{0,3}.[0-9]{0,3}.[0-9]{0,3}.[0-9]{0,3}</rec>
     <rec key="ServerAdmin">root@localhost</rec>
     <rec key="ErrorLog">logs/localhost-error_log</rec>
@@ -234,7 +234,7 @@
     </recm>
   </var>
   
-  <var set="1001" lvl="0" vid="724645" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTPS virtual host." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724645" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTPS virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -523,7 +523,7 @@
     </recm>
   </var>
   
-  <var set="1001" lvl="0" vid="724647" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 2 HTTPS virtual hosts." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724647" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 2 HTTPS virtual hosts." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -686,7 +686,7 @@
     </recm>
   </var>
   
-  <var set="1001" lvl="0" vid="724648" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTP virtual host and 1 HTTPS virtual host." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724648" cid="Apache_HTTPDVirtualHost" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHost works for 1 HTTP virtual host and 1 HTTPS virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -920,7 +920,7 @@
     </recm>
   </var>
     
-  <var set="1001" lvl="0" vid="724650" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTPs virtual host." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724650" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTPs virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1076,7 +1076,7 @@
     </recm>
   </var>
   
-  <var set="1001" lvl="0" vid="724652" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 2 HTTPs virtual hosts." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724652" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 2 HTTPs virtual hosts." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1163,7 +1163,7 @@
     </recm>
   </var>
   
-  <var set="1001" lvl="0" vid="724653" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTP virtual host and 1 HTTPs virtual host." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724653" cid="Apache_HTTPDVirtualHostStatistics" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostStatistics works for 1 HTTP virtual host and 1 HTTPs virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo" />
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1253,7 +1253,7 @@
   </var>
 
     <!-- 724656-Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host -->
-  <var set="1001" lvl="0" vid="724656" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724656" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 1 SSL virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1349,13 +1349,10 @@
       <val>^$</val>
     </recm>
     <recm key="p:VirtualHost">
-      <val>localhost\.%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
     </recm>
     <recm key="p:ExpirationDate">
-      <val>true</val>
-    </recm>
-    <recm key="p:Datetime">
-      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+z</val>
+      <val>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z</val>
     </recm>
     <recm key="p:DaysUntilExpiration">
       <val>[0-9]+</val>
@@ -1366,13 +1363,14 @@
  </var>
   
   <!-- 724657- Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host. -->
-  <var set="1001" lvl="0" vid="724657" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724657" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate works for 2 SSL virtual host." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
     <!--set the common variable-->
     <recm key="Name">
       <val>localhost\.crt\*\w{8}</val>
+      <val>localhost1\.crt\*\w{8}</val>
     </recm>
     <recm key="File">
       <val>/etc/ssl/crt/localhost\.crt</val>
@@ -1380,6 +1378,7 @@
     </recm>
     <recm key="HTTPSPort">
       <val>443</val>
+      <val>444</val>
     </recm>
   <recm key="ActionCmd">
       <val> sh /tmp/createPortforApache.sh -2sslc</val>
@@ -1489,16 +1488,12 @@
       <val>^$</val>
     </recm>
     <recm key="p:VirtualHost">
-      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
-      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
     </recm>
     <recm key="p:ExpirationDate">
-      <val>true</val>
-      <val>true</val>
-    </recm>
-    <recm key="p:Datetime">
-      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
-      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+      <val>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z</val>
+      <val>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z</val>
     </recm>
     <recm key="p:DaysUntilExpiration">
       <val>[0-9]+</val>
@@ -1511,7 +1506,7 @@
   </var>
 
    <!-- 724658-Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured. -->
-  <var set="1001" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
+  <var set="1" lvl="0" vid="724658" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc=" Verify enumeration of Apache_HTTPDVirtualHostCertificate didn't return any data if no SSL virtual host configured." act="true"  permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1528,7 +1523,7 @@
 
 
   <!-- 724659-Verify the value is correct if SSL certificate is expired. -->
-  <var set="1001" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
+  <var set="1" lvl="0" vid="724659" cid="Apache_HTTPDVirtualHostCertificate" cls="Scx.Test.Apache.Provider.VerifyVirtualHost" dsc="Verify the value is correct if SSL certificate is expired." act="true" permutation="rows">
     <snipref id="UniqueApacheServerInfo"/>
     <snipref id="LinuxInfo" />
     <snipref id="ApacheInfo" />
@@ -1624,13 +1619,10 @@
       <val>^$</val>
     </recm>
     <recm key="p:VirtualHost">
-      <val>%Linux.Host%\.%IpAddress%:%HTTPSPort%</val>
+      <val>%ServerName%,%IpAddress%:%HTTPSPort%</val>
     </recm>
     <recm key="p:ExpirationDate">
-      <val>true</val>
-    </recm>
-    <recm key="p:Datetime">
-      <val>[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}T[0-9]+[0-9]+Z</val>
+      <val>[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z</val>
     </recm>
     <recm key="p:DaysUntilExpiration">
       <val>[0-9]+</val>
@@ -1712,7 +1704,7 @@
   </var>
 
   <!-- 724958-VerifyCimProvUpgradeOption -->
-  <var set="1001" lvl="0" vid="724958" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade' option" act="true">
+  <var set="2" lvl="0" vid="724958" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade' option" act="true">
     <snipref id="ApacheInstallInfo" />
     <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
     <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
@@ -1724,7 +1716,7 @@
   </var>
 
   <!-- 724961-VerifyCimProvUpgradeUsingForceOption -->
-  <var set="1001" lvl="0" vid="724961" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
+  <var set="2" lvl="0" vid="724961" cid="VerifyCimProv" cls="Scx.Test.Apache.Provider.VerifyCimProv.VerifyCimProvCompatibility" dsc="[Apache]Verify if upgrade Apache agent successfully with '--upgrade --force' option" act="true">
     <snipref id="ApacheInstallInfo" />
     <rec key="installOlderApacheCmd">sh /tmp/{0} --install</rec>
     <rec key="oldApachesLocation"><![CDATA[C:\Apache\cimprov\old]]></rec>
