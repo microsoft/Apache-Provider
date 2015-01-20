@@ -36,12 +36,12 @@ typedef struct
 
     apr_uint32_t idleApacheWorkers;     // Number of workers that are currently idle (from Apache)
     apr_uint32_t busyApacheWorkers;     // Number of workers that are currently busy (from Apache)
-    apr_uint32_t apacheCpuUtilization;  // CPU utilization (from Apache); total ticks consumed
     volatile time_t busyRefreshTime;    // Time of last update for idle/busy workers
 
     /* The following are from provider worker thread that are updated once/minute */
     apr_uint32_t idleWorkers;           // Number of workers that are currently idle
     apr_uint32_t busyWorkers;           // Number of workers that are currently busy
+    apr_uint32_t currentCpuUtilization; // Current CPU utilization of Apache Server for delta computations
     apr_uint32_t priorCpuUtilization;   // Prior copy of apacheCpuUtilization for delta computations
     apr_uint32_t percentCPU;            // Percentage of CPU utilization
 
