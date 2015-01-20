@@ -20,6 +20,68 @@
 #include <algorithm>
 #include <limits>
 
+
+struct LinuxProcStat {
+    int processId;                           //!< %d  1
+    char command[30];                        //!< %s
+    char state;                              //!< %c
+    int parentProcessId;                     //!< %d
+    int processGroupId;                      //!< %d  5
+    int sessionId;                           //!< %d
+    int controllingTty;                      //!< %d
+    int terminalProcessId;                   //!< %d
+    unsigned long flags;                     //!< %lu
+    unsigned long minorFaults;               //!< %lu 10
+    unsigned long childMinorFaults;          //!< %lu
+    unsigned long majorFaults;               //!< %lu
+    unsigned long childMajorFaults;          //!< %lu
+    unsigned long userTime;                  //!< %lu
+    unsigned long systemTime;                //!< %lu 15
+    long childUserTime;                      //!< %ld
+    long childSystemTime;                    //!< %ld
+    long priority;                           //!< %ld
+    long nice;                               //!< %ld
+    // dummy at this position, not read;     //!< %ld 20
+    long intervalTimerValue;                 //!< %ld
+    unsigned long startTime;                 //!< %lu
+    unsigned long virtualMemSizeBytes;       //!< %lu
+    long residentSetSize;                    //!< %ld
+    unsigned long residentSetSizeLimit;      //!< %lu 25
+    unsigned long startAddress;              //!< %lu
+    unsigned long endAddress;                //!< %lu
+    unsigned long startStackAddress;         //!< %lu
+    unsigned long kernelStackPointer;        //!< %lu
+    unsigned long kernelInstructionPointer;  //!< %lu 30
+    unsigned long signal;                    //!< %lu
+    unsigned long blocked;                   //!< %lu
+    unsigned long sigignore;                 //!< %lu
+    unsigned long sigcatch;                  //!< %lu
+    unsigned long waitChannel;               //!< %lu 35
+    unsigned long numPagesSwapped;           //!< %lu
+    unsigned long cumNumPagesSwapped;        //!< %lu
+    int exitSignal;                          //!< %d
+    int processorNum;                        //!< %d
+    unsigned long realTimePriority;          //!< %lu 40 (Since 2.5.19)
+    unsigned long schedulingPolicy;          //!< %lu    (Since 2.5.19)
+
+    static const int procstat_len = 40; //!< Number of fields not counting dummy
+
+    /** The format string that should be supplied to fscanf() to read procstat_fields */
+    static const char *scanstring;  /* = 
+        "%d %s %c %d %d %d %d %d %lu %lu " // 1 to 10
+        "%lu %lu %lu %lu %lu %ld %ld %ld %ld %*ld " // 11 to 20
+        "%ld %lu %lu %ld %lu %lu %lu %lu %lu %lu " // 21 to 30
+        "%lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu"; // 31 to 41
+                                    */
+};
+
+const char* LinuxProcStat::scanstring = 
+        /* "%d %s " */ "%c %d %d %d %d %d %lu %lu " // 1 to 10 (pid & command read independently)
+        "%lu %lu %lu %lu %lu %ld %ld %ld %ld %*ld " // 11 to 20
+        "%ld %lu %lu %ld %lu %lu %lu %lu %lu %lu " // 21 to 30
+        "%lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu"; // 31 to 41
+
+
 DataSampler::DataSampler()
     : m_tid(NULL), m_skipValidationCount(0), m_mutex(NULL), m_cond(NULL), m_fShutdown(false)
 {
@@ -279,6 +341,120 @@ static apr_uint32_t DeltaHelper(apr_uint64_t *myCurrentTotal, apr_uint32_t *myPr
     return currentDelta;
 }
 
+bool DataSampler::GetApacheTickCount(ApacheDataCollector& data)
+{
+    LinuxProcStat ps;
+    char procStatName[64];
+
+    apr_file_t* fp;
+    apr_pool_t *pool = data.GetPool();
+    apr_status_t status;
+
+    apr_snprintf(procStatName, sizeof(procStatName), "/proc/%d/stat", data.m_server_data->serverPid);
+    if ( APR_SUCCESS != (status = apr_file_open(&fp, procStatName, APR_FOPEN_READ, 0, pool)) )
+    {
+        char *text = apr_psprintf(pool,
+                                  "DataSampler::GetApacheTickCount skipping execution due to file open error on %s",
+                                  procStatName);
+        DisplayError(status, text);
+
+        data.m_server_data->currentCpuUtilization = 0;
+        return false;
+    }
+
+    // We used to parse by reading bytes, but this can be problematic if
+    // process names contain "(" or ")" (which was found on SuSE 12).
+    //
+    // Read the entire thing into a buffer and use sscanf to parse it.
+    // This allows us to search for "(" (start of process name), and
+    // reverse search for ")" (end of process name), and not care what
+    // is in the middle.
+
+    char buffer[1024];
+    apr_size_t bufferSize = sizeof(buffer) - 1;
+
+    if ( APR_SUCCESS != (status = apr_file_read(fp, buffer, &bufferSize)) )
+    {
+        DisplayError(status, "DataSampler::GetApacheTickCount encountered error reading status file");
+        data.m_server_data->currentCpuUtilization = 0;
+        return false;
+    }
+
+    // Less than 32 bytes read; that's not possible unless something is really wrong
+    if (bufferSize < 32) {
+        char *text = apr_psprintf(pool,
+                                  "DataSampler::GetApacheTickCount Getting very short contents reading %s file. "
+                                  "Expecing minimum of 32 bytes but got %pS bytes.",
+                                  procStatName, &bufferSize);
+        DisplayError(0, text);
+
+        data.m_server_data->currentCpuUtilization = 0;
+        return false;
+    }
+
+    // We have some data, so parse it
+    buffer[bufferSize] = '\0';
+    apr_file_close(fp);
+
+    int nscanned = sscanf(buffer, "%d", &ps.processId);
+    if (nscanned != 1) {
+        char *text = apr_psprintf(pool,
+                                  "DataSampler::GetApacheTickCount Getting wrong number of parameters from %s file. "
+                                  "Expecing 1 but getting %d.",
+                                  procStatName, nscanned);
+        DisplayError(0, text);
+
+        data.m_server_data->currentCpuUtilization = 0;
+        return false;
+    }
+
+    // Now go for the process name "(processname)", but search for starting
+    // "(" and last ")" to handle processes that contain "(" or ")" bytes.
+    const char* procStart = strchr(buffer, '(');
+    const char* procEnd = strrchr(buffer, ')');
+    if (NULL == procStart || NULL == procEnd || procStart > procEnd || (procEnd - procStart) > 28)
+    {
+        char *text = apr_psprintf(pool,
+                                  "DataSampler::GetApacheTickCount Unexpended error parsing  %s file, file contents: %s",
+                                  procStatName, buffer);
+        DisplayError(0, text);
+
+        data.m_server_data->currentCpuUtilization = 0;
+        return false;
+    }
+
+    size_t endByte = procEnd - procStart - 1;
+    const char* remainingPtr = procEnd + 2;
+    memcpy(ps.command, procStart + 1, endByte);
+    ps.command[endByte] = '\0';
+
+    nscanned = sscanf(remainingPtr, ps.scanstring,
+                      &ps.state, &ps.parentProcessId, &ps.processGroupId,
+                      &ps.sessionId, &ps.controllingTty, &ps.terminalProcessId, &ps.flags, &ps.minorFaults,
+                      &ps.childMinorFaults, &ps.majorFaults, &ps.childMajorFaults, &ps.userTime, &ps.systemTime,
+                      &ps.childUserTime, &ps.childSystemTime, &ps.priority, &ps.nice, &ps.intervalTimerValue,
+                      &ps.startTime, &ps.virtualMemSizeBytes, &ps.residentSetSize, &ps.residentSetSizeLimit,
+                      &ps.startAddress, &ps.endAddress, &ps.startStackAddress, &ps.kernelStackPointer, 
+                      &ps.kernelInstructionPointer, &ps.signal, &ps.blocked, &ps.sigignore, &ps.sigcatch, 
+                      &ps.waitChannel, &ps.numPagesSwapped, &ps.cumNumPagesSwapped, &ps.exitSignal, 
+                      &ps.processorNum, &ps.realTimePriority, &ps.schedulingPolicy);
+
+    // -2 since we read pid and name separatly
+    if (nscanned != ps.procstat_len-2) {
+        char *text = apr_psprintf(pool,
+                                  "DataSampler::GetApacheTickCount Getting wrong number of parameters from %s file. "
+                                  "Expecting %d, but getting %d.",
+                                  procStatName, ps.procstat_len - 2, nscanned);
+        DisplayError(0, text);
+
+        data.m_server_data->currentCpuUtilization = 0;
+        return false;
+    }
+
+    data.m_server_data->currentCpuUtilization = ps.userTime + ps.systemTime + ps.childUserTime + ps.childSystemTime;
+    return true;
+}
+
 void DataSampler::PerformComputations()
 {
     apr_time_t currentTime = apr_time_now();
@@ -311,16 +487,24 @@ void DataSampler::PerformComputations()
 
     int ticks;
 
+    if ( GetApacheTickCount(data) )
+    {
 #ifdef _SC_CLK_TCK
-    ticks = sysconf(_SC_CLK_TCK);
+        ticks = sysconf(_SC_CLK_TCK);
 #else
-    ticks = HZ;
+        ticks = HZ;
 #endif
 
-    apr_uint32_t deltaTicks = DeltaHelper(NULL, &data.m_server_data->priorCpuUtilization, &data.m_server_data->apacheCpuUtilization);
-    int logicalProcs = sysconf(_SC_NPROCESSORS_ONLN);
-    int percentBusy = ((deltaTicks + (ticks/2)) * 100) / (logicalProcs * ticks * 60);
-    apr_atomic_set32(&data.m_server_data->percentCPU, std::min(percentBusy, 100));
+        apr_uint32_t deltaTicks = DeltaHelper(NULL, &data.m_server_data->priorCpuUtilization, &data.m_server_data->currentCpuUtilization);
+        int logicalProcs = sysconf(_SC_NPROCESSORS_ONLN);
+        int percentBusy = ((deltaTicks + (ticks/2)) * 100) / (logicalProcs * ticks * 60);
+        apr_atomic_set32(&data.m_server_data->percentCPU, std::min(percentBusy, 100));
+    }
+    else
+    {
+        // Whoops, some sort of error ...
+        apr_atomic_set32(&data.m_server_data->percentCPU, 0);
+    }
 
     // Copy from "volatile" Apache idle/busy counters to values that are updated once/minute
 

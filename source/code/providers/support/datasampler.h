@@ -20,6 +20,7 @@
 #include <apr_thread_mutex.h>
 #include <apr_thread_proc.h>
 
+class ApacheDataCollector;
 
 /*------------------------------------------------------------------------------*/
 /**
@@ -41,6 +42,7 @@ private:
     apr_status_t Lock();
     apr_status_t Unlock();
     void ThreadMain();
+    bool GetApacheTickCount(ApacheDataCollector& data);
     void PerformComputations();
 
     apr_thread_t *m_tid;

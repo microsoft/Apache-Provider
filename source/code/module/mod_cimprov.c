@@ -40,15 +40,6 @@
  */
 extern const char* ap_server_root;
 
-#ifdef HAVE_TIMES
-/* ugh... need to know if we're running with a pthread implementation
- * such as linuxthreads that treats individual threads as distinct
- * processes; that affects how we add up CPU time in a process
- */
-static pid_t g_child_pid;
-#endif
-
-
 typedef enum
 {
     LOCKTYPE_INIT,
@@ -1381,9 +1372,6 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
     apr_uint32_t ready = 0, busy = 0;
     clock_t tu, ts, tcu, tcs;
     int i, j;
-#ifdef HAVE_TIMES
-    int times_per_thread = getpid() != g_child_pid;
-#endif
 
     tu = ts = tcu = tcs = 0;
 
@@ -1403,10 +1391,6 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
         process_score *score_process;
         worker_score *score_worker;
         int state;
-#ifdef HAVE_TIMES
-        clock_t proc_tu = 0, proc_ts = 0, proc_tcu = 0, proc_tcs = 0;
-        clock_t tmp_tu, tmp_ts, tmp_tcu, tmp_tcs;
-#endif
 
         score_process = ap_get_scoreboard_process(i);
         for (j = 0; j < cfg->thread_limit; ++j) {
@@ -1433,49 +1417,8 @@ static apr_status_t handle_WorkerStatistics(const request_rec *r)
                     busy++;
                 }
             }
-
-#ifdef HAVE_TIMES
-            unsigned long lres = score_worker->access_count;
-
-            if (lres != 0 || (state != SERVER_READY && state != SERVER_DEAD)) {
-                tmp_tu = score_worker->times.tms_utime;
-                tmp_ts = score_worker->times.tms_stime;
-                tmp_tcu = score_worker->times.tms_cutime;
-                tmp_tcs = score_worker->times.tms_cstime;
-
-                if (times_per_thread) {
-                    proc_tu += tmp_tu;
-                    proc_ts += tmp_ts;
-                    proc_tcu += tmp_tcu;
-                    proc_tcs += proc_tcs;
-                }
-                else {
-                    if (tmp_tu > proc_tu || tmp_ts > proc_ts || tmp_tcu > proc_tcu || tmp_tcs > proc_tcs) {
-                        proc_tu = tmp_tu;
-                        proc_ts = tmp_ts;
-                        proc_tcu = tmp_tcu;
-                        proc_tcs = proc_tcs;
-                    }
-                }
-            }
-#endif /* HAVE_TIMES */
         }
-
-#ifdef HAVE_TIMES
-        tu += proc_tu;
-        ts += proc_ts;
-        tcu += proc_tcu;
-        tcs += proc_tcs;
-#endif
     }
-
-#ifdef HAVE_TIMES
-    // ts: System time, tu: User time, tcs: System time of children, tcu: User time of children
-    if (ts || tu || tcu || tcs)
-    {
-        apr_atomic_add32(&cfg->server_data->apacheCpuUtilization, tu + ts + tcu + tcs);
-    }
-#endif
 
     apr_atomic_set32(&cfg->server_data->idleApacheWorkers, ready);
     apr_atomic_set32(&cfg->server_data->busyApacheWorkers, busy);
@@ -1501,10 +1444,6 @@ static void child_init_handler(apr_pool_t *pool, server_rec *server)
     {
         display_error(cfg, "child_init_handler: failed to initialize child mutex", status, 1);
     }
-
-#ifdef HAVE_TIMES
-    g_child_pid = getpid();
-#endif
 }
 
 /*
