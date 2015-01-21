@@ -9,9 +9,9 @@ FindApacheService() {
        	if [ $? -eq 0 ]; then 
        	    APACHE_SERVICE="httpd"
             SERVICE_TYPE="systemd"
-   	else
+        else
             # Try for apache2; if not found, last ditch effort for a local install
-            /bin/systemctl is-active apache2 | head -2 | tail -1 | grep "Loaded: loaded" > /dev/null 2>&1
+            /bin/systemctl status apache2 | head -2 | tail -1 | grep "Loaded: loaded" > /dev/null 2>&1
             if [ $? -eq 0 ]; then
                 APACHE_SERVICE="apache2"
                 SERVICE_TYPE="systemd"
