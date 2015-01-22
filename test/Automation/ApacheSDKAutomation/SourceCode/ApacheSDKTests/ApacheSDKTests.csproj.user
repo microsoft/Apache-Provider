@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'signed|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\CDM_SFE\Branches\OnPrem\Imp\SCX_Dev\apache-osm\test\Automation\ApacheSDKAutomation\SourceCode\ApacheSDKTests\bin\signed\Tools\MCF\MCF.exe</StartProgram>
-    <StartArguments>/m:scx.test.apache.sdk.source.universald_x86.xml  /v:726528 /logxml:"C:\Apache\runPass\Logs\rerun\rhel5-01.xml" /dbgloc:63 /dbglvl:15</StartArguments>
+    <StartArguments>/m:scx.test.apache.sdk.package.universalr_x86.xml /v:725209 /logxml:"C:\Apache\runPass\Logs\rerun\sles12-01.xml" /dbgloc:63 /dbglvl:15</StartArguments>
     <StartWorkingDirectory>C:\CDM_SFE\Branches\OnPrem\Imp\SCX_Dev\apache-osm\test\Automation\ApacheSDKAutomation\SourceCode\ApacheSDKTests\bin\signed\ApacheSDK\</StartWorkingDirectory>
   </PropertyGroup>
 </Project>

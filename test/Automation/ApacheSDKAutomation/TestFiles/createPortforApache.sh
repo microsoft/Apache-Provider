@@ -33,7 +33,7 @@ function removeOldPorts {
 
 ServerAdmin=root@localhost
 DocumentRoot=/var/www/html
-ServerName=localhost
+ServerName=`hostname`
 ErrorLog=logs/localhost-error_log
 CustomLog="logs/localhost-custom_log common"
 TransferLog=logs/localhost-access_log

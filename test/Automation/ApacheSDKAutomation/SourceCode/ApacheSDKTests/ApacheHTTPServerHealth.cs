@@ -72,7 +72,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
                 this.DeleteMonitorOverride(ctx);
 
-                this.ApplyDefaultMonitorOverride(ctx, 10);
+                this.ApplyDefaultMonitorOverride(ctx, 5);
 
                 this.CloseMatchingAlerts(ctx);
 
@@ -111,7 +111,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
             try
             {
-                ApplyMonitorOverride(ctx, 10);
+                ApplyMonitorOverride(ctx, 5);
 
                 ctx.Alw("Running command: " + actionCmd);
                 RunCmd(actionCmd);
@@ -179,7 +179,7 @@ namespace Scx.Test.Apache.SDK.ApacheSDKTests
 
             this.DeleteMonitorOverride(ctx);
 
-            this.ApplyDefaultMonitorOverride(ctx, 10);
+            this.ApplyDefaultMonitorOverride(ctx, 5);
 
             this.VerifyMonitor(ctx, HealthState.Success);
 

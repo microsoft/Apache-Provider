@@ -672,7 +672,7 @@
   
   
   <grp cls="Scx.Test.Apache.SDK.ApacheSDKTests.GroupHelper">
-    <rec key="hostname">a22p-ora5-01.scx.com</rec>
+    <rec key="hostname">a22p-ora5-01</rec>
     <rec key="superuser">root</rec>
     <rec key="superuserpwd">OpsMgr2007R2</rec>
     <rec key="nonsuperuser">scxuser</rec>

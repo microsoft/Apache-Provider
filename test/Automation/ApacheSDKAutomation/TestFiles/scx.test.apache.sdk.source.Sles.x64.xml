@@ -125,7 +125,8 @@
     </recm>
   </var>
 
-  <var set="0" lvl="0" vid="725217" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Reload Apache HTTP Server (Graceful) task works." permutation="rows">
+  <!--TC 725217,725218 are not supported on the OS from source-->
+  <!--<var set="0" lvl="0" vid="725217" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Reload Apache HTTP Server (Graceful) task works." permutation="rows">
     <recm key="EntityName">
       <val>Reload Apache HTTP Server(Graceful) with valid root account</val>
     </recm>
@@ -159,7 +160,7 @@
     <recm key="expectedOutputKeyWord">
       <val>&lt;p:ReturnCode&gt;0&lt;/p:ReturnCode&gt;</val>
     </recm>
-  </var>
+  </var>-->
 
   <var set="0" lvl="0" vid="725219" cid="ManageApacheServiceTask" cls="Scx.Test.Apache.SDK.ApacheSDKTests.ManageApacheServiceTask" dsc="Verify Update Discovered Properties task works." permutation="rows">
     <recm key="EntityName">
@@ -730,7 +731,7 @@
     <rec key="startApacheCmd">/usr/local/apache2/bin/httpd -k start</rec>
     <rec key="stopApacheCmd">/usr/local/apache2/bin/httpd -k stop</rec>
     <rec key="restartApacheCmd">/usr/local/apache2/bin/httpd -k restart</rec>
-    <rec key="checkServiceCmd"></rec>
+    <rec key="checkServiceCmd">ps -ef |grep httpd</rec>
     <varref />
   </grp>
 
