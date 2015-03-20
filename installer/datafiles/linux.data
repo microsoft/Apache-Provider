@@ -1,103 +1,6 @@
 %Variables
 PF:	'Linux'
 
-%ApacheService_funcs
-FindApacheService() {
-    if [ -x /bin/systemctl ]; then
-        # Will match either "active" or "inactive", but not "unknown"
-       	/bin/systemctl status httpd | head -2 | tail -1 | grep "Loaded: loaded" > /dev/null 2>&1
-       	if [ $? -eq 0 ]; then 
-       	    APACHE_SERVICE="httpd"
-            SERVICE_TYPE="systemd"
-        else
-            # Try for apache2; if not found, last ditch effort for a local install
-            /bin/systemctl status apache2 | head -2 | tail -1 | grep "Loaded: loaded" > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                APACHE_SERVICE="apache2"
-                SERVICE_TYPE="systemd"
-            elif [ -x  /usr/local/apache2/bin/httpd ]; then
-                APACHE_SERVICE="none" 
-                SERVICE_TYPE="legacy"
-            else
-                echo "Unable to determine Apache service name under systemd; Apache must be restarted manually" 1>&2
-            fi
-        fi
-    elif [ -x /etc/init.d/httpd ]; then
-        APACHE_SERVICE="httpd"
-        SERVICE_TYPE="legacy"
-    elif [ -x /etc/init.d/apache2 ]; then
-        APACHE_SERVICE="apache2"
-        SERVICE_TYPE="legacy"
-    elif [ -x  /usr/local/apache2/bin/httpd ]; then
-        APACHE_SERVICE="none" 
-        SERVICE_TYPE="legacy"
-    else
-        echo "Unable to determine Apache service name; Apache must be restarted manually" 1>&2
-    fi
-}
-
-StopApacheServer() {
-    FindApacheService
-    if [ -z "${APACHE_SERVICE}" ]; then
-        echo "No service defined for Apache; please stop Apache manually"
-        return 0
-    fi
-
-    if [ "${SERVICE_TYPE}" = "systemd" -a -n "${APACHE_SERVICE}" ]; then
-        echo "Stopping Apache server ..."
-        /bin/systemctl stop ${APACHE_SERVICE}
-    elif [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
-        echo "Stopping Apache server ..."
-        /usr/local/apache2/bin/httpd -k stop
-    elif [ -x /usr/sbin/invoke-rc.d ]; then
-        /usr/sbin/invoke-rc.d ${APACHE_SERVICE} stop
-    elif [ -x /sbin/service ]; then
-        service ${APACHE_SERVICE} stop
-    else
-        echo "Unrecognized Service Controller to stop Apache Service" 1>&2
-	return 0
-    fi
-
-    # Apache may begin to shut down, but may not complete before we try to start up again
-    COUNTER=5
-    while [ $COUNTER -gt 0 ]; do
-        PROCESSES=`ps -ef | egrep "apache2|httpd" | grep -v grep | wc -l`
-        [ $PROCESSES -eq 0 ] && break
-
-        echo "Waiting for Apache to shut down (${COUNTER}) ..."
-        COUNTER=$(( ${COUNTER} - 1 ))
-        sleep 1
-    done	
-}
-
-StartApacheServer() {
-    FindApacheService
-    if [ -z "${APACHE_SERVICE}" ]; then
-        echo "No service defined for Apache; please start Apache manually"
-        return 0;
-    fi
-
-    if [ "${SERVICE_TYPE}" = "systemd" -a -n "${APACHE_SERVICE}" ]; then
-        echo "Starting Apache server ..."
-        /bin/systemctl start ${APACHE_SERVICE}
-    elif [ "${APACHE_SERVICE}" = "none" -a -x /usr/local/apache2/bin/httpd ]; then
-        echo "Starting Apache server ..."
-        /usr/local/apache2/bin/httpd -k start
-    elif [ -x /usr/sbin/invoke-rc.d ]; then
-        /usr/sbin/invoke-rc.d ${APACHE_SERVICE} start
-    elif [ -x /sbin/service ]; then
-        service ${APACHE_SERVICE} start
-    else
-        echo "Unrecognized Service Controller to start Apache Service" 1>&2
-        exit 1
-    fi
-}
-
-RestartApacheServer() {
-    StopApacheServer
-    StartApacheServer
-}
-
 %OmiService_funcs
 StopOmiServer() {
     if [ -x /usr/sbin/invoke-rc.d ]; then
@@ -136,23 +39,15 @@ if [ $OMI_IS_RUNNING -eq 1 ]; then
     StopOmiServer
 fi
 
-#include ApacheService_funcs
-StopApacheServer
-
 %Postinstall_1100
-#include ApacheService_funcs
-StartApacheServer
-
 #include OmiService_funcs
 StartOmiServer
 
 %Postuninstall_1100
-#include ApacheService_funcs
 #include OmiService_funcs
 #include CheckIfOmiIsRunning
 
 # If we're called for upgrade, don't do anything
 if ${{PERFORMING_UPGRADE_NOT}}; then 
-    RestartApacheServer
     RestartOmiServer
 fi
