@@ -12,6 +12,8 @@ INCLUDE_FILE="/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf"
 # Routines to configure and unconfigure Apache server
 #
 
+# Note: FindApacheConfigFile() is found in SCXCore/installer/oss-kits/apache-oss-test.sh
+#       If this function is modified, modify in that file as well!
 FindApacheConfigFile()
 {
     if [ -z "${APACHE_CONF}" -o -z "${CONF_STYLE}" ]; then
