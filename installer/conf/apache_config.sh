@@ -63,33 +63,37 @@ ConfigureApacheConf_File()
 
     if [ "${CONF_STYLE}" = "d" ]; then
         #
-    	# Support for conf.d style setups
-    	#
+        # Support for conf.d style setups
+        #
 
-        [ -e ${APACHE_CONF}/mod_cimprov.conf ] && rm ${APACHE_CONF}/mod_cimprov.conf
-	[ $VERBOSE -ne 0 ] && echo "Linking file ${APACHE_CONF}/mod_cimprov.conf to ${INCLUDE_FILE}"
+        if [ -e ${APACHE_CONF}/mod_cimprov.conf ]; then
+            echo "Apache is already configured to include mod_cimprov.conf"
+            return 0
+        fi
+        [ $VERBOSE -ne 0 ] && echo "Linking file ${APACHE_CONF}/mod_cimprov.conf to ${INCLUDE_FILE}"
         ln -s ${INCLUDE_FILE} ${APACHE_CONF}/mod_cimprov.conf
-	RESTART_APACHE=1
+        RESTART_APACHE=1
     elif [ "${CONF_STYLE}" = "f" ]; then
         #
-    	# Support for httpd.conf-style setups
-    	#
+        # Support for httpd.conf-style setups
+        #
 
         grep -q "${INCLUDE_DIRECTIVE}" ${APACHE_CONF}
         if [ $? -eq 0 ]; then
             # mod_cimprov is already configured in Apache
+            echo "Apache is already configured to include mod_cimprov.conf"
             return 0
         fi
         #
         # Append the include directive to the Apache configuraiton file
         #
-	[ $VERBOSE -ne 0 ] && echo "Appending include directive to file ${APACHE_CONF}"
+        [ $VERBOSE -ne 0 ] && echo "Appending include directive to file ${APACHE_CONF}"
         echo "${INCLUDE_DIRECTIVE}" >> ${APACHE_CONF}
         if [ $? -ne 0 ]; then
             echo "Can't append include directive to file ${APACHE_CONF}"
             return 1
         fi
-	RESTART_APACHE=1
+        RESTART_APACHE=1
     else
         echo "Internal error configuring Apache; please report this problem to support services" 1>&2
         echo "    Conf file:  ${APACHE_CONF}" 1>&2
@@ -111,13 +115,13 @@ UnconfigureApacheConf_File()
 
     if [ "${CONF_STYLE}" = "d" ]; then
         #
-    	# Support for conf.d style setups
-    	#
+        # Support for conf.d style setups
+        #
 
         if [ -L ${APACHE_CONF}/mod_cimprov.conf ]; then
-	    [ $VERBOSE -ne 0 ] && echo "Removing linkage file ${APACHE_CONF}/mod_cimprov.conf"
+            [ $VERBOSE -ne 0 ] && echo "Removing linkage file ${APACHE_CONF}/mod_cimprov.conf"
             rm ${APACHE_CONF}/mod_cimprov.conf
-	    RESTART_APACHE=1
+            RESTART_APACHE=1
             return 0
         fi
 
@@ -126,26 +130,26 @@ UnconfigureApacheConf_File()
         return 1
     elif [ "${CONF_STYLE}" = "f" ]; then
         #
-    	# Support for httpd.conf-style setups
-    	#
-
-        apache_config_data=`grep -v "${INCLUDE_DIRECTIVE}" ${APACHE_CONF}`
+        # Support for httpd.conf-style setups
+        #
+        grep -q "${INCLUDE_DIRECTIVE}" ${APACHE_CONF}
         if [ $? -ne 0 ]; then
             # mod_cimprov not configured in Apache
-	    echo "Apache not currently configured to include mod_cimprov.conf"
+            echo "Apache not currently configured to include mod_cimprov.conf"
             return 0
-    	fi
+        fi
         #
         # Write it back (to the copy first, but leave backup "just in case")
         #
-	[ $VERBOSE -ne 0 ] && echo "Creating backup of file ${APACHE_CONF}"
+        [ $VERBOSE -ne 0 ] && echo "Creating backup of file ${APACHE_CONF}"
         cp -p ${APACHE_CONF} ${APACHE_CONF}.bak
         if [ $? -ne 0 ]; then
-	   echo "Can't create backup of ${APACHE_CONF}"
-	   return 1
+           echo "Can't create backup of ${APACHE_CONF}"
+           return 1
         fi
-	[ $VERBOSE -ne 0 ] && echo "Removing include directive from file ${APACHE_CONF}"
+        [ $VERBOSE -ne 0 ] && echo "Removing include directive from file ${APACHE_CONF}"
         cp -p ${APACHE_CONF} ${APACHE_CONF}.tmp
+        apache_config_data=`grep -v "${INCLUDE_DIRECTIVE}" ${APACHE_CONF}`
         echo "${apache_config_data}" > ${APACHE_CONF}.tmp
         if [ $? -ne 0 ]; then
             echo "Can't write to ${APACHE_CONF}.tmp"
@@ -156,8 +160,8 @@ UnconfigureApacheConf_File()
             echo "Can't replace file ${APACHE_CONF}"
             return 1
         fi
-	# Unconfiguraiton complete
-	RESTART_APACHE=0
+        # Unconfiguraiton complete
+        RESTART_APACHE=1
         return 0
     else
         echo "Internal error unconfiguring Apache; please report this problem to support services" 1>&2
