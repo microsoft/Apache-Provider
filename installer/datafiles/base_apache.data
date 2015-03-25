@@ -36,6 +36,7 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 
 /etc/opt/microsoft/omi/conf/omiregister/root-apache/ApacheHttpdProvider.reg; installer/conf/omi/ApacheHttpdProvider.reg;                  755; root; root
 
+/opt/microsoft/apache-cimprov/THIRD_PARTY_SOFTWARE;                     installer/conf/THIRD_PARTY_SOFTWARE;                              644; root; root
 /opt/microsoft/apache-cimprov/bin/apache_config.sh;                     installer/conf/apache_config.sh;                                  755; root; root
 
 %Links
