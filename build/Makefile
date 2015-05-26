@@ -135,7 +135,7 @@ distclean : clean
 #          LoadModule cimprov_module /usr/lib64/httpd/modules/mod_cimprov.so
 #   2) OMI already has registration files for libApacheHttpdProvider.so
 
-install : /opt/microsoft/omi/lib/libApacheHttpdProvider.so /opt/microsoft/apache-cimprov/lib/$(APACHE_MODULE_BASENAME).so
+install : /opt/omi/lib/libApacheHttpdProvider.so /opt/microsoft/apache-cimprov/lib/$(APACHE_MODULE_BASENAME).so
 	@[ -e $(TARGET_DIR)/tmp_start_http ] && rm $(TARGET_DIR)/tmp_start_http && sudo /etc/init.d/httpd start || exit 0
 	@[ -e $(TARGET_DIR)/tmp_start_omi  ] && rm $(TARGET_DIR)/tmp_start_omi  && sudo /etc/init.d/omiserverd start || exit 0
 
@@ -145,11 +145,11 @@ install : /opt/microsoft/omi/lib/libApacheHttpdProvider.so /opt/microsoft/apache
 	touch $(TARGET_DIR)/tmp_start_http
 	sudo cp -v $(APACHE_MODULE) /opt/microsoft/apache-cimprov/lib/
 
-/opt/microsoft/omi/lib/libApacheHttpdProvider.so : $(PROVIDER_LIBRARY)
+/opt/omi/lib/libApacheHttpdProvider.so : $(PROVIDER_LIBRARY)
 	@echo "========================= Performing Installing OMI provider"
 	-sudo /etc/init.d/omiserverd stop
 	touch $(TARGET_DIR)/tmp_start_omi
-	sudo cp -v $(PROVIDER_LIBRARY) /opt/microsoft/omi/lib/
+	sudo cp -v $(PROVIDER_LIBRARY) /opt/omi/lib/
 
 restart :
 	@-sudo /etc/init.d/omiserverd stop
