@@ -34,13 +34,13 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf;                installer/conf/mod_cimprov.conf;                                  644; root; root; conffile
 /etc/opt/microsoft/apache-cimprov/conf/installinfo.txt;                 installer/conf/installinfo.txt;                                   644; root; root; conffile
 
-/etc/opt/microsoft/omi/conf/omiregister/root-apache/ApacheHttpdProvider.reg; installer/conf/omi/ApacheHttpdProvider.reg;                  755; root; root
+/etc/opt/omi/conf/omiregister/root-apache/ApacheHttpdProvider.reg; installer/conf/omi/ApacheHttpdProvider.reg;                  755; root; root
 
 /opt/microsoft/apache-cimprov/THIRD_PARTY_SOFTWARE;                     installer/conf/THIRD_PARTY_SOFTWARE;                              644; root; root
 /opt/microsoft/apache-cimprov/bin/apache_config.sh;                     installer/conf/apache_config.sh;                                  755; root; root
 
 %Links
-/opt/microsoft/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; /opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; 644; root; root
+/opt/omi/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; /opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; 644; root; root
 
 %Directories
 /etc;                                                   755; root; root; sysdir
@@ -53,19 +53,18 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 /etc/opt/microsoft/apache-cimprov;                      755; root; root
 /etc/opt/microsoft/apache-cimprov/conf;                 755; root; root
 
-/etc/opt/microsoft/omi;                                 755; root; root
-/etc/opt/microsoft/omi/conf;                            755; root; root
-/etc/opt/microsoft/omi/conf/omiregister;                755; root; root
-/etc/opt/microsoft/omi/conf/omiregister/root-apache;    755; root; root
+/etc/opt/omi;                                           755; root; root
+/etc/opt/omi/conf;                                      755; root; root
+/etc/opt/omi/conf/omiregister;                          755; root; root
+/etc/opt/omi/conf/omiregister/root-apache;              755; root; root
 
 /opt/microsoft;                                         755; root; root
 /opt/microsoft/apache-cimprov;                          755; root; root
 /opt/microsoft/apache-cimprov/bin;                      755; root; root
 /opt/microsoft/apache-cimprov/lib;                      755; root; root
 
-/opt/microsoft;                                         755; root; root
-/opt/microsoft/omi;                                     755; root; root
-/opt/microsoft/omi/lib;                                 755; root; root
+/opt/omi;                                               755; root; root
+/opt/omi/lib;                                           755; root; root
 
 /var/opt/microsoft;                                     755; root; root
 /var/opt/microsoft/apache-cimprov;                      755; root; root
@@ -76,9 +75,9 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 
 %CheckIfOmiIsRunning
 OMI_IS_RUNNING=1
-if [ -f /var/opt/microsoft/omi/run/omiserver.pid ]; then
+if [ -f /var/opt/omi/run/omiserver.pid ]; then
     #  Check if omiserver is running with this pid.
-    omi_pid=`cat /var/opt/microsoft/omi/run/omiserver.pid`
+    omi_pid=`cat /var/opt/omi/run/omiserver.pid`
     ps -aef | grep $omi_pid | grep omiserver 1> /dev/null 2> /dev/null
     if [ $? -ne 0 ]; then
 	OMI_IS_RUNNING=0
