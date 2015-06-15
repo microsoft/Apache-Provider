@@ -1,7 +1,28 @@
 #!/bin/bash
+#
+#--------------------------------- START OF LICENSE ----------------------------
+#
+# Apache Cimprov ver. 1.0
+#
+# Copyright (c) Microsoft Corporation
+#
+# All rights reserved. 
+#
+# Licensed under the Apache License, Version 2.0 (the License); you may not use
+# this file except in compliance with the license. You may obtain a copy of the
+# License at http://www.apache.org/licenses/LICENSE-2.0 
+#
+# THIS CODE IS PROVIDED ON AN  *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+# WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+# MERCHANTABLITY OR NON-INFRINGEMENT.
+#
+# See the Apache Version 2.0 License for specific language governing permissions
+# and limitations under the License.
+#
+#---------------------------------- END OF LICENSE -----------------------------
 
 scxomi_dir=`(cd ../../omi/Unix; pwd -P)`
-scxpal_dir=`(cd ../../pal; pwd -P)`
 
 enable_debug=""
 enable_debug_flag=0
@@ -9,7 +30,10 @@ enable_purify_agent=""
 enable_purify_server=""
 enable_omi_tools=""
 enable_omi_tools_flag=0
+opensource_distro=0
 build_type=Release
+ULINUX=0
+NOULINUX=0
 
 # Default OMI qualifiers for build purposes
 omi_configure_quals=""
@@ -73,6 +97,10 @@ do
       enable_omi_tools_flag=1
     ;;
 
+    --enable-open-source)
+      opensource_distro=1
+    ;;
+
     *)
       echo "configure: invalid option '$opt'"
       echo "Try configure --help' for more information."
@@ -104,6 +132,7 @@ OPTIONS:
     --enable-purify-agent       Allow agent to be run with purify (memory leak detection)
     --enable-purify-server      Allow server to be run with purify (memory leak detection)
     --enable-omi-tools          Build to allow use of OMI tools (omischema and omireg)
+    --enable-open-source        Build for open source distribution
 
 EOF
     exit 0
@@ -111,6 +140,16 @@ fi
 
 omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${enable_omi_tools} ${omi_configure_quals}"
 pal_configure_quals="${enable_debug}"
+
+if [ "$ULINUX" -eq 1 -a "$opensource_distro" -eq 1 ]; then
+    echo "*** ULINUX not permitted for open source distributions; ULINUX disabled ***"
+    ULINUX=0
+fi
+
+if [ "$opensource_distro" -eq 1 ]; then
+    # We really don't want ULINUX, not even defaulted
+    NOULINUX=1
+fi
 
 # See if we're running on a SuSE 10 (universal) system; if so, assume ULINUX
 if [ "$NOULINUX" != "1" ]; then
@@ -213,6 +252,7 @@ cat <<EOF > config.mak
 ENABLE_DEBUG=$enable_debug_flag
 PERFORM_OMI_MAKEINSTALL=$enable_omi_tools_flag
 OMI_CONFIGURE_QUALS=$omi_configure_quals
+OPENSOURCE_DISTRO=$opensource_distro
 
 BUILD_TYPE=$build_type
 PF=$PF
@@ -231,9 +271,13 @@ EOF
 chmod ug+x ${scxomi_dir}/configure ${scxomi_dir}/buildtool
 (cd ${scxomi_dir} && ./configure ${omi_configure_quals})
 
-# Fix permissions in case they aren't executable - and then configure PAL
-chmod ug+x ${scxpal_dir}/build/configure
-(cd ${scxpal_dir}/build && ./configure ${pal_configure_quals})
+if [ ${opensource_distro} -eq 0 ]; then
+    scxpal_dir=`(cd ../../pal; pwd -P)`
+
+    # Fix permissions in case they aren't executable - and then configure PAL
+    chmod ug+x ${scxpal_dir}/build/configure
+    (cd ${scxpal_dir}/build && ./configure ${pal_configure_quals})
+fi
 
 # Display some information for our own configuration
 if [ "$ULINUX" = "1" ]; then
