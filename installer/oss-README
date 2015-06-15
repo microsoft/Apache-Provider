@@ -1,0 +1,85 @@
+Building the Apache OMI Provider
+
+Prerequisites
+----------------------------------------------------------------------
+1. At least one modern Linux system with:
+    a. root login capability
+    b. These build tools:
+        i.   GNU Make
+        ii.  g++
+        iii. pam-devel
+	iv.  openssl-devel
+    c. Open Management Infrastructure (OMI) 1.0.8.
+       (Download from: http://theopengroup.org/software/omi)
+       Note that you need BOTH the binary packages, omi-1.0.8.1.packages.tar.gz,
+       as well as the source distribution file (omi-1.0.8-1.tar.gz).
+
+
+Building the Apache OMI provider
+----------------------------------------------------------------------
+1. Extract oss-apache.tar.gz into a directory that you will build it from.
+   This will create an "apache" directory like this:
+
+   apache/apache   (directory with contents)
+   apache/omi      (no contents under this directory)
+   README          (this file)
+
+2. Change directory (cd) into directory apache/omi and extract the OMI source
+   file downloaded above. After extraction, you should have a single directory
+   named "omi-1.0.8". Rename this directory to "Unix" (capital U is important).
+
+   From the base apache directory, things should now look like:
+
+   apache/apache/...
+   apache/omi/Unix/...
+   README          (this file)
+
+3. Building
+   A. Configuring OMI and building
+      i. Configure OMI with desired options (refer to OMI documentation for this
+         step). Running configure with -h gives basic help.
+        a. The default configuration installs to /opt/omi-1.0.8. You must not change this.
+        b. To use the default configuration, run: (cd omi/Unix && ./configure)
+      ii. From directory omi/Unix, run: make
+   B. Installing OMI:
+      i.  Run: (cd omi/Unix && sudo ./output/install)
+   C. Build apache provider:
+      i.   cd apache/apache/build
+      ii.  ./configure
+      iii. make
+
+4. Installing
+   A. Install the appropriate kit for your system from the binary file,
+      omi-1.0.8.1.packages.tar.gz (downloaded earlier).
+   B. Install apache provider:
+      i.   cd apache/apache/build
+      ii.  sudo bash
+      iii. make install
+   C. Configure OMI
+      i.   Locate OMI registration directory. Depending on what version of OMI
+           you installed, it could be in one of two possible places:
+             /opt/omi/etc/omiregister
+             /etc/opt/omi/conf/omiregister
+      ii.  Create directory root-apache in this OMI registration directory
+      iii. Copy Apache's OMI registration file, from Apache base directory, file
+           installer/conf/omi/ApacheHttpdProvider.reg, to the directory that you
+           just created above.
+      iv.  Restart OMI (see OMI documentation on how to do this)
+   D. Configure Apache:
+      i.   Run: /opt/microsoft/apache-cimprov/bin/apache_config.sh -c
+
+           Note: If you encounter permission problems loading the mod_cimprov.so
+           library, this may be due to SELINUX permissions problems. Be certain
+           that either SELINUX permits mod_cimprov.so to be loaded by Apache, or
+           disable SELINUX on your system.
+
+5. Test the provier
+   A. To test the provider, run a command like:
+        /opt/omi/bin/omicli ei root/apache Apache_HTTPDServer
+      If the command succeeds, then the Apache provider is running properly. The
+      complete list of classes that the Apache provider can enumerate are:
+        Apache_HTTPDServer
+        Apache_HTTPDServerStatistics
+        Apache_HTTPDVirtualHost
+        Apache_HTTPDVirtualHostCertificate
+        Apache_HTTPDVirtualHostStatistics

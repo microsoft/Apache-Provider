@@ -1,23 +1,64 @@
 # -*- mode: Makefile; -*- 
-#--------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation.  All rights reserved.
-#--------------------------------------------------------------------------------
+#--------------------------------- START OF LICENSE ----------------------------
+#
+# Apache Cimprov ver. 1.0
+#
+# Copyright (c) Microsoft Corporation
+#
+# All rights reserved. 
+#
+# Licensed under the Apache License, Version 2.0 (the License); you may not use
+# this file except in compliance with the license. You may obtain a copy of the
+# License at http://www.apache.org/licenses/LICENSE-2.0 
+#
+# THIS CODE IS PROVIDED ON AN  *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+# ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+# WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+# MERCHANTABLITY OR NON-INFRINGEMENT.
+#
+# See the Apache Version 2.0 License for specific language governing permissions
+# and limitations under the License.
+#
+#---------------------------------- END OF LICENSE -----------------------------
+
+#-------------------------------------------------------------------------------
 # 2014-01-17
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 BASE_DIR := $(subst /build,,$(PWD))
 OMI_ROOT := $(shell cd ../../omi/Unix; pwd -P)
-SCXPAL_DIR := $(shell cd ../../pal; pwd -P)
 
 PF_POSIX := 1
-include $(SCXPAL_DIR)/build/config.mak
+
 include $(BASE_DIR)/build/config.mak
 include $(BASE_DIR)/build/Makefile.version
-include $(SCXPAL_DIR)/build/Makefile.pal
 
 ifndef ENABLE_DEBUG
 $(error "ENABLE_DEBUG is not set.  Please re-run configure")
 endif
+
+ifeq ($(OPENSOURCE_DISTRO),0)
+
+SCXPAL_DIR := $(shell cd ../../pal; pwd -P)
+
+include $(SCXPAL_DIR)/build/config.mak
+include $(SCXPAL_DIR)/build/Makefile.pal
+
+else
+
+RM=rm -f
+RMDIR=rm -rf
+MKPATH=mkdir -p
+ECHO=@echo
+COPY=cp
+COPYDIR=cp -r
+pf_fwrite=echo $(1) > $(2)
+pf_fappend=echo $(1) >> $(2)
+SOFTLINK=ln -sf
+NOOP=echo
+MV=mv
+
+endif # ifeq ($(OPENSOURCE_DISTRO),0)
 
 ifeq ($(ULINUX),1)
 HTTPD_BASE_V22 := /usr/local_httpd_2.2.0
@@ -98,7 +139,7 @@ endif
 
 COMPILE_FLAGS := $(PROV_DEBUG_FLAGS) -D_REENTRANT -fstack-protector-all -Wall -fno-nonansi-builtins  -Woverloaded-virtual -Wformat -Wformat-security -Wcast-align -Wswitch-enum -Wshadow -Wwrite-strings -Wredundant-decls -Werror  -Wcast-qual -fPIC
 
-LINK_LIBRARIES := -Wl,-rpath=/opt/microsoft/apache-cimprov/lib -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1
+LINK_LIBRARIES := -Wl,-rpath=/opt/omi/lib -L$(OMI_ROOT)/output/lib $(APACHE_SOURCE_LIB_PATH_OPTION) -lmicxx -lapr-1
 PROVIDER_TEST_LINK_LIBRARIES := -lbase -lpal -L$(SCXPAL_TARGET_DIR) -lscxcore $(SCXPAL_DIR)/test/ext/lib/linux/$(ARCH)/cppunit/libcppunit.a -lpthread -lrt
 
 SHARED_FLAGS := -shared
@@ -123,11 +164,15 @@ clean :
 distclean : clean
 	$(RM) $(BASE_DIR)/build/config.mak
 	-make -C $(OMI_ROOT) distclean
-	-make -C $(SCXPAL_DIR)/build clean
 	-$(RMDIR) $(OMI_ROOT)/output*
+ifeq ($(OPENSOURCE_DISTRO),0)
+	-make -C $(SCXPAL_DIR)/build clean
 	-$(RM) $(SCXPAL_DIR)/build/config.mak
 	-$(RM) $(SCXPAL_DIR)/build/Makefile.config_cache
 	-$(RMDIR) $(SCXPAL_DIR)/intermediate $(SCXPAL_DIR)/target
+endif # ifeq ($(OPENSOURCE_DISTRO),0)
+
+ifeq ($(OPENSOURCE_DISTRO),0)
 
 # Install both the Apache module and the OMI provider
 # This assumes that:
@@ -157,6 +202,33 @@ restart :
 	@sudo /etc/init.d/httpd start
 	@sudo /etc/init.d/omiserverd start
 
+else
+
+# Install for open source distributions:
+
+# We copy all required files to appropriate places, but we do NOT configure apache.
+# That must be done manually by the system administrator when Apache can be restarted.
+
+install : $(PROVIDER_LIBRARY) $(APACHE_MODULE)
+	$(MKPATH) /etc/opt/microsoft/apache-cimprov/conf
+	$(MKPATH) /opt/microsoft/apache-cimprov/bin
+	$(MKPATH) /opt/microsoft/apache-cimprov/lib
+	$(MKPATH) /var/opt/microsoft/apache-cimprov/run
+
+	$(COPY) ../installer/conf/mod_cimprov.conf /etc/opt/microsoft/apache-cimprov/conf
+
+	$(COPY) ../installer/conf/apache_config.sh /opt/microsoft/apache-cimprov/bin
+
+	$(COPY) $(TARGET_DIR)/libApacheHttpdProvider.so /opt/microsoft/apache-cimprov/lib 
+	$(COPY) $(TARGET_DIR)/mod_cimprov.so /opt/microsoft/apache-cimprov/lib
+
+	chmod 644 /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf
+	chmod 755 /opt/microsoft/apache-cimprov/bin/apache_config.sh
+	chmod 755 /opt/microsoft/apache-cimprov/lib/mod_cimprov.so
+
+	$(SOFTLINK) /opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.so /opt/omi/lib
+
+endif # ifeq ($(OPENSOURCE_DISTRO),0)
 
 #--------------------------------------------------------------------------------
 # OMI build
@@ -355,6 +427,8 @@ $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_V
 
 endif
 
+ifeq ($(OPENSOURCE_DISTRO),0)
+
 #--------------------------------------------------------------------------------
 # Apache Provider Unit Tests
 #
@@ -393,6 +467,8 @@ test : $(SCXPAL_INTERMEDIATE_DIR) $(TARGET_DIR)/testrunner
 	@echo "========================= Performing Apache testrun execution"
 	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(OMI_ROOT)/output/lib $(TARGET_DIR)/testrunner
 
+endif # ifeq ($(OPENSOURCE_DISTRO),0)
+
 #--------------------------------------------------------------------------------
 # Apache Module
 
@@ -420,6 +496,8 @@ $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 	cd $(TARGET_DIR)/module && $(APXS) -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
 
 endif
+
+ifeq ($(OPENSOURCE_DISTRO),0)
 
 #--------------------------------------------------------------------------------
 # Build the distribution kit
@@ -594,6 +672,8 @@ endif
 	../installer/bundle/create_bundle.sh $(PF)_$(PF_DISTRO) \
                                              $(TARGET_DIR) \
                                              `cat $(TARGET_DIR)/package_filename`
+
+endif # ifeq ($(OPENSOURCE_DISTRO),0)
 
 #
 # The following is all for OMI "bootstrap" stuff (allowing omigen and omireg to run)
