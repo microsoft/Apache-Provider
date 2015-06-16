@@ -34,19 +34,10 @@ Building the Apache OMI provider
    apache/omi/Unix/...
    README          (this file)
 
-3. Building
-   A. Configuring OMI and building
-      i. Configure OMI with desired options (refer to OMI documentation for this
-         step). Running configure with -h gives basic help.
-        a. The default configuration installs to /opt/omi-1.0.8. You must not change this.
-        b. To use the default configuration, run: (cd omi/Unix && ./configure)
-      ii. From directory omi/Unix, run: make
-   B. Installing OMI:
-      i.  Run: (cd omi/Unix && sudo ./output/install)
-   C. Build apache provider:
-      i.   cd apache/apache/build
-      ii.  ./configure
-      iii. make
+3. Building the Apache provider:
+   A.  cd apache/apache/build
+   B.  ./configure
+   C.  make
 
 4. Installing
    A. Install the appropriate kit for your system from the binary file,
