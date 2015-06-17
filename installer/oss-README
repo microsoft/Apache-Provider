@@ -13,6 +13,11 @@ Prerequisites
        (Download from: http://theopengroup.org/software/omi)
        Note that you need BOTH the binary packages, omi-1.0.8.1.packages.tar.gz,
        as well as the source distribution file (omi-1.0.8-1.tar.gz).
+    d. For compiling provider, you need the Apache development package for your
+       distribution. For example, this is package httpd-devel (on Redhat).
+
+       To installl/run the provider, you need the httpd server installed (package
+       httpd or apache2, depending on your distribution).
 
 
 Building the Apache OMI provider
