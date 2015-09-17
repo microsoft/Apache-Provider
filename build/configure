@@ -119,7 +119,7 @@ Usage: ./configure [OPTIONS]
 
 OVERVIEW:
 
-This script configures SCXOM for building. Type the following commands.
+This script configures apache-cimprov for building. Type the following commands.
 
     $ ./configure
     $ make
