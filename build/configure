@@ -30,6 +30,7 @@ enable_purify_agent=""
 enable_purify_server=""
 enable_omi_tools=""
 enable_omi_tools_flag=0
+enable_ulinux=""
 opensource_distro=0
 build_type=Release
 ULINUX=0
@@ -138,9 +139,6 @@ EOF
     exit 0
 fi
 
-omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${enable_omi_tools} ${omi_configure_quals}"
-pal_configure_quals="${enable_debug}"
-
 if [ "$ULINUX" -eq 1 -a "$opensource_distro" -eq 1 ]; then
     echo "*** ULINUX not permitted for open source distributions; ULINUX disabled ***"
     ULINUX=0
@@ -161,6 +159,13 @@ if [ "$NOULINUX" != "1" ]; then
         fi
     fi
 fi
+
+if [ "$ULINUX" = "1" ]; then
+    enable_ulinux="--enable-ulinux"
+fi
+
+omi_configure_quals="${enable_debug} ${enable_purify_agent} ${enable_purify_server} ${enable_omi_tools} ${omi_configure_quals}"
+pal_configure_quals="${enable_debug} ${enable_ulinux}"
 
 # Note: Most of this code came from the PAL configure file
 
