@@ -33,6 +33,9 @@
 #include <string.h>
 #include <vector>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 #include <apr_file_io.h>
 
 #include "apachebinding.h"
