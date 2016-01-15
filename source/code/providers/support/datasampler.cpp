@@ -39,6 +39,9 @@
 #include <algorithm>
 #include <limits>
 
+#include <sys/types.h>
+#include <unistd.h>
+
 
 struct LinuxProcStat {
     int processId;                           //!< %d  1
