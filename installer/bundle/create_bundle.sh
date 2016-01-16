@@ -15,9 +15,10 @@ SOURCE_DIR=`(cd ../installer/bundle; pwd -P)`
 INTERMEDIATE_DIR=`(mkdir -p ../installer/intermediate; cd ../installer/intermediate; pwd -P)`
 
 # Exit on error
-
 set -e
-set -x
+
+# Don't display output
+set +x
 
 usage()
 {
