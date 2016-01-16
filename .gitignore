@@ -4,3 +4,9 @@ intermediate/
 target/
 build/config.mak
 build/Makefile.version
+
+# Unit test files
+build/cppunit_result.log
+build/cppunit_result.xml
+build/scxtestrunner.log
+test/code/providers/providertestutils.cpp
