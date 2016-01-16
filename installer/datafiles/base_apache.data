@@ -21,14 +21,14 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 
 %Files
 #if HTTP_VERSION == 22
-/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v22;   755; root; root
-/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v22; 755; root; root
+/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           intermediate/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v22;   755; root; root
+/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; intermediate/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v22; 755; root; root
 #elseif HTTP_VERSION == 24
-/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v24;   755; root; root
-/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v24; 755; root; root
+/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           intermediate/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}}_v24;   755; root; root
+/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; intermediate/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}_v24; 755; root; root
 #else
-/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           target/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}};       755; root; root
-/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; target/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}; 755; root; root
+/opt/microsoft/apache-cimprov/lib/mod_cimprov.${{SHLIB_EXT}};           intermediate/${{BUILD_CONFIGURATION}}/mod_cimprov.${{SHLIB_EXT}};       755; root; root
+/opt/microsoft/apache-cimprov/lib/libApacheHttpdProvider.${{SHLIB_EXT}}; intermediate/${{BUILD_CONFIGURATION}}/libApacheHttpdProvider.${{SHLIB_EXT}}; 755; root; root
 #endif
 
 /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf;                installer/conf/mod_cimprov.conf;                                  644; root; root; conffile

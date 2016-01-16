@@ -81,12 +81,13 @@ PROVIDER_TEST_DIR := $(TEST_DIR)/providers
 PROVIDER_TEST_SUPPORT_DIR := $(PROVIDER_TEST_DIR)/support
 PAL_TESTUTILS_DIR := $(SCXPAL_DIR)/test/code/testutils
 
+INTERMEDIATE_DIR := $(BASE_DIR)/intermediate/$(BUILD_CONFIGURATION)
 TARGET_DIR := $(BASE_DIR)/target/$(BUILD_CONFIGURATION)
-PROVIDER_LIBRARY := $(TARGET_DIR)/libApacheHttpdProvider.so
+PROVIDER_LIBRARY := $(INTERMEDIATE_DIR)/libApacheHttpdProvider.so
 APACHE_MODULE_BASENAME := mod_cimprov
-APACHE_MODULE := $(TARGET_DIR)/$(APACHE_MODULE_BASENAME).so
+APACHE_MODULE := $(INTERMEDIATE_DIR)/$(APACHE_MODULE_BASENAME).so
 
-INSTALLER_TMPDIR := $(TARGET_DIR)/installer_tmp
+INSTALLER_TMPDIR := $(INTERMEDIATE_DIR)/installer_tmp
 
 # If building with Apache source code, handle appropriately
 APACHE_SOURCE_DIR := $(wildcard /usr/local/apache2)
@@ -114,28 +115,28 @@ endif
 # Include files
 
 INCLUDE_VHOST := $(SOURCE_DIR)/include/mmap_region.h
-INCLUDE_VERSION := $(TARGET_DIR)/buildversion.h
-INCLUDE_DEFINES := $(TARGET_DIR)/defines.h
+INCLUDE_VERSION := $(INTERMEDIATE_DIR)/buildversion.h
+INCLUDE_DEFINES := $(INTERMEDIATE_DIR)/defines.h
 
 # Compiler flags
 
 OMI_INCLUDE_FLAGS := -I$(OMI_ROOT)/output/include
-PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support -I$(TARGET_DIR)
+PROVIDER_INCLUDE_FLAGS := -I/usr/include/apr-1 -I$(PROVIDER_DIR)/support -I$(INTERMEDIATE_DIR)
 
 # Note: MODULE_INCLUDE_FLAGS always included prior to PROVIDER_INCLUDE_FLAGS for provider and module; we depend on this
 ifeq ($(ULINUX),1)
 
-MODULE_INCLUDE_FLAGS_v22 := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(HTTPD_BASE_V22)/include -DHAVE_TIMES
-MODULE_INCLUDE_FLAGS_v24 := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(HTTPD_BASE_V24)/include -I$(APR_BASE_V24)/include/apr-1 -I$(APRUTIL_BASE_V24)/include/apr-1 -DHAVE_TIMES
+MODULE_INCLUDE_FLAGS_v22 := -I$(SOURCE_DIR)/include -I$(INTERMEDIATE_DIR) -I$(HTTPD_BASE_V22)/include -DHAVE_TIMES
+MODULE_INCLUDE_FLAGS_v24 := -I$(SOURCE_DIR)/include -I$(INTERMEDIATE_DIR) -I$(HTTPD_BASE_V24)/include -I$(APR_BASE_V24)/include/apr-1 -I$(APRUTIL_BASE_V24)/include/apr-1 -DHAVE_TIMES
 LINK_LIBRARIES_v24 := -L$(APR_BASE_V24)/lib -L$(APRUTIL_BASE_V24)/lib
 
 else
 
-MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(TARGET_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
+MODULE_INCLUDE_FLAGS := -I$(SOURCE_DIR)/include -I$(INTERMEDIATE_DIR) $(APACHE_SOURCE_INCLUDE_PATH_OPTION) -DHAVE_TIMES
 
 endif
 
-PROVIDER_TEST_INCLUDE_FLAGS := -Wmissing-include-dirs -Wno-non-virtual-dtor -I$(SCXPAL_DIR)/source/code/include -I$(SOURCE_DIR)/include -I$(TARGET_DIR) -I$(SCXPAL_DIR)/test/ext/include -I$(OMI_ROOT)/output/include -I$(OMI_ROOT) -I$(OMI_ROOT)/common -I$(SCXPAL_DIR)/test/code/include $(PROVIDER_INCLUDE_FLAGS) -I$(PROVIDER_DIR) -I$(PROVIDER_TEST_SUPPORT_DIR)
+PROVIDER_TEST_INCLUDE_FLAGS := -Wmissing-include-dirs -Wno-non-virtual-dtor -I$(SCXPAL_DIR)/source/code/include -I$(SOURCE_DIR)/include -I$(INTERMEDIATE_DIR) -I$(SCXPAL_DIR)/test/ext/include -I$(OMI_ROOT)/output/include -I$(OMI_ROOT) -I$(OMI_ROOT)/common -I$(SCXPAL_DIR)/test/code/include $(PROVIDER_INCLUDE_FLAGS) -I$(PROVIDER_DIR) -I$(PROVIDER_TEST_SUPPORT_DIR)
 
 ifeq ($(ENABLE_DEBUG),1)
 PROV_DEBUG_FLAGS := -g
@@ -150,7 +151,7 @@ SHARED_FLAGS := -shared
 
 # Support for installbuilder
 
-STAGING_DIR := $(TARGET_DIR)/staging
+STAGING_DIR := $(INTERMEDIATE_DIR)/staging
 
 #--------------------------------------------------------------------------------
 # Build targets
@@ -163,7 +164,7 @@ endif
 
 clean :
 	$(RMDIR) $(BASE_DIR)/build/Makefilie.version $(BASE_DIR)/build/cppunit_result.* $(BASE_DIR)/build/scxtestrunner.log
-	$(RMDIR) $(BASE_DIR)/installer/intermediate $(BASE_DIR)/target
+	$(RMDIR) $(BASE_DIR)/installer/intermediate $(BASE_DIR)/intermediate $(BASE_DIR)/target
 	$(RMDIR) $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 
@@ -187,20 +188,20 @@ ifeq ($(OPENSOURCE_DISTRO),0)
 #   2) OMI already has registration files for libApacheHttpdProvider.so
 
 install : /opt/omi/lib/libApacheHttpdProvider.so /opt/microsoft/apache-cimprov/lib/$(APACHE_MODULE_BASENAME).so
-	@[ -e $(TARGET_DIR)/tmp_start_http ] && rm $(TARGET_DIR)/tmp_start_http && sudo /etc/init.d/httpd start || exit 0
-	@[ -e $(TARGET_DIR)/tmp_start_omi  ] && rm $(TARGET_DIR)/tmp_start_omi  && sudo /etc/init.d/omiserverd start || exit 0
+	@[ -e $(INTERMEDIATE_DIR)/tmp_start_http ] && rm $(INTERMEDIATE_DIR)/tmp_start_http && sudo /etc/init.d/httpd start || exit 0
+	@[ -e $(INTERMEDIATE_DIR)/tmp_start_omi  ] && rm $(INTERMEDIATE_DIR)/tmp_start_omi  && sudo /etc/init.d/omiserverd start || exit 0
 
 /opt/microsoft/apache-cimprov/lib/$(APACHE_MODULE_BASENAME).so : $(APACHE_MODULE)
 	@echo "========================= Performing Installing Apache module"
 	sudo /etc/init.d/httpd stop
-	touch $(TARGET_DIR)/tmp_start_http
-	sudo cp -v $(APACHE_MODULE) /opt/microsoft/apache-cimprov/lib/
+	touch $(INTERMEDIATE_DIR)/tmp_start_http
+	sudo $(COPY) -v $(APACHE_MODULE) /opt/microsoft/apache-cimprov/lib/
 
 /opt/omi/lib/libApacheHttpdProvider.so : $(PROVIDER_LIBRARY)
 	@echo "========================= Performing Installing OMI provider"
 	-sudo /etc/init.d/omiserverd stop
-	touch $(TARGET_DIR)/tmp_start_omi
-	sudo cp -v $(PROVIDER_LIBRARY) /opt/omi/lib/
+	touch $(INTERMEDIATE_DIR)/tmp_start_omi
+	sudo $(COPY) -v $(PROVIDER_LIBRARY) /opt/omi/lib/
 
 restart :
 	@-sudo /etc/init.d/omiserverd stop
@@ -225,8 +226,8 @@ install : $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 
 	$(COPY) ../installer/conf/apache_config.sh /opt/microsoft/apache-cimprov/bin
 
-	$(COPY) $(TARGET_DIR)/libApacheHttpdProvider.so /opt/microsoft/apache-cimprov/lib 
-	$(COPY) $(TARGET_DIR)/mod_cimprov.so /opt/microsoft/apache-cimprov/lib
+	$(COPY) $(INTERMEDIATE_DIR)/libApacheHttpdProvider.so /opt/microsoft/apache-cimprov/lib 
+	$(COPY) $(INTERMEDIATE_DIR)/mod_cimprov.so /opt/microsoft/apache-cimprov/lib
 
 	chmod 644 /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf
 	chmod 755 /opt/microsoft/apache-cimprov/bin/apache_config.sh
@@ -416,19 +417,19 @@ ifeq ($(ULINUX),1)
 
 $(PROVIDER_LIBRARY)_v22: $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider (w/HTTP v2.2)"
-	$(MKPATH) $(TARGET_DIR)
+	$(MKPATH) $(INTERMEDIATE_DIR)
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS_v22) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
 
 $(PROVIDER_LIBRARY)_v24: $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider (w/HTTP v2.4)"
-	$(MKPATH) $(TARGET_DIR)
+	$(MKPATH) $(INTERMEDIATE_DIR)
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS_v24) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES_v24) $(LINK_LIBRARIES)
 
 else
 
 $(PROVIDER_LIBRARY): $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_VERSION) $(PROVIDER_HEADERS)
 	@echo "========================= Performing Building provider"
-	$(MKPATH) $(TARGET_DIR)
+	$(MKPATH) $(INTERMEDIATE_DIR)
 	g++ $(COMPILE_FLAGS) $(SHARED_FLAGS) $(OMI_INCLUDE_FLAGS) $(MODULE_INCLUDE_FLAGS) $(PROVIDER_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES)
 
 endif
@@ -462,16 +463,16 @@ STATIC_PROVIDER_UNITFILES = \
 	$(PAL_TESTUTILS_DIR)/testrunner.cpp \
 	$(PAL_TESTUTILS_DIR)/testrunnerlogpolicy.cpp
 
-$(TARGET_DIR)/testrunner : $(STATIC_PROVIDER_UNITFILES_INCLUDE) $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
+$(INTERMEDIATE_DIR)/testrunner : $(STATIC_PROVIDER_UNITFILES_INCLUDE) $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(INCLUDE_VHOST) $(INCLUDE_DEFINES) $(INCLUDE_VERSION) $(PROVIDER_HEADERS) $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	@echo "========================= Performing Building provider tests"
-	$(MKPATH) $(TARGET_DIR)
+	$(MKPATH) $(INTERMEDIATE_DIR)
 	g++ $(COMPILE_FLAGS) $(PROVIDER_TEST_INCLUDE_FLAGS) -o $@ $(STATIC_PROVIDER_UNITFILES) $(STATIC_PROVIDERLIB_SRCFILES) $(LINK_LIBRARIES) $(PROVIDER_TEST_LINK_LIBRARIES)
 
 testrun : test
 
-test : $(SCXPAL_INTERMEDIATE_DIR) $(TARGET_DIR)/testrunner
+test : $(SCXPAL_INTERMEDIATE_DIR) $(INTERMEDIATE_DIR)/testrunner
 	@echo "========================= Performing Apache testrun execution"
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(OMI_ROOT)/output/lib $(TARGET_DIR)/testrunner
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(OMI_ROOT)/output/lib $(INTERMEDIATE_DIR)/testrunner
 
 endif # ifeq ($(OPENSOURCE_DISTRO),0)
 
@@ -479,27 +480,27 @@ endif # ifeq ($(OPENSOURCE_DISTRO),0)
 # Apache Module
 
 APACHE_REAL_SOURCE := $(SOURCE_DIR)/module/$(APACHE_MODULE_BASENAME).c
-APACHE_TARGET_SOURCE := $(TARGET_DIR)/module/$(APACHE_MODULE_BASENAME).c
+APACHE_TARGET_SOURCE := $(INTERMEDIATE_DIR)/module/$(APACHE_MODULE_BASENAME).c
 
 $(APACHE_TARGET_SOURCE) : $(APACHE_REAL_SOURCE)
-	$(MKPATH) $(TARGET_DIR)/module
+	$(MKPATH) $(INTERMEDIATE_DIR)/module
 	ln -s  $(APACHE_REAL_SOURCE) $(APACHE_TARGET_SOURCE)
 
 ifeq ($(ULINUX),1)
 
 $(APACHE_MODULE)_v22 : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 	@echo "========================= Performing Building module (w/HTTP v2.2)"
-	cd $(TARGET_DIR)/module && $(HTTPD_BASE_V22)/bin/$(APXS) -c $(MODULE_INCLUDE_FLAGS_v22) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
+	cd $(INTERMEDIATE_DIR)/module && $(HTTPD_BASE_V22)/bin/$(APXS) -c $(MODULE_INCLUDE_FLAGS_v22) $(APACHE_MODULE_BASENAME).c && $(COPY) -v .libs/$(APACHE_MODULE_BASENAME).so $@
 
 $(APACHE_MODULE)_v24 : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 	@echo "========================= Performing Building module (w/HTTP v2.4)"
-	cd $(TARGET_DIR)/module && $(HTTPD_BASE_V24)/bin/$(APXS) -c $(MODULE_INCLUDE_FLAGS_v24) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
+	cd $(INTERMEDIATE_DIR)/module && $(HTTPD_BASE_V24)/bin/$(APXS) -c $(MODULE_INCLUDE_FLAGS_v24) $(APACHE_MODULE_BASENAME).c && $(COPY) -v .libs/$(APACHE_MODULE_BASENAME).so $@
 
 else
 
 $(APACHE_MODULE) : $(APACHE_TARGET_SOURCE) $(INCLUDE_VHOST) $(INCLUDE_VERSION)
 	@echo "========================= Performing Building module"
-	cd $(TARGET_DIR)/module && $(APXS) -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && cp -v .libs/$(APACHE_MODULE_BASENAME).so $@
+	cd $(INTERMEDIATE_DIR)/module && $(APXS) -c $(MODULE_INCLUDE_FLAGS) $(APACHE_MODULE_BASENAME).c && $(COPY) -v .libs/$(APACHE_MODULE_BASENAME).so $@
 
 endif
 
@@ -527,10 +528,10 @@ ifeq ($(ULINUX),1)
 	@echo "========================= Performing Building RPM and DPKG packages"
 	$(MKPATH) $(INSTALLER_TMPDIR)
 	sudo $(RMDIR) $(STAGING_DIR)
-	$(MKPATH) $(TARGET_DIR)/apache_22
+	$(MKPATH) $(INTERMEDIATE_DIR)/apache_22
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
-		--TARGET_DIR=$(TARGET_DIR) \
+		--TARGET_DIR=$(INTERMEDIATE_DIR) \
 		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--BUILD_TYPE=$(BUILD_TYPE) \
@@ -546,15 +547,15 @@ ifeq ($(ULINUX),1)
 		base_apache.data linux.data linux_rpm.data
 
 	# The kit has a name including .universalr., and the 'r' is only desired for OM
-	sed -e 's/\.universalr\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -e 's/\.universalr\./.universal./' $(INTERMEDIATE_DIR)/package_filename > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_filename` $(INTERMEDIATE_DIR)/apache_22/`cat $(INTERMEDIATE_DIR)/package_file.tmp`
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	sudo $(RMDIR) $(STAGING_DIR)
-	$(MKPATH) $(TARGET_DIR)/apache_22
+	$(MKPATH) $(INTERMEDIATE_DIR)/apache_22
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
-		--TARGET_DIR=$(TARGET_DIR) \
+		--TARGET_DIR=$(INTERMEDIATE_DIR) \
 		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--BUILD_TYPE=$(BUILD_TYPE) \
@@ -571,16 +572,16 @@ ifeq ($(ULINUX),1)
 		base_apache.data linux.data linux_dpkg.data
 
 	# The kit has a name including .universald., and the 'd' is only desired for OM
-	sed -e 's/\.universald\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -e 's/\.universald\./.universal./' $(INTERMEDIATE_DIR)/package_filename > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_filename` $(INTERMEDIATE_DIR)/apache_22/`cat $(INTERMEDIATE_DIR)/package_file.tmp`
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	$(MKPATH) $(INSTALLER_TMPDIR)
 	sudo $(RMDIR) $(STAGING_DIR)
-	$(MKPATH) $(TARGET_DIR)/apache_24
+	$(MKPATH) $(INTERMEDIATE_DIR)/apache_24
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
-		--TARGET_DIR=$(TARGET_DIR) \
+		--TARGET_DIR=$(INTERMEDIATE_DIR) \
 		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--BUILD_TYPE=$(BUILD_TYPE) \
@@ -596,15 +597,15 @@ ifeq ($(ULINUX),1)
 		base_apache.data linux.data linux_rpm.data
 
 	# The kit has a name including .universalr., and the 'r' is only desired for OM
-	sed -e 's/\.universalr\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -e 's/\.universalr\./.universal./' $(INTERMEDIATE_DIR)/package_filename > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_filename` $(INTERMEDIATE_DIR)/apache_24/`cat $(INTERMEDIATE_DIR)/package_file.tmp`
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	sudo $(RMDIR) $(STAGING_DIR)
-	$(MKPATH) $(TARGET_DIR)/apache_24
+	$(MKPATH) $(INTERMEDIATE_DIR)/apache_24
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
-		--TARGET_DIR=$(TARGET_DIR) \
+		--TARGET_DIR=$(INTERMEDIATE_DIR) \
 		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--BUILD_TYPE=$(BUILD_TYPE) \
@@ -621,24 +622,24 @@ ifeq ($(ULINUX),1)
 		base_apache.data linux.data linux_dpkg.data
 
 	# The kit has a name including .universald., and the 'd' is only desired for OM
-	sed -e 's/\.universald\./.universal./' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename` $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -e 's/\.universald\./.universal./' $(INTERMEDIATE_DIR)/package_filename > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_filename` $(INTERMEDIATE_DIR)/apache_24/`cat $(INTERMEDIATE_DIR)/package_file.tmp`
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	# Strip the package extension from the package filename
-	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -re 's/.rpm$$|.deb$$//' $(INTERMEDIATE_DIR)/package_filename > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	# The MP needs architecture of i686 (for x86) and x86_64 (for x64).
-	sed -e 's/\.x86$$/\.i686/' $(TARGET_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`.rpm
-	mv $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_filename`.deb $(TARGET_DIR)/apache_22/`cat $(TARGET_DIR)/package_file.tmp`.deb
-	mv $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`.rpm
-	mv $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_filename`.deb $(TARGET_DIR)/apache_24/`cat $(TARGET_DIR)/package_file.tmp`.deb
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -e 's/\.x86$$/\.i686/' $(INTERMEDIATE_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/apache_22/`cat $(INTERMEDIATE_DIR)/package_filename`.rpm $(INTERMEDIATE_DIR)/apache_22/`cat $(INTERMEDIATE_DIR)/package_file.tmp`.rpm
+	$(MV) $(INTERMEDIATE_DIR)/apache_22/`cat $(INTERMEDIATE_DIR)/package_filename`.deb $(INTERMEDIATE_DIR)/apache_22/`cat $(INTERMEDIATE_DIR)/package_file.tmp`.deb
+	$(MV) $(INTERMEDIATE_DIR)/apache_24/`cat $(INTERMEDIATE_DIR)/package_filename`.rpm $(INTERMEDIATE_DIR)/apache_24/`cat $(INTERMEDIATE_DIR)/package_file.tmp`.rpm
+	$(MV) $(INTERMEDIATE_DIR)/apache_24/`cat $(INTERMEDIATE_DIR)/package_filename`.deb $(INTERMEDIATE_DIR)/apache_24/`cat $(INTERMEDIATE_DIR)/package_file.tmp`.deb
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	# Build the tar file containing both .rpm and .deb packages
-	cd $(TARGET_DIR); tar cvf `cat $(TARGET_DIR)/package_filename`.tar apache_22/`cat $(TARGET_DIR)/package_filename`.rpm apache_22/`cat $(TARGET_DIR)/package_filename`.deb apache_24/`cat $(TARGET_DIR)/package_filename`.rpm apache_24/`cat $(TARGET_DIR)/package_filename`.deb
+	cd $(INTERMEDIATE_DIR); tar cvf `cat $(INTERMEDIATE_DIR)/package_filename`.tar apache_22/`cat $(INTERMEDIATE_DIR)/package_filename`.rpm apache_22/`cat $(INTERMEDIATE_DIR)/package_filename`.deb apache_24/`cat $(INTERMEDIATE_DIR)/package_filename`.rpm apache_24/`cat $(INTERMEDIATE_DIR)/package_filename`.deb
 
 else
 
@@ -647,7 +648,7 @@ else
 	sudo $(RMDIR) $(STAGING_DIR)
 	python $(SCXPAL_DIR)/installer/InstallBuilder/installbuilder.py \
 		--BASE_DIR=$(BASE_DIR) \
-		--TARGET_DIR=$(TARGET_DIR) \
+		--TARGET_DIR=$(INTERMEDIATE_DIR) \
 		--INTERMEDIATE_DIR=$(INSTALLER_TMPDIR) \
 		--STAGING_DIR=$(STAGING_DIR) \
 		--BUILD_TYPE=$(BUILD_TYPE) \
@@ -662,22 +663,24 @@ else
 		base_apache.data linux.data linux_rpm.data
 
 	# Strip the package extension from the package filename
-	sed -re 's/.rpm$$|.deb$$//' $(TARGET_DIR)/package_filename > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -re 's/.rpm$$|.deb$$//' $(INTERMEDIATE_DIR)/package_filename > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	# The MP needs architecture of i686 (for x86) and x86_64 (for x64).
-	sed -e 's/\.x86$$/\.i686/' $(TARGET_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(TARGET_DIR)/package_file.tmp
-	mv $(TARGET_DIR)/`cat $(TARGET_DIR)/package_filename`.rpm $(TARGET_DIR)/`cat $(TARGET_DIR)/package_file.tmp`.rpm
-	mv $(TARGET_DIR)/package_file.tmp $(TARGET_DIR)/package_filename
+	sed -e 's/\.x86$$/\.i686/' $(INTERMEDIATE_DIR)/package_filename | sed 's/\.x64$$/.x86_64/' > $(INTERMEDIATE_DIR)/package_file.tmp
+	$(MV) $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_filename`.rpm $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_file.tmp`.rpm
+	$(MV) $(INTERMEDIATE_DIR)/package_file.tmp $(INTERMEDIATE_DIR)/package_filename
 
 	# Build the tar file containing the .rpm package
-	cd $(TARGET_DIR); tar cvf `cat $(TARGET_DIR)/package_filename`.tar `cat $(TARGET_DIR)/package_filename`.rpm
+	cd $(INTERMEDIATE_DIR); tar cvf `cat $(INTERMEDIATE_DIR)/package_filename`.tar `cat $(INTERMEDIATE_DIR)/package_filename`.rpm
 
 endif
 
 	../installer/bundle/create_bundle.sh $(PF)_$(PF_DISTRO) \
-                                             $(TARGET_DIR) \
-                                             `cat $(TARGET_DIR)/package_filename`
+                                             $(INTERMEDIATE_DIR) \
+                                             `cat $(INTERMEDIATE_DIR)/package_filename`
+	$(MKPATH) $(TARGET_DIR)
+	$(COPY) $(INTERMEDIATE_DIR)/`cat $(INTERMEDIATE_DIR)/package_filename`.sh $(TARGET_DIR)
 
 endif # ifeq ($(OPENSOURCE_DISTRO),0)
 
@@ -707,14 +710,14 @@ MOF_DIR = $(SOURCE_DIR)/mof
 schema_gen :
 	# The omigen facility is unhappy if no ~/.omigenrc file exists, so create one for this run
 	touch ~/.omigenrc
-	$(MKPATH) $(TARGET_DIR)/omi
-	cd $(TARGET_DIR)/omi; $(OMIGEN) $(MOF_DIR)/apache.mof -d $(PROVIDER_DIR) $(CLASSES) --cpp -I $(OMI_DIR)/share/omischema
+	$(MKPATH) $(INTERMEDIATE_DIR)/omi
+	cd $(INTERMEDIATE_DIR)/omi; $(OMIGEN) $(MOF_DIR)/apache.mof -d $(PROVIDER_DIR) $(CLASSES) --cpp -I $(OMI_DIR)/share/omischema
 	$(RM) ~/.omigenrc
 
 omi_reg :
-	$(MKPATH) $(TARGET_DIR)/omi
+	$(MKPATH) $(INTERMEDIATE_DIR)/omi
 	$(MKPATH) $(OMI_DIR)/etc/omiregister/root-apache
-	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(TARGET_DIR)/omi; $(OMI_BINDIR)/omireg -n root/apache -o root $(PROVIDER_LIBRARY)
-	cp -r $(OMI_DIR)/etc/omiregister/root-apache $(TARGET_DIR)/omi
+	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(OMI_LIBDIR); cd $(INTERMEDIATE_DIR)/omi; $(OMI_BINDIR)/omireg -n root/apache -o root $(PROVIDER_LIBRARY)
+	$(COPY) -r $(OMI_DIR)/etc/omiregister/root-apache $(INTERMEDIATE_DIR)</omi
 
 endif # $(PERFORM_OMI_MAKEINSTALL),1
