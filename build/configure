@@ -253,6 +253,22 @@ else
     BUILD_CONFIGURATION=${PF}_${PF_MAJOR}.${PF_MINOR}_${PF_ARCH}_${PF_WIDTH}_${build_type}
 fi
 
+# Do we have a version file from the super project? If not, make one
+
+if [ -f ../../apache.version ]; then
+    rm -f Makefile.version
+    ln -s ../../apache.version Makefile.version
+else
+    cat <<EOF > Makefile.version
+SCX_BUILDVERSION_MAJOR=0
+SCX_BUILDVERSION_MINOR=0
+SCX_BUILDVERSION_PATCH=0
+SCX_BUILDVERSION_BUILDNR=0
+SCX_BUILDVERSION_DATE=20150101
+SCX_BUILDVERSION_STATUS=Developer_Build
+EOF
+fi
+
 cat <<EOF > config.mak
 ENABLE_DEBUG=$enable_debug_flag
 PERFORM_OMI_MAKEINSTALL=$enable_omi_tools_flag

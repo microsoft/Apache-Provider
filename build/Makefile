@@ -37,6 +37,10 @@ ifndef ENABLE_DEBUG
 $(error "ENABLE_DEBUG is not set.  Please re-run configure")
 endif
 
+ifndef SCX_BUILDVERSION_STATUS
+$(error "Is Makefile.version missing?  Please re-run configure")
+endif
+
 ifeq ($(OPENSOURCE_DISTRO),0)
 
 SCXPAL_DIR := $(shell cd ../../pal; pwd -P)
@@ -158,7 +162,9 @@ all : $(OMI_ROOT)/output $(PROVIDER_LIBRARY) $(APACHE_MODULE)
 endif
 
 clean :
-	$(RMDIR) $(BASE_DIR)/build/cppunit_result.* $(BASE_DIR)/build/scxtestrunner.log $(BASE_DIR)/installer/intermediate $(BASE_DIR)/target $(PROVIDER_TEST_DIR)/providertestutils.cpp
+	$(RMDIR) $(BASE_DIR)/build/Makefilie.version $(BASE_DIR)/build/cppunit_result.* $(BASE_DIR)/build/scxtestrunner.log
+	$(RMDIR) $(BASE_DIR)/installer/intermediate $(BASE_DIR)/target
+	$(RMDIR) $(PROVIDER_TEST_DIR)/providertestutils.cpp
 	-find $(BASE_DIR) -name \*~ -exec rm {} \;
 
 distclean : clean
