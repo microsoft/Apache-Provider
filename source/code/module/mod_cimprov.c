@@ -439,8 +439,9 @@ static const command_rec cimprov_module_cmds[] =
       "Set the name of the document root directory for the host."),
     AP_INIT_TAKE1("TransferLog", set_transfer_log_file, NULL, RSRC_CONF,
       "Set the name of the transfer log file for the host."),
-    AP_INIT_TAKE2("CustomLog", set_custom_log_file, NULL, RSRC_CONF,
-      "Set the name of the custom log file for the host host."),
+    AP_INIT_TAKE23("CustomLog", set_custom_log_file, NULL, RSRC_CONF,
+     "a file name, a custom log format string or format name, "
+     "and an optional \"env=\" clause (see docs)"),
     AP_INIT_RAW_ARGS("ServerAlias", set_server_alias, NULL, RSRC_CONF,
       "A name or names alternately used to access the server"),
     AP_INIT_TAKE1("SSLCertificateFile", set_server_certificate_file, NULL, RSRC_CONF,
