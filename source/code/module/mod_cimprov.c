@@ -445,7 +445,7 @@ static const command_rec cimprov_module_cmds[] =
     AP_INIT_RAW_ARGS("ServerAlias", set_server_alias, NULL, RSRC_CONF,
       "A name or names alternately used to access the server"),
     AP_INIT_TAKE1("SSLCertificateFile", set_server_certificate_file, NULL, RSRC_CONF,
-      "Set the name of the SSL certificate file for the host."),
+      "SSL Server Certificate file ('/path/to/file' - PEM or DER encoded)"),
     {NULL}
 };
 
