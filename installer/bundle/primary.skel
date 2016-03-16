@@ -347,19 +347,6 @@ pkg_upd() {
     esac
 }
 
-force_stop_omi_service() {
-    # For any installation or upgrade, we should be shutting down omiserver (and it will be started after install/upgrade).
-    if [ -x /usr/sbin/invoke-rc.d ]; then
-        /usr/sbin/invoke-rc.d omiserverd stop 1> /dev/null 2> /dev/null
-    elif [ -x /sbin/service ]; then
-        service omiserverd stop 1> /dev/null 2> /dev/null
-    fi
-
-    # Catchall for stopping omiserver
-    /etc/init.d/omiserverd stop 1> /dev/null 2> /dev/null
-    /sbin/init.d/omiserverd stop 1> /dev/null 2> /dev/null
-}
-
 getInstalledVersion()
 {
     # Parameter: Package to check if installed
@@ -567,15 +554,12 @@ case "$installMode" in
     I)
         echo "Installing Apache agent ..."
 
-        force_stop_omi_service
-
         pkg_add $APACHE_PKG apache-cimprov
         EXIT_STATUS=$?
         ;;
 
     U)
         echo "Updating Apache agent ..."
-        force_stop_omi_service
 
         shouldInstall_apache
         pkg_upd $APACHE_PKG apache-cimprov $?
