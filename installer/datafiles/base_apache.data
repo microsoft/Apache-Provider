@@ -49,24 +49,24 @@ INCLUDE_FILE:		 '/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf'
 /var;                                                   755; root; root; sysdir
 /var/opt;                                               755; root; root; sysdir
 
-/etc/opt/microsoft;                                     755; root; root
+/etc/opt/microsoft;                                     755; root; root; sysdir
 /etc/opt/microsoft/apache-cimprov;                      755; root; root
 /etc/opt/microsoft/apache-cimprov/conf;                 755; root; root
 
-/etc/opt/omi;                                           755; root; root
-/etc/opt/omi/conf;                                      755; root; root
-/etc/opt/omi/conf/omiregister;                          755; root; root
+/etc/opt/omi;                                           755; root; root; sysdir
+/etc/opt/omi/conf;                                      755; root; root; sysdir
+/etc/opt/omi/conf/omiregister;                          755; root; root; sysdir
 /etc/opt/omi/conf/omiregister/root-apache;              755; root; root
 
-/opt/microsoft;                                         755; root; root
+/opt/microsoft;                                         755; root; root; sysdir
 /opt/microsoft/apache-cimprov;                          755; root; root
 /opt/microsoft/apache-cimprov/bin;                      755; root; root
 /opt/microsoft/apache-cimprov/lib;                      755; root; root
 
-/opt/omi;                                               755; root; root
-/opt/omi/lib;                                           755; root; root
+/opt/omi;                                               755; root; root; sysdir
+/opt/omi/lib;                                           755; root; root; sysdir
 
-/var/opt/microsoft;                                     755; root; root
+/var/opt/microsoft;                                     755; root; root; sysdir
 /var/opt/microsoft/apache-cimprov;                      755; root; root
 /var/opt/microsoft/apache-cimprov/run;                  755; root; root
 
