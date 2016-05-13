@@ -61,7 +61,7 @@ static int CheckServiceSystemd(apr_pool_t* pool, const char* serviceName)
 {
     // Return codes:
     //    0 : systemd supported, service exists
-    //    1 : systemd supported, services does not exist
+    //    1 : systemd supported, service does not exist
     //    2 : systemd supported, but an internal error occurred
     //   -1 : systemd not supported
 
@@ -121,7 +121,7 @@ static int CheckServiceSystemd(apr_pool_t* pool, const char* serviceName)
      */
     apr_file_t* fh;
     char buffer[256];
-    exitStatus = -1;
+    exitStatus = 1;
 
     if ( APR_SUCCESS != (status = apr_file_open(&fh, filename, APR_FOPEN_READ, 0, pool)) )
     {
@@ -151,7 +151,7 @@ static int CheckServiceSystemd(apr_pool_t* pool, const char* serviceName)
     if ( NULL != strstr(buffer, "Loaded: loaded") )
     {
         /* Only set exitStatus if some failure did not occur already */
-        if ( exitStatus < 0 )
+        if ( exitStatus == 1 )
             exitStatus = 0;
     }
 
