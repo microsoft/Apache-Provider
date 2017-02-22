@@ -559,8 +559,8 @@ void DataSampler::PerformComputations()
         apr_atomic_set32(&vhosts[i].kbPerSecond, (deltaBytes / 1024) / apr_time_sec(deltaTime));
 
         // errorsPerMinute* = (errorDelta / (# of seconds since last run)) * 60. (the idea is to normalize to a per-minute rate)
-        apr_atomic_set32(&vhosts[i].errorsPerMinute400, (delta400 / apr_time_sec(deltaTime)) * 60);
-        apr_atomic_set32(&vhosts[i].errorsPerMinute500, (delta500 / apr_time_sec(deltaTime)) * 60);
+        apr_atomic_set32(&vhosts[i].errorsPerMinute400, ((delta400 * 60) / apr_time_sec(deltaTime)));
+        apr_atomic_set32(&vhosts[i].errorsPerMinute500, ((delta500 * 60) / apr_time_sec(deltaTime)));
     }
 
     // TODO: Unlock the process mutex
