@@ -30,6 +30,10 @@ RESTART_APACHE=0
 INCLUDE_DIRECTIVE="include /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf"
 INCLUDE_FILE="/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf"
 
+if grep --help 2>/dev/null | grep -q "\-E"; then
+    alias egrep='grep -E'
+fi
+
 #
 # Routines to configure and unconfigure Apache server
 #
