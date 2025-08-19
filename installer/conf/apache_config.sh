@@ -30,10 +30,6 @@ RESTART_APACHE=0
 INCLUDE_DIRECTIVE="include /etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf"
 INCLUDE_FILE="/etc/opt/microsoft/apache-cimprov/conf/mod_cimprov.conf"
 
-if grep --help 2>/dev/null | grep -q "\-E"; then
-    alias egrep='grep -E'
-fi
-
 #
 # Routines to configure and unconfigure Apache server
 #
@@ -262,7 +258,7 @@ StopApacheServer()
     # Apache may begin to shut down, but may not complete before we try to start up again
     COUNTER=5
     while [ $COUNTER -gt 0 ]; do
-        PROCESSES=`ps -ef | egrep "apache2|httpd" | grep -v grep | wc -l`
+        PROCESSES=`ps -ef | grep -E "apache2|httpd" | grep -v grep | wc -l`
         [ $PROCESSES -eq 0 ] && break
 
         echo "Waiting for Apache to shut down (${COUNTER}) ..."
