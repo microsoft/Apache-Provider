@@ -258,7 +258,7 @@ StopApacheServer()
     # Apache may begin to shut down, but may not complete before we try to start up again
     COUNTER=5
     while [ $COUNTER -gt 0 ]; do
-        PROCESSES=`ps -ef | egrep "apache2|httpd" | grep -v grep | wc -l`
+        PROCESSES=`ps -ef | grep -E "apache2|httpd" | grep -v grep | wc -l`
         [ $PROCESSES -eq 0 ] && break
 
         echo "Waiting for Apache to shut down (${COUNTER}) ..."
